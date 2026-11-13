@@ -1,0 +1,36 @@
+RailOps Hub v55 – App installabile (iPhone e Android)
+=====================================================
+
+CONTENUTO DELLA CARTELLA
+  index.html             l'app (deve chiamarsi esattamente così)
+  manifest.webmanifest   nome, icone e colori dell'app installata
+  sw.js                  service worker: apertura veloce e anche senza rete
+  icons/                 icone per iPhone, Android e browser
+
+COME PUBBLICARLA
+1. Carica TUTTI i file e la cartella "icons" nella stessa cartella del sito,
+   al posto della versione precedente (stesso indirizzo di prima).
+2. Il sito deve essere in HTTPS (GitHub Pages, Netlify, Vercel e simili lo sono già).
+3. Apri il link una volta per verificare che tutto funzioni.
+
+COME INSTALLARLA
+- Android (Chrome): apri il link → compare "Installa l'app" nella schermata
+  iniziale o nel menu laterale. In alternativa: menu ⋮ → "Installa app".
+- iPhone / iPad: apri il link con SAFARI → Condividi → "Aggiungi alla schermata Home".
+- Computer (Chrome / Edge): icona di installazione nella barra degli indirizzi,
+  oppure "Installa l'app" nel menu laterale.
+Chi aveva già aggiunto la vecchia versione alla schermata Home di iPhone farebbe
+bene a rimuovere l'icona e aggiungerla di nuovo, per avere la nuova icona.
+
+AGGIORNAMENTI FUTURI
+- Basta sostituire index.html sul sito: gli utenti ricevono automaticamente
+  la nuova versione alla prima apertura con connessione.
+- Se modifichi anche sw.js, cambia il numero in CACHE_VERSION (es. railops-v55.2):
+  chi ha l'app aperta vedrà l'avviso "Nuova versione disponibile → Aggiorna".
+
+SENZA CONNESSIONE
+- L'app si apre lo stesso e mostra i dati dell'ultimo aggiornamento, in sola lettura,
+  con un avviso giallo in alto. Al ritorno della rete si riallinea da sola.
+
+SCORCIATOIE (Android: tieni premuta l'icona dell'app)
+  Calendario · Nuova attività · Nuova trasferta · Nuovo intervento reperibilità
