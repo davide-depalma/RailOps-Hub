@@ -3,16 +3,16 @@
      senza connessione si apre l'ultima versione salvata.
    - I dati (Supabase) NON passano da qui: restano sempre in tempo reale.
    Quando si pubblica una nuova versione basta cambiare CACHE_VERSION. */
-const CACHE_VERSION = "railops-v55.1";
+const CACHE_VERSION = "railops-v55.3";
 const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js";
 const SHELL = [
   "./",
   "./manifest.webmanifest",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/apple-touch-icon.png",
-  "./icons/favicon-32.png",
-  "./icons/favicon.svg"
+  "./icon-192.png",
+  "./icon-512.png",
+  "./apple-touch-icon.png",
+  "./favicon-32.png",
+  "./favicon.svg"
 ];
 
 self.addEventListener("install", (event) => {

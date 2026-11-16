@@ -1,7 +1,9 @@
 <!DOCTYPE html>
+<!-- RailOps Hub · versione v55.3 · 16/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
+  <meta name="app-version" content="v55.3" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -11,9 +13,9 @@
   <meta name="application-name" content="RailOps Hub" />
   <meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no" />
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
-  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <title>RailOps Hub</title>
   <script>
     window.addEventListener("error", function(event) {
@@ -191,6 +193,7 @@
     .operator-card-note{border:1px solid #c9d8ff;background:var(--primary-soft);color:var(--primary-ink);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.45;margin:0 0 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
     .operator-card-note .btn{margin-left:auto}
     .pill{border:1px solid var(--border);border-radius:999px;padding:4px 10px;display:inline-flex;font-size:12px;background:var(--soft)}
+    .select.filter-active{border-color:var(--primary);background-color:var(--primary-soft);color:var(--primary-ink);font-weight:700}
     .filter-chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);font-weight:700;font-size:12px;padding:4px 6px 4px 10px;border:1px solid #c9d8ff}
     .filter-chip button{border:0;background:rgba(31,79,216,.12);color:inherit;border-radius:50%;width:18px;height:18px;cursor:pointer;display:grid;place-items:center;font-size:12px;line-height:1}
 
@@ -675,7 +678,7 @@
 
       <div id="installHint"></div>
       <div class="login-copyright">
-        © 2026 Davide De Palma · RailOps Hub · Software proprietario · Tutti i diritti riservati.
+        © 2026 Davide De Palma · RailOps Hub <span data-app-version></span> · Software proprietario · Tutti i diritti riservati.
       </div>
     </div>
   </div>
@@ -808,6 +811,15 @@
             <div id="taskQuickFilterBox" class="hidden" style="margin-bottom:10px"></div>
             <div class="toolbar">
               <input id="taskSearch" class="input" type="search" placeholder="Cerca attività, veicolo, descrizione…" oninput="renderTasks()">
+              <select id="taskQuickSelect" class="select" onchange="taskQuickFilter = this.value; renderTasks()" aria-label="Scadenza e situazione">
+                <option value="">Tutte le attività</option>
+                <option value="open">Solo aperte</option>
+                <option value="overdue">In ritardo</option>
+                <option value="due7">In scadenza entro 7 giorni</option>
+                <option value="blocked">Bloccate</option>
+                <option value="nodue">Aperte senza scadenza</option>
+                <option value="done">Completate</option>
+              </select>
               <select id="taskStatusFilter" class="select" onchange="renderTasks()"><option value="">Tutti gli stati</option></select>
               <select id="taskSystemFilter" class="select" onchange="renderTasks()"><option value="">Tutti i sistemi</option></select>
               <select id="taskResourceFilter" class="select" onchange="renderTasks()"><option value="">Tutte le risorse</option></select>
@@ -1175,6 +1187,10 @@
                 <h3>Dicitura sintetica</h3>
                 <p>© 2026 Davide De Palma · RailOps Hub · Software proprietario · Tutti i diritti riservati.</p>
               </div>
+              <div class="license-card" style="grid-column:1/-1" id="versioni">
+                <h3>Versioni e novità</h3>
+                <div id="changelogList"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -1270,7 +1286,17 @@
     let activeCalendarEntityType = "";
     let realtimeChannel = null;
 
-    const APP_VERSION = "v55 App";
+    // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
+    const APP_VERSION = "v55.3";
+    const APP_RELEASE_DATE = "16/11/2026";
+    const CHANGELOG = [
+      { v: "v55.3", date: "16/11/2026", items: ["Icone dell'app spostate nella cartella principale del sito, insieme agli altri file (corregge l'installazione, soprattutto su Android)"] },
+      { v: "v55.2", date: "16/11/2026", items: ["Attività: nuovo filtro con In ritardo, In scadenza entro 7 giorni, Bloccate, Senza scadenza, Completate (con il numero di elementi)", "I riquadri della Dashboard impostano direttamente questo filtro", "Numero di versione visibile nell'app, con lo storico delle novità"] },
+      { v: "v55.1", date: "13/11/2026", items: ["Istruzioni di installazione su Android sempre visibili, anche quando il link è aperto da WhatsApp o Gmail"] },
+      { v: "v55.0", date: "13/11/2026", items: ["App installabile su iPhone, Android e Windows, con icona e scorciatoie", "Apertura anche senza connessione, con i dati dell'ultimo aggiornamento in sola lettura", "Aggiornamento automatico dei dati al ritorno nell'app"] },
+      { v: "v54", date: "12–13/11/2026", items: ["Nuova interfaccia: menu a gruppi, pulsante + Nuovo, navigazione mobile in basso, tasto Indietro funzionante", "Calendario: barre continue per gli elementi di più giorni, matricola/stato/risorse su ogni elemento, vista Risorse, ricerca per data", "Dashboard con riquadro Oggi e priorità senza doppioni", "Correzioni: ore per risorsa con le trasferte, backup JSON completo con ripristino, valori rimossi dalle anagrafiche, nomi con apostrofo, filtri reperibilità", "PDF impaginati, CSV reperibilità, controlli su date e orari"] },
+      { v: "v53", date: "", items: ["Versione precedente (Travel Breaks)"] }
+    ];
     const DEFAULT_REGISTRY = {
       vehicles: [...vehicles], people: [...people], systems: [...systems], task_statuses: [...taskStatuses],
       trip_statuses: [...tripStatuses], priorities: [...taskPriorities], unavailability_reasons: [...unavailabilityReasons], oncall_types: [...oncallTypes]
@@ -2037,6 +2063,7 @@
       await loadAllData();
       startRealtime();
       showToast("Benvenuto, " + operatorName, { type: "success" });
+      checkVersionChange();
     }
 
     async function changeOperator() {
@@ -4112,7 +4139,9 @@
       open: { label: "Solo attività aperte", test: t => isOpenTask(t) },
       overdue: { label: "In ritardo", test: t => isTaskOverdue(t) },
       due7: { label: "In scadenza entro 7 giorni", test: t => isTaskDueWithin(t, 7) },
-      blocked: { label: "Bloccate", test: t => statusTone(t.status) === "blocked" }
+      blocked: { label: "Bloccate", test: t => statusTone(t.status) === "blocked" },
+      nodue: { label: "Aperte senza scadenza", test: t => isOpenTask(t) && !t.due_date },
+      done: { label: "Completate", test: t => isDoneStatus(t.status) }
     };
 
     function openTasksQuick(key) {
@@ -4133,10 +4162,15 @@
       const priority = document.getElementById("taskPriorityFilter")?.value || "";
       const quick = TASK_QUICK_FILTERS[taskQuickFilter];
 
-      const quickBox = document.getElementById("taskQuickFilterBox");
-      if (quickBox) {
-        quickBox.classList.toggle("hidden", !quick);
-        quickBox.innerHTML = quick ? `<span class="filter-chip">Filtro rapido: ${escapeHtml(quick.label)}<button onclick="clearTaskQuickFilter()" aria-label="Rimuovi filtro rapido">✕</button></span>` : "";
+      // menu "Tutte le attività / In ritardo / …": sincronizzato con i riquadri della dashboard e con il numero di elementi
+      const quickSelect = document.getElementById("taskQuickSelect");
+      if (quickSelect) {
+        [...quickSelect.options].forEach(opt => {
+          const def = TASK_QUICK_FILTERS[opt.value];
+          if (def) opt.textContent = `${def.label} (${tasks.filter(def.test).length})`;
+        });
+        quickSelect.value = quick ? taskQuickFilter : "";
+        quickSelect.classList.toggle("filter-active", !!quick);
       }
 
       const filtered = tasks.filter(t => {
@@ -6046,6 +6080,7 @@
         risorse: renderResourceDetail,
         backup: () => { updateBackupSelects(); renderReport(); },
         anagrafiche: renderAnagrafiche,
+        licenza: renderChangelog,
         logmodifiche: renderChangeLog,
         logaccessi: renderAccessLog
       };
@@ -6090,6 +6125,30 @@
       toggleMenu(false);
       renderSection(id);
       try { window.scrollTo({ top: 0, behavior: "instant" }); } catch { window.scrollTo(0, 0); }
+    }
+
+    function renderChangelog() {
+      const box = document.getElementById("changelogList");
+      if (!box) return;
+      box.innerHTML = CHANGELOG.map((rel, i) => `
+        <div style="padding:10px 0;${i ? "border-top:1px solid var(--border);" : ""}">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+            <span class="badge plain ${i === 0 ? "tone-trip" : "tone-todo"}">${escapeHtml(rel.v)}</span>
+            ${rel.date ? `<span class="mini-meta">${escapeHtml(rel.date)}</span>` : ""}
+            ${rel.v === APP_VERSION ? `<span class="mini-meta" style="font-weight:700;color:var(--success)">· versione in uso</span>` : ""}
+          </div>
+          <ul style="margin:4px 0 0">${rel.items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>`).join("");
+    }
+
+    // Dopo un aggiornamento avvisa una volta della nuova versione, con il link alle novità.
+    function checkVersionChange() {
+      const key = "railops_last_version";
+      const previous = storeGet(key);
+      storeSet(key, APP_VERSION);
+      if (previous && previous !== APP_VERSION) {
+        showToast(`RailOps Hub aggiornata alla versione ${APP_VERSION}`, { type: "success", duration: 10000, action: { label: "Novità", fn: () => { showSection("licenza"); setTimeout(() => document.getElementById("versioni")?.scrollIntoView({ behavior: "smooth" }), 80); } } });
+      }
     }
 
     function showSectionByName(id) {
@@ -6196,9 +6255,33 @@
       return isIOS() && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|GSA|Instagram|FBAN|FBAV|WhatsApp/i.test(ua);
     }
 
+    function isAndroid() {
+      return /Android/i.test(navigator.userAgent || "");
+    }
+
+    function isAndroidInAppBrowser() {
+      return isAndroid() && /; wv\)|FBAN|FBAV|Instagram|WhatsApp|GSA\/|Line\//i.test(navigator.userAgent || "");
+    }
+
     function canInstall() {
       if (isStandalone()) return false;
-      return !!deferredInstallPrompt || isIOS();
+      return !!deferredInstallPrompt || isIOS() || isAndroid();
+    }
+
+    function androidInstallStepsHtml() {
+      return isAndroidInAppBrowser() ? `
+        <p>Stai usando il browser interno di un'altra app: l'installazione funziona solo da <b>Chrome</b>.</p>
+        <ol class="install-steps">
+          <li>Tocca il menu <span class="kbd">⋮</span> e scegli <span class="kbd">Apri in Chrome</span> (oppure copia il link e incollalo in Chrome).</li>
+          <li>In Chrome tocca <span class="kbd">⋮</span> → <span class="kbd">Aggiungi a schermata Home</span>.</li>
+          <li>Scegli <span class="kbd">Installa</span> e conferma.</li>
+        </ol>` : `
+        <ol class="install-steps">
+          <li>Tocca il menu <span class="kbd">⋮</span> in alto a destra di Chrome.</li>
+          <li>Scegli <span class="kbd">Aggiungi a schermata Home</span> (o <span class="kbd">Installa app</span>).</li>
+          <li>Nella finestra scegli <span class="kbd">Installa</span> (non “Crea scorciatoia”) e conferma.</li>
+        </ol>
+        <p class="mini-meta" style="margin-top:10px">Con Samsung Internet: menu <span class="kbd">≡</span> → <span class="kbd">Aggiungi pagina a</span> → <span class="kbd">Schermata Home</span>.</p>`;
     }
 
     // Aggiorna i punti dell'interfaccia che propongono l'installazione (login e menu laterale)
@@ -6209,6 +6292,8 @@
       if (isStandalone()) { hint.innerHTML = ""; return; }
       if (deferredInstallPrompt) {
         hint.innerHTML = `<div class="auth-install"><strong>Installa RailOps Hub</strong> sul dispositivo: si apre come un'app, a schermo intero e con la sua icona.<button class="btn" onclick="installApp()">${icon("download")}Installa l'app</button></div>`;
+      } else if (isAndroid()) {
+        hint.innerHTML = `<div class="auth-install"><strong>Installa su Android:</strong> ${isAndroidInAppBrowser() ? "apri questo link con <b>Chrome</b>, poi " : ""}tocca il menu <b>⋮</b> → <b>Aggiungi a schermata Home</b> → <b>Installa</b>.</div>`;
       } else if (isIOS()) {
         hint.innerHTML = isIOSSafari()
           ? `<div class="auth-install"><strong>Installa su iPhone:</strong> tocca <b>Condividi</b> (il quadrato con la freccia) e poi <b>Aggiungi alla schermata Home</b>.</div>`
@@ -6247,6 +6332,13 @@
             <li>Tocca <span class="kbd">Condividi</span> → <span class="kbd">Aggiungi alla schermata Home</span>.</li>
           </ol>
           <div class="form-actions"><button class="btn secondary" onclick="navigator.clipboard?.writeText(location.href.split('#')[0]).then(() => showToast('Link copiato', { type: 'success' }))">${icon("copy")}Copia link</button><button class="btn" onclick="closeEditModal(true)">Chiudi</button></div>`;
+        showModal();
+        return;
+      }
+      if (isAndroid()) {
+        document.getElementById("editModalTitle").textContent = "Installa RailOps Hub su Android";
+        document.getElementById("editModalBody").innerHTML = androidInstallStepsHtml() + `
+          <div class="form-actions"><button class="btn secondary" onclick="navigator.clipboard?.writeText(location.href.split('#')[0]).then(() => showToast('Link copiato', { type: 'success' }))">${icon("copy")}Copia link</button><button class="btn" onclick="closeEditModal(true)">Ho capito</button></div>`;
         showModal();
         return;
       }
@@ -6363,7 +6455,7 @@
     initFormData();
     renderInstallUI();
     registerServiceWorker();
-    initOperatorMode();
+    initOperatorMode().then(() => { if (currentUser) checkVersionChange(); });
   </script>
 </body>
 </html>
