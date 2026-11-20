@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v55.6 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v55.7 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v55.6" />
+  <meta name="app-version" content="v55.7" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -2588,6 +2588,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let taskPriorities = ["Media","Alta","Urgente"];
     let unavailabilityReasons = ["Ferie","Malattia","Permesso","Formazione","Altro"];
     let oncallTypes = ["Chiamata da remoto","Supporto telefonico","Intervento in campo","Analisi log","Altro"];
+    let taskInterventionTypes = ["Intervento da remoto","Intervento in sede","Intervento misto"];
 
     const registryDefinitions = [
       { category:"vehicles", title:"Commesse / Veicoli", singular:"commessa/veicolo", listKey:"vehicles", hint:"Usati in trasferte, attività, calendario, filtri e report." },
@@ -2597,7 +2598,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       { category:"trip_statuses", title:"Stati trasferte", singular:"stato trasferta", listKey:"tripStatuses", hint:"Usati nel menu stato delle trasferte." },
       { category:"priorities", title:"Priorità attività", singular:"priorità", listKey:"taskPriorities", hint:"Usate nella creazione e modifica attività." },
       { category:"unavailability_reasons", title:"Motivi indisponibilità", singular:"motivo", listKey:"unavailabilityReasons", hint:"Usati nella sezione Indisponibilità." },
-      { category:"oncall_types", title:"Tipi intervento reperibilità", singular:"tipo intervento", listKey:"oncallTypes", hint:"Usati nella sezione Reperibilità e nel calendario." }
+      { category:"oncall_types", title:"Tipi intervento reperibilità", singular:"tipo intervento", listKey:"oncallTypes", hint:"Usati nella sezione Reperibilità e nel calendario." },
+      { category:"task_intervention_types", title:"Tipi di intervento attività", singular:"tipo di intervento", listKey:"taskInterventionTypes", hint:"Scelto quando si crea un'attività: compare prima del nome (es. «Intervento da remoto - Verifica odometria») anche nel rapportino." }
     ];
     const ATTACHMENT_BUCKET = "railops-attachments";
     const MAX_ATTACHMENT_SIZE_MB = 25;
@@ -2616,9 +2618,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v55.6";
+    const APP_VERSION = "v55.7";
     const APP_RELEASE_DATE = "20/11/2026";
     const CHANGELOG = [
+      { v: "v55.7", date: "20/11/2026", items: ["Attività: nuovo campo obbligatorio «Tipo di intervento» (da remoto, in sede, misto) prima del nome; il titolo diventa «Intervento da remoto - Nome attività» e compare così anche nel rapportino", "I tipi di intervento si possono modificare in Anagrafiche"] },
       { v: "v55.6", date: "20/11/2026", items: ["Anagrafiche: ogni valore si può modificare (con aggiornamento facoltativo degli elementi già creati), riordinare con le frecce e cercare; per ogni valore si vede in quanti elementi è usato", "Rapportino: il nome del file contiene sempre giorno di inizio e di fine (es. 2026_11_09-15_Rapportino_Settimanale_De Palma)"] },
       { v: "v55.5", date: "20/11/2026", items: ["Gli aggiornamenti pubblicati su GitHub arrivano all'app installata alla prima apertura, senza attendere la cache del browser"] },
       { v: "v55.4", date: "20/11/2026", items: ["Nuovo: Rapportino settimanale in Excel (Consuntivo ore di intervento MD.INT.02) — pagina 1: cliente, compilato da, matricole POS, attività della settimana con data, luogo e trasferta/reperibilità", "Disponibile in Report & Export e nella pagina Risorse"] },
@@ -2631,7 +2634,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     ];
     const DEFAULT_REGISTRY = {
       vehicles: [...vehicles], people: [...people], systems: [...systems], task_statuses: [...taskStatuses],
-      trip_statuses: [...tripStatuses], priorities: [...taskPriorities], unavailability_reasons: [...unavailabilityReasons], oncall_types: [...oncallTypes]
+      trip_statuses: [...tripStatuses], priorities: [...taskPriorities], unavailability_reasons: [...unavailabilityReasons], oncall_types: [...oncallTypes], task_intervention_types: [...taskInterventionTypes]
     };
     let registryRows = [];
     let registryDbCategories = new Set();
@@ -3089,6 +3092,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (category === "priorities") return taskPriorities;
       if (category === "unavailability_reasons") return unavailabilityReasons;
       if (category === "oncall_types") return oncallTypes;
+      if (category === "task_intervention_types") return taskInterventionTypes;
       return [];
     }
 
@@ -3103,6 +3107,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (category === "priorities") taskPriorities = clean;
       if (category === "unavailability_reasons") unavailabilityReasons = clean;
       if (category === "oncall_types") oncallTypes = clean;
+      if (category === "task_intervention_types") taskInterventionTypes = clean;
     }
 
     function applyRegistryRows(rows) {
@@ -3841,7 +3846,9 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       document.getElementById("editModalBody").innerHTML = `
         <form id="taskForm" onsubmit="addTask(event)" novalidate>
           <div class="form-grid">
-            <div class="field full"><label>Titolo attività <span class="req">*</span></label><input id="taskTitle" class="input" placeholder="Es. Verifica odometria, aggiornamento DB, test simulata…" required></div>
+            <div class="field"><label>Tipo di intervento <span class="req">*</span></label>${modalSelect("taskInterventionType", taskInterventionTypes, "", { emptyLabel: "Seleziona…" })}</div>
+            <div class="field"><label>Nome attività <span class="req">*</span></label><input id="taskTitle" class="input" placeholder="Es. Verifica odometria, aggiornamento DB…" required oninput="updateTaskTitlePreview('taskInterventionType','taskTitle','taskTitlePreview')"></div>
+            <div class="field full mini-meta" id="taskTitlePreview" style="margin-top:-6px"></div>
             <div class="field"><label>Commessa / Veicolo <span class="req">*</span></label>${modalSelect("taskVehicle", vehicles, prefill.vehicle || "", { search: true, emptyLabel: "Seleziona commessa…" })}</div>
             <div class="field"><label>Stato</label>${modalSelect("taskStatus", taskStatuses, defaultStatus)}</div>
             <div class="field full"><label>Risorse assegnate <span class="req">*</span></label>${modalChecks("taskResourcesBox", people, "taskResources", prefill.resources || [])}</div>
@@ -3868,6 +3875,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           </div>
         </form>
       `;
+      document.getElementById("taskInterventionType").addEventListener("change", () => updateTaskTitlePreview("taskInterventionType", "taskTitle", "taskTitlePreview"));
       showModal();
     }
 
@@ -3984,8 +3992,11 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const selectedResources = checkedValues("taskResources");
       const attachmentFiles = selectedFilesFromInput("taskAttachments");
 
-      const title = document.getElementById("taskTitle").value.trim();
-      if (!title) return showToast("Inserisci il titolo dell'attività", { type: "error" });
+      const interventionType = document.getElementById("taskInterventionType").value;
+      const name = splitTaskTitle(document.getElementById("taskTitle").value.trim()).name;
+      if (!interventionType) return showToast("Scegli il tipo di intervento (da remoto, in sede o misto)", { type: "error" });
+      if (!name) return showToast("Inserisci il nome dell'attività", { type: "error" });
+      const title = composeTaskTitle(interventionType, name);
       if (!document.getElementById("taskVehicle").value) return showToast("Seleziona la commessa / veicolo", { type: "error" });
       if (!selectedResources.length) return showToast("Seleziona almeno una risorsa", { type: "error" });
       if (!selectedSystems.length) return showToast("Seleziona almeno un sistema diagnostico", { type: "error" });
@@ -4894,7 +4905,9 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       document.getElementById("editModalBody").innerHTML = `
         <form id="editTaskForm" onsubmit="saveTaskEdit(event, ${jsArg(task.id)})" novalidate>
           <div class="form-grid">
-            <div class="field full"><label>Titolo attività <span class="req">*</span></label><input id="editTaskTitle" class="input" value="${escapeHtml(task.title || "")}" required></div>
+            <div class="field"><label>Tipo di intervento</label>${modalSelect("editTaskInterventionType", taskInterventionTypes, splitTaskTitle(task.title).type, { emptyLabel: "— non indicato —" })}</div>
+            <div class="field"><label>Nome attività <span class="req">*</span></label><input id="editTaskTitle" class="input" value="${escapeHtml(splitTaskTitle(task.title).name)}" required oninput="updateTaskTitlePreview('editTaskInterventionType','editTaskTitle','editTaskTitlePreview')"></div>
+            <div class="field full mini-meta" id="editTaskTitlePreview" style="margin-top:-6px"></div>
             <div class="field"><label>Commessa / Veicolo</label>${modalSelect("editTaskVehicle", vehicles, task.vehicle, { search: true })}</div>
             <div class="field"><label>Stato</label>${modalSelect("editTaskStatus", taskStatuses, task.status)}</div>
             <div class="field full"><label>Risorse assegnate <span class="req">*</span></label>${modalChecks("editTaskResourcesBox", people, "editTaskResources", getTaskResources(task))}</div>
@@ -4957,6 +4970,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (!taskLogs.length) addTaskLogRow({ start_date: task.start_date || task.due_date || "", end_date: task.end_date || task.due_date || "" });
       else taskLogs.forEach(log => addTaskLogRow(log));
       refreshTaskDailyTotals();
+      document.getElementById("editTaskInterventionType").addEventListener("change", () => updateTaskTitlePreview("editTaskInterventionType", "editTaskTitle", "editTaskTitlePreview"));
+      updateTaskTitlePreview("editTaskInterventionType", "editTaskTitle", "editTaskTitlePreview");
       showModal();
     }
 
@@ -4971,7 +4986,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const resources = checkedValues("editTaskResources");
       const logs = collectTaskLogsFromModal();
       const updated = {
-        title: document.getElementById("editTaskTitle").value.trim(),
+        title: composeTaskTitle(document.getElementById("editTaskInterventionType").value, splitTaskTitle(document.getElementById("editTaskTitle").value.trim()).name),
         vehicle: document.getElementById("editTaskVehicle").value,
         systems: checkedValues("editTaskSystems"),
         resources,
@@ -4988,7 +5003,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         updates: collectTaskUpdates("editTaskUpdatesList")
       };
 
-      if (!updated.title) return showToast("Inserisci il titolo dell'attività", { type: "error" });
+      if (!splitTaskTitle(updated.title).name) return showToast("Inserisci il nome dell'attività", { type: "error" });
       if (!updated.resources.length) return showToast("Seleziona almeno una risorsa", { type: "error" });
       if (!updated.systems.length) return showToast("Seleziona almeno un sistema diagnostico", { type: "error" });
       const dateErr = dateOrderError(updated.start_date, updated.end_date);
@@ -5018,6 +5033,28 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       await loadAllData();
     }
 
+
+    // Tipo di intervento: è scritto all'inizio del titolo ("Intervento da remoto - Nome attività")
+    function splitTaskTitle(title) {
+      const text = String(title || "").trim();
+      const known = [...taskInterventionTypes, ...DEFAULT_REGISTRY.task_intervention_types].sort((a, b) => b.length - a.length);
+      const type = known.find(t => text.toLowerCase().startsWith(t.toLowerCase() + " - "));
+      if (type) return { type: taskInterventionTypes.find(t => t.toLowerCase() === type.toLowerCase()) || type, name: text.slice(type.length + 3).trim() };
+      return { type: "", name: text };
+    }
+
+    function composeTaskTitle(type, name) {
+      const clean = splitTaskTitle(name).name;
+      return type ? `${type} - ${clean}` : clean;
+    }
+
+    function updateTaskTitlePreview(typeId, nameId, previewId) {
+      const box = document.getElementById(previewId);
+      if (!box) return;
+      const type = document.getElementById(typeId)?.value || "";
+      const name = document.getElementById(nameId)?.value.trim() || "";
+      box.innerHTML = name || type ? `Titolo che verrà salvato: <b>${escapeHtml(composeTaskTitle(type, name) || "—")}</b>` : "";
+    }
 
     function oncallTitle(item) {
       return `${item?.intervention_type || "Reperibilità"} · ${item?.resource || "-"}`;
@@ -5714,13 +5751,19 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       trip_statuses: [{ list: () => trips, table: "railops_trips", field: "status" }],
       priorities: [{ list: () => tasks, table: "railops_tasks", field: "priority" }],
       unavailability_reasons: [{ list: () => unavailability, table: "railops_unavailability", field: "reason" }],
-      oncall_types: [{ list: () => oncallInterventions, table: "railops_oncall_interventions", field: "intervention_type" }]
+      oncall_types: [{ list: () => oncallInterventions, table: "railops_oncall_interventions", field: "intervention_type" }],
+      task_intervention_types: [{
+        list: () => tasks, table: "railops_tasks",
+        match: (item, value) => splitTaskTitle(item.title).type === value,
+        patch: (item, oldValue, newValue) => ({ title: composeTaskTitle(newValue, splitTaskTitle(item.title).name) })
+      }]
     };
 
     function registryValueUsage(category, value) {
       const found = [];
       (REGISTRY_USAGE[category] || []).forEach(src => {
         src.list().forEach(item => {
+          if (src.match) { if (src.match(item, value)) found.push({ src, item }); return; }
           const v = src.field === "resources" ? getTaskResources(item) : item[src.field];
           if (src.array ? (Array.isArray(v) && v.includes(value)) : v === value) found.push({ src, item });
         });
@@ -5826,8 +5869,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         const failures = [];
         if (propagate) {
           for (const { src, item } of registryValueUsage(category, oldValue)) {
-            const patch = {};
-            if (src.array) {
+            let patch = {};
+            if (src.patch) {
+              patch = src.patch(item, oldValue, newValue);
+            } else if (src.array) {
               const current = src.field === "resources" ? getTaskResources(item) : (item[src.field] || []);
               patch[src.field] = [...new Set(current.map(v => v === oldValue ? newValue : v))];
               if (src.alsoPerson) patch.person = patch[src.field].join(", ");
