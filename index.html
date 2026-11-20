@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v55.5 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v55.6 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v55.5" />
+  <meta name="app-version" content="v55.6" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -490,6 +490,9 @@
     .registry-list{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
     .registry-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border);background:var(--soft);border-radius:10px;padding:6px 6px 6px 10px}
     .registry-value{font-size:13px;font-weight:700;word-break:break-word}
+    .registry-actions{display:flex;gap:0;flex:0 0 auto}
+    .registry-actions .btn.icon{width:30px;height:30px;padding:5px}
+    .registry-list{max-height:360px}
     .registry-meta{font-size:12px;color:var(--muted);margin-bottom:8px}
     .backup-note{border:1px solid #c9d8ff;background:var(--primary-soft);color:var(--primary-ink);border-radius:12px;padding:12px;margin-bottom:14px;line-height:1.45;font-size:13.5px}
     .backup-group-title{font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:18px 0 8px}
@@ -647,6 +650,8 @@
     <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></symbol>
     <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
     <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></symbol>
   </svg>
 
@@ -2611,9 +2616,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v55.5";
+    const APP_VERSION = "v55.6";
     const APP_RELEASE_DATE = "20/11/2026";
     const CHANGELOG = [
+      { v: "v55.6", date: "20/11/2026", items: ["Anagrafiche: ogni valore si può modificare (con aggiornamento facoltativo degli elementi già creati), riordinare con le frecce e cercare; per ogni valore si vede in quanti elementi è usato", "Rapportino: il nome del file contiene sempre giorno di inizio e di fine (es. 2026_11_09-15_Rapportino_Settimanale_De Palma)"] },
       { v: "v55.5", date: "20/11/2026", items: ["Gli aggiornamenti pubblicati su GitHub arrivano all'app installata alla prima apertura, senza attendere la cache del browser"] },
       { v: "v55.4", date: "20/11/2026", items: ["Nuovo: Rapportino settimanale in Excel (Consuntivo ore di intervento MD.INT.02) — pagina 1: cliente, compilato da, matricole POS, attività della settimana con data, luogo e trasferta/reperibilità", "Disponibile in Report & Export e nella pagina Risorse"] },
       { v: "v55.3", date: "16/11/2026", items: ["Icone dell'app spostate nella cartella principale del sito, insieme agli altri file (corregge l'installazione, soprattutto su Android)"] },
@@ -3199,7 +3205,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     async function deleteRegistryItem(category, value) {
       const def = registryDefinitions.find(item => item.category === category);
       if (!def) return showToast("Anagrafica non valida");
-      if (!(await uiConfirm(`"${value}" non sarà più selezionabile nei nuovi inserimenti. Gli elementi già creati non cambiano.`, { title: `Rimuovere da ${def.title}?`, confirmLabel: "Rimuovi", danger: true }))) return;
+      const usedBy = registryValueUsage(category, value).length;
+      if (!(await uiConfirm(`"${value}" non sarà più selezionabile nei nuovi inserimenti.${usedBy ? ` È usato in ${usedBy} element${usedBy === 1 ? "o" : "i"}, che lo manterranno.` : ""} Se vuoi solo correggerlo, usa la matita (Modifica).`, { title: `Rimuovere da ${def.title}?`, confirmLabel: "Rimuovi", danger: true }))) return;
 
       const wasSeeded = registryDbCategories.has(category);
       if (!(await seedRegistryCategoryIfNeeded(category, value))) return;
@@ -5685,6 +5692,49 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     }
 
 
+    // Dove viene usato ogni valore di anagrafica (per mostrare il conteggio e per aggiornarlo quando si rinomina)
+    const REGISTRY_USAGE = {
+      vehicles: [
+        { list: () => trips, table: "railops_trips", field: "vehicle" },
+        { list: () => tasks, table: "railops_tasks", field: "vehicle" },
+        { list: () => oncallInterventions, table: "railops_oncall_interventions", field: "vehicle" }
+      ],
+      people: [
+        { list: () => trips, table: "railops_trips", field: "people", array: true },
+        { list: () => tasks, table: "railops_tasks", field: "resources", array: true, alsoPerson: true },
+        { list: () => unavailability, table: "railops_unavailability", field: "resource" },
+        { list: () => oncallInterventions, table: "railops_oncall_interventions", field: "resource" }
+      ],
+      systems: [
+        { list: () => trips, table: "railops_trips", field: "systems", array: true },
+        { list: () => tasks, table: "railops_tasks", field: "systems", array: true },
+        { list: () => oncallInterventions, table: "railops_oncall_interventions", field: "systems", array: true }
+      ],
+      task_statuses: [{ list: () => tasks, table: "railops_tasks", field: "status" }],
+      trip_statuses: [{ list: () => trips, table: "railops_trips", field: "status" }],
+      priorities: [{ list: () => tasks, table: "railops_tasks", field: "priority" }],
+      unavailability_reasons: [{ list: () => unavailability, table: "railops_unavailability", field: "reason" }],
+      oncall_types: [{ list: () => oncallInterventions, table: "railops_oncall_interventions", field: "intervention_type" }]
+    };
+
+    function registryValueUsage(category, value) {
+      const found = [];
+      (REGISTRY_USAGE[category] || []).forEach(src => {
+        src.list().forEach(item => {
+          const v = src.field === "resources" ? getTaskResources(item) : item[src.field];
+          if (src.array ? (Array.isArray(v) && v.includes(value)) : v === value) found.push({ src, item });
+        });
+      });
+      return found;
+    }
+
+    function filterRegistryList(input) {
+      const q = input.value.trim().toLowerCase();
+      input.closest(".registry-card-body").querySelectorAll(".registry-item").forEach(row => {
+        row.classList.toggle("hidden", !!q && !row.dataset.value.toLowerCase().includes(q));
+      });
+    }
+
     function renderAnagrafiche() {
       const grid = document.getElementById("registryGrid");
       if (!grid) return;
@@ -5702,19 +5752,130 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
                 <input id="registryInput_${def.category}" class="input" placeholder="Aggiungi ${escapeHtml(def.singular)}..." onkeydown="if(event.key==='Enter'){event.preventDefault(); addRegistryItem('${def.category}');}">
                 <button type="button" class="btn small" onclick="addRegistryItem('${def.category}')">${icon("plus")}Aggiungi</button>
               </div>
+              ${list.length > 8 ? `<input class="input" type="search" placeholder="Cerca in ${escapeHtml(def.title.toLowerCase())}…" style="margin-bottom:8px;padding:7px 10px;font-size:14px" oninput="filterRegistryList(this)">` : ""}
               <div class="registry-meta">${list.length} valori${registryDbCategories.has(def.category) ? "" : " · valori predefiniti (non ancora salvati nel database)"}</div>
               <div class="registry-list">
-                ${list.map(value => `
-                  <div class="registry-item">
-                    <div class="registry-value">${escapeHtml(value)}</div>
-                    <button type="button" class="btn ghost small" onclick="deleteRegistryItem('${def.category}', ${jsArg(value)})" aria-label="Rimuovi ${escapeHtml(value)}">${icon("x")}</button>
-                  </div>
-                `).join("") || `<div class="empty">Nessun valore presente.</div>`}
+                ${list.map((value, index) => {
+                  const used = registryValueUsage(def.category, value).length;
+                  return `
+                  <div class="registry-item" data-value="${escapeHtml(value)}">
+                    <div style="min-width:0">
+                      <div class="registry-value">${escapeHtml(value)}</div>
+                      <div class="mini-meta" style="font-size:11.5px">${used ? `usato in ${used} element${used === 1 ? "o" : "i"}` : "non usato"}</div>
+                    </div>
+                    <div class="registry-actions">
+                      <button type="button" class="btn ghost icon" title="Sposta su" aria-label="Sposta su ${escapeHtml(value)}" ${index === 0 ? "disabled" : ""} onclick="moveRegistryItem('${def.category}', ${jsArg(value)}, -1)">${icon("up")}</button>
+                      <button type="button" class="btn ghost icon" title="Sposta giù" aria-label="Sposta giù ${escapeHtml(value)}" ${index === list.length - 1 ? "disabled" : ""} onclick="moveRegistryItem('${def.category}', ${jsArg(value)}, 1)">${icon("down")}</button>
+                      <button type="button" class="btn ghost icon" title="Modifica" aria-label="Modifica ${escapeHtml(value)}" onclick="openEditRegistryItem('${def.category}', ${jsArg(value)})">${icon("edit")}</button>
+                      <button type="button" class="btn ghost icon" title="Rimuovi" aria-label="Rimuovi ${escapeHtml(value)}" onclick="deleteRegistryItem('${def.category}', ${jsArg(value)})">${icon("x")}</button>
+                    </div>
+                  </div>`;
+                }).join("") || `<div class="empty">Nessun valore presente.</div>`}
               </div>
             </div>
           </div>
         `;
       }).join("");
+    }
+
+    function openEditRegistryItem(category, value) {
+      const def = registryDefinitions.find(d => d.category === category);
+      if (!def) return;
+      const usage = registryValueUsage(category, value);
+      document.getElementById("editModalTitle").textContent = `Modifica ${def.singular}`;
+      document.getElementById("editModalBody").innerHTML = `
+        <form onsubmit="saveRegistryRename(event, '${category}', ${jsArg(value)})" novalidate>
+          <div class="form-grid">
+            <div class="field full"><label>Valore attuale</label><input class="input" value="${escapeHtml(value)}" readonly></div>
+            <div class="field full"><label>Nuovo valore <span class="req">*</span></label><input id="registryRenameInput" class="input" value="${escapeHtml(value)}" required></div>
+            <div class="field full">
+              ${usage.length ? `<label class="check-item" style="border-radius:12px;padding:10px 12px;width:100%">
+                <input type="checkbox" id="registryRenamePropagate" checked>
+                <span>Aggiorna anche ${usage.length} element${usage.length === 1 ? "o già creato" : "i già creati"} (attività, trasferte, reperibilità, indisponibilità) che usano “${escapeHtml(value)}”</span>
+              </label>
+              <div class="mini-meta" style="margin-top:6px">Se togli la spunta, gli elementi esistenti mantengono il valore vecchio.</div>` : `<div class="mini-meta">Questo valore non è usato da nessun elemento.</div>`}
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn secondary" onclick="closeEditModal()">Annulla</button>
+            <button type="submit" class="btn">Salva</button>
+          </div>
+        </form>`;
+      showModal();
+      const input = document.getElementById("registryRenameInput");
+      setTimeout(() => { input.focus(); input.select(); }, 60);
+    }
+
+    async function saveRegistryRename(event, category, oldValue) {
+      event.preventDefault();
+      const def = registryDefinitions.find(d => d.category === category);
+      const newValue = document.getElementById("registryRenameInput").value.trim();
+      const propagate = document.getElementById("registryRenamePropagate")?.checked;
+      if (!newValue) return showToast("Inserisci il nuovo valore", { type: "error" });
+      if (newValue === oldValue) return closeEditModal(true);
+      if (registryList(category).some(v => v !== oldValue && v.toLowerCase() === newValue.toLowerCase())) return showToast("Questo valore esiste già", { type: "error" });
+
+      setSaving(event.target, true);
+      setLoading(true);
+      try {
+        if (!(await seedRegistryCategoryIfNeeded(category))) throw new Error("anagrafica non salvata");
+        const { error } = await sb.from("railops_registry").update({ value: newValue }).eq("category", category).eq("value", oldValue);
+        if (error) throw error;
+
+        let updated = 0;
+        const failures = [];
+        if (propagate) {
+          for (const { src, item } of registryValueUsage(category, oldValue)) {
+            const patch = {};
+            if (src.array) {
+              const current = src.field === "resources" ? getTaskResources(item) : (item[src.field] || []);
+              patch[src.field] = [...new Set(current.map(v => v === oldValue ? newValue : v))];
+              if (src.alsoPerson) patch.person = patch[src.field].join(", ");
+            } else {
+              patch[src.field] = newValue;
+            }
+            const res = await sb.from(src.table).update(patch).eq("id", item.id);
+            if (res.error) failures.push(res.error.message); else updated++;
+          }
+        }
+
+        await logChange({
+          entityType: "registry", entityId: null, entityTitle: def.title, action: "update",
+          changedFields: [{ field: "value", label: "Valore anagrafica", old_value: oldValue, new_value: newValue }, ...(propagate ? [{ field: "elementi", label: "Elementi aggiornati", old_value: "", new_value: String(updated) }] : [])]
+        });
+        if (category === "people" && storeGet(OPERATOR_STORAGE_KEY) === oldValue) {
+          storeSet(OPERATOR_STORAGE_KEY, newValue);
+          currentUser = operatorObject(newValue);
+          updateAuthUI();
+        }
+        closeEditModal(true);
+        showToast(failures.length ? `Valore rinominato, ma ${failures.length} elementi non aggiornati: ${failures[0]}` : `“${oldValue}” rinominato in “${newValue}”${propagate ? ` · ${updated} elementi aggiornati` : ""}`, { type: failures.length ? "error" : "success" });
+      } catch (error) {
+        showToast("Errore modifica anagrafica: " + (error?.message || error), { type: "error" });
+        setSaving(event.target, false);
+      } finally {
+        setLoading(false);
+        await loadAllData();
+      }
+    }
+
+    async function moveRegistryItem(category, value, delta) {
+      const list = [...registryList(category)];
+      const from = list.indexOf(value);
+      const to = from + delta;
+      if (from < 0 || to < 0 || to >= list.length) return;
+      [list[from], list[to]] = [list[to], list[from]];
+      setRegistryList(category, list);
+      renderAnagrafiche();
+      if (!(await seedRegistryCategoryIfNeeded(category))) return loadAllData();
+      // aggiorna le posizioni solo dove sono cambiate
+      const current = new Map(registryRows.filter(r => r.category === category).map(r => [r.value, Number(r.position || 0)]));
+      for (let i = 0; i < list.length; i++) {
+        if (current.get(list[i]) === i + 1) continue;
+        const { error } = await sb.from("railops_registry").update({ position: i + 1 }).eq("category", category).eq("value", list[i]);
+        if (error) { showToast("Errore riordino: " + error.message, { type: "error" }); break; }
+      }
+      await loadAllData();
     }
 
     function generateReport() {
@@ -7630,13 +7791,14 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       return parts.length > 1 ? parts.slice(1).join(" ") : (parts[0] || "");
     }
 
-    // anno_mese_giorno_Rapportino_Settimanale_Cognome  (se la settimana finisce nel mese dopo: anno_mese_giorno-giorno_mese_…)
+    // anno_mese_giornoinizio-giornofine_Rapportino_Settimanale_Cognome (se la settimana finisce nel mese dopo: …-giornofine_mesefine_…)
     function rapportinoFileName(startKey, resource) {
       const s = parseDateKey(startKey);
       const e = addDays(s, 6);
       const p = n => String(n).padStart(2, "0");
-      let base = `${s.getFullYear()}_${p(s.getMonth() + 1)}_${p(s.getDate())}`;
-      if (e.getMonth() !== s.getMonth()) base += `-${p(e.getDate())}_${p(e.getMonth() + 1)}`;
+      // stesso mese: 2026_11_09-15 · mese diverso: 2026_10_26-01_11
+      let base = `${s.getFullYear()}_${p(s.getMonth() + 1)}_${p(s.getDate())}-${p(e.getDate())}`;
+      if (e.getMonth() !== s.getMonth()) base += `_${p(e.getMonth() + 1)}`;
       return `${base}_Rapportino_Settimanale_${surnameOf(resource)}.xlsx`.replace(/[\\/:*?"<>|]/g, "");
     }
 
