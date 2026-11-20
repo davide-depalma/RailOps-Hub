@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v56.3 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v56.4 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v56.3" />
+  <meta name="app-version" content="v56.4" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -400,7 +400,7 @@
     .calendar-day.weekend{background:#fbfcfd}
     .calendar-day.today{border-color:var(--primary);box-shadow:0 0 0 3px rgba(31,79,216,.1)}
     .calendar-day.focused-day{border-color:var(--primary)}
-    .calendar-day-number{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:13px;font-weight:800}
+    .calendar-day-number{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:13px;font-weight:800;height:22px;line-height:20px;flex:0 0 auto}
     .calendar-day.today .calendar-day-number > span:first-child{background:var(--primary);color:#fff;border-radius:999px;padding:0 7px}
     .calendar-count{color:var(--muted);font-size:11px;font-weight:700}
     .calendar-count.busy{color:var(--warning)}
@@ -435,7 +435,7 @@
     .cal-h.task.st-progress{background:var(--prog-bg);color:var(--prog-ink);border-color:var(--prog-bd)}
     .cal-h.task.st-done{background:var(--done-bg);color:var(--done-ink);border-color:var(--done-bd)}
     .cal-h.task.st-blocked{background:var(--block-bg);color:var(--block-ink);border-color:var(--block-bd)}
-    .calendar-hours-btn{display:inline-flex;align-items:center;gap:3px;height:22px;min-width:22px;padding:0 5px;border-radius:999px;border:1px solid var(--border);background:var(--surface,#fff);color:var(--muted);font:inherit;font-size:11px;font-weight:800;cursor:pointer;line-height:1;position:relative;z-index:3}
+    .calendar-hours-btn{display:inline-flex;align-items:center;justify-content:center;gap:3px;height:20px;min-width:20px;padding:0 4px;margin:0;box-sizing:border-box;border-radius:999px;border:1px solid var(--border);background:var(--surface,#fff);color:var(--muted);font:inherit;font-size:11px;font-weight:800;cursor:pointer;line-height:1;position:relative;z-index:3}
     .calendar-hours-btn .ico{width:13px;height:13px}
     .calendar-hours-btn:hover{border-color:var(--border-strong);color:var(--text)}
     .calendar-hours-btn.on{background:var(--primary);border-color:var(--primary);color:#fff}
@@ -2678,9 +2678,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v56.3";
+    const APP_VERSION = "v56.4";
     const APP_RELEASE_DATE = "20/11/2026";
     const CHANGELOG = [
+      { v: "v56.4", date: "20/11/2026", items: ["Calendario: le barre degli elementi su più giorni sono di nuovo perfettamente allineate anche nei giorni con il pulsante delle ore (l'intestazione del giorno ha ora un'altezza fissa)"] },
       { v: "v56.3", date: "20/11/2026", items: ["Calendario, finestra del giorno: in alto il totale ore della giornata con il dettaglio per tipo; per ogni elemento le ore del giorno e le fasce orarie (es. 08:30–13:00 · 14:00–15:30), per le trasferte separate tra lavoro e viaggio", "Elementi ordinati per orario d'inizio; compaiono anche le reperibilità iniziate il giorno prima e proseguite dopo mezzanotte"] },
       { v: "v56.2", date: "20/11/2026", items: ["Calendario: le ore si aprono e chiudono giorno per giorno con il pulsante orologio in alto a destra di ogni giornata (al posto del numero di elementi); aperto mostra il totale del giorno", "Le ore delle attività sono colorate in base allo stato (da fare, in corso, completata, bloccata)", "Tolto il pulsante generale «Nascondi ore»"] },
       { v: "v56.1", date: "20/11/2026", items: ["Calendario: in ogni giorno il riepilogo delle ore di Attività, Trasferta (lavoro + viaggio) e Reperibilità, con il totale quando ce n'è più di uno; stesse regole del rapportino (pausa pranzo 13–14 e pause escluse) e segue i filtri attivi", "Pulsante «Nascondi ore / Mostra ore» per toglierlo quando non serve; la scelta resta salvata sul dispositivo"] },
