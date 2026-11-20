@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v56.2 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v56.3 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v56.2" />
+  <meta name="app-version" content="v56.3" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -481,6 +481,19 @@
     .day-events-modal-item.trip{border-left-color:var(--trip-dot)}
     .day-events-modal-item.task.todo{border-left-color:var(--todo-dot)} .day-events-modal-item.task.progress{border-left-color:var(--prog-dot)} .day-events-modal-item.task.done{border-left-color:var(--done-dot)} .day-events-modal-item.task.blocked{border-left-color:var(--block-dot)}
     .day-events-modal-item.unavailable{border-left-color:var(--unav-dot)} .day-events-modal-item.oncall{border-left-color:var(--oncall-dot)}
+    .day-events-modal-item{position:relative}
+    .day-ev-hours{float:right;margin:0 0 6px 12px;text-align:right;max-width:46%}
+    .day-ev-total{display:inline-block;font-size:15px;font-weight:850;font-variant-numeric:tabular-nums;background:var(--soft-2);border:1px solid var(--border);border-radius:8px;padding:2px 9px}
+    .day-ev-range{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:3px;line-height:1.35}
+    .day-ev-range b{color:var(--text);font-weight:700}
+    .day-ev-hours.none{font-size:11.5px;color:var(--muted);font-style:italic;padding-top:2px}
+    .day-ev-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid var(--border);background:var(--soft);border-radius:12px;padding:10px 14px;margin-bottom:10px}
+    .day-ev-summary-total{display:flex;align-items:baseline;gap:10px}
+    .day-ev-summary-total span{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    .day-ev-summary-total strong{font-size:22px;font-weight:850;font-variant-numeric:tabular-nums}
+    .calendar-hours.day-ev-chips{margin-top:0;border-top:0;padding-top:0}
+    .day-ev-chips .cal-h{font-size:12px;padding:2px 8px}
+    @media (max-width:560px){.day-ev-hours{max-width:52%}.day-ev-total{font-size:14px}}
     .day-events-modal-type{font-size:10.5px;font-weight:850;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:2px}
     .day-events-modal-title{font-size:14px;font-weight:800;margin-bottom:2px}
     .day-events-modal-meta{font-size:12.5px;color:var(--muted);line-height:1.4}
@@ -2665,9 +2678,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v56.2";
+    const APP_VERSION = "v56.3";
     const APP_RELEASE_DATE = "20/11/2026";
     const CHANGELOG = [
+      { v: "v56.3", date: "20/11/2026", items: ["Calendario, finestra del giorno: in alto il totale ore della giornata con il dettaglio per tipo; per ogni elemento le ore del giorno e le fasce orarie (es. 08:30–13:00 · 14:00–15:30), per le trasferte separate tra lavoro e viaggio", "Elementi ordinati per orario d'inizio; compaiono anche le reperibilità iniziate il giorno prima e proseguite dopo mezzanotte"] },
       { v: "v56.2", date: "20/11/2026", items: ["Calendario: le ore si aprono e chiudono giorno per giorno con il pulsante orologio in alto a destra di ogni giornata (al posto del numero di elementi); aperto mostra il totale del giorno", "Le ore delle attività sono colorate in base allo stato (da fare, in corso, completata, bloccata)", "Tolto il pulsante generale «Nascondi ore»"] },
       { v: "v56.1", date: "20/11/2026", items: ["Calendario: in ogni giorno il riepilogo delle ore di Attività, Trasferta (lavoro + viaggio) e Reperibilità, con il totale quando ce n'è più di uno; stesse regole del rapportino (pausa pranzo 13–14 e pause escluse) e segue i filtri attivi", "Pulsante «Nascondi ore / Mostra ore» per toglierlo quando non serve; la scelta resta salvata sul dispositivo"] },
       { v: "v56.0", date: "20/11/2026", items: ["Rapportino pagina 2: ore lavoro e ore viaggio compilate in automatico dai registri tempo (una riga per giorno e POS, data e totale del giorno uniti se nello stesso giorno ci sono più POS); la pausa pranzo 13–14 e le pause indicate negli slot non vengono conteggiate", "Rapportino pagina 3: nome e cognome dell'operatore e firma inserita in automatico", "Anagrafiche: nuova sezione «Firme operatori» per caricare le firme (anche tutte insieme, con i file FIRMA_NOME_COGNOME.png); i bordi bianchi vengono ritagliati e la firma è condivisa su tutti i dispositivi", "Anteprima delle ore nella finestra del rapportino, con avviso per i giorni senza orari"] },
@@ -6993,15 +7007,6 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       renderCalendar();
     }
 
-    // Minuti di una lista di slot che cadono nel giorno: quelli del giorno stesso più la parte dopo mezzanotte del giorno prima.
-    // Stesse regole del rapportino: pause degli slot e pausa pranzo 13–14 escluse.
-    function slotsMinutesOnDay(slotsToday, slotsYesterday) {
-      let total = 0;
-      (slotsToday || []).forEach(slot => rapportinoSlotIntervals(slot).forEach(([a, b]) => { if (a < 1440) total += Math.min(b, 1440) - a; }));
-      (slotsYesterday || []).forEach(slot => rapportinoSlotIntervals(slot).forEach(([a, b]) => { if (b > 1440) total += b - Math.max(a, 1440); }));
-      return total;
-    }
-
     function taskSlotsOnDate(task, key) {
       const slots = [];
       let legacy = 0;
@@ -7012,6 +7017,41 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         else if (log.time_spent_minutes !== "") legacy += Number(log.time_spent_minutes || 0) / Math.max(1, range.length);
       });
       return { slots, legacy };
+    }
+
+    // Fasce orarie (minuti) di un elemento in un giorno: lavoro e viaggio, già senza pause e pausa pranzo.
+    function slotsIntervalsOnDay(slotsToday, slotsYesterday) {
+      const out = [];
+      (slotsToday || []).forEach(slot => rapportinoSlotIntervals(slot).forEach(([a, b]) => { if (a < 1440) out.push([a, Math.min(b, 1440)]); }));
+      (slotsYesterday || []).forEach(slot => rapportinoSlotIntervals(slot).forEach(([a, b]) => { if (b > 1440) out.push([Math.max(a, 1440) - 1440, b - 1440]); }));
+      return mergeIntervals(out);
+    }
+
+    function calendarEventDayDetail(event, key) {
+      const set = event._set || new Set(calendarEventDateKeys(event));
+      const prev = addDateDaysKey(key, -1);
+      const inToday = set.has(key), inPrev = set.has(prev);
+      const raw = event.raw || {};
+      let work = [], travel = [], legacy = 0;
+      if (event.type === "task") {
+        const today = inToday ? taskSlotsOnDate(raw, key) : { slots: [], legacy: 0 };
+        work = slotsIntervalsOnDay(today.slots, inPrev ? taskSlotsOnDate(raw, prev).slots : []);
+        legacy = today.legacy;
+      } else if (event.type === "trip") {
+        const d = inToday ? tripDayOn(raw, key) : null, p = inPrev ? tripDayOn(raw, prev) : null;
+        work = slotsIntervalsOnDay(d?.work_slots, p?.work_slots);
+        travel = slotsIntervalsOnDay(d?.travel_slots, p?.travel_slots);
+      } else if (event.type === "oncall") {
+        const slot = { start_time: raw.start_time, end_time: raw.end_time };
+        work = slotsIntervalsOnDay(inToday ? [slot] : [], inPrev ? [slot] : []);
+      }
+      const sum = list => list.reduce((t, [a, b]) => t + (b - a), 0);
+      const workMin = Math.round(sum(work) + legacy), travelMin = Math.round(sum(travel));
+      return { work, travel, legacy: Math.round(legacy), workMin, travelMin, minutes: workMin + travelMin, first: Math.min(work[0]?.[0] ?? 9999, travel[0]?.[0] ?? 9999) };
+    }
+
+    function intervalsText(list) {
+      return list.map(([a, b]) => `<span style="white-space:nowrap">${minutesToHHMM(a)}–${b >= 1440 ? "24:00" : minutesToHHMM(b)}</span>`).join(" · ");
     }
 
     function tripDayOn(trip, key) {
@@ -7025,22 +7065,16 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       events.forEach(event => {
         const inToday = event._set.has(key), inPrev = event._set.has(prev);
         if (!inToday && !inPrev) return;
-        const raw = event.raw;
+        if (!["task", "trip", "oncall"].includes(event.type)) return;
+        const d = calendarEventDayDetail(event, key);
         if (event.type === "task") {
-          const today = inToday ? taskSlotsOnDate(raw, key) : { slots: [], legacy: 0 };
-          const before = inPrev ? taskSlotsOnDate(raw, prev).slots : [];
-          const minutes = slotsMinutesOnDay(today.slots, before) + today.legacy;
-          const tone = statusTone(raw.status);
-          out.task += minutes;
-          if (minutes) out.taskByTone[tone] = (out.taskByTone[tone] || 0) + minutes;
+          const tone = statusTone(event.raw?.status);
+          out.task += d.minutes;
+          if (d.minutes) out.taskByTone[tone] = (out.taskByTone[tone] || 0) + d.minutes;
         } else if (event.type === "trip") {
-          const d = inToday ? tripDayOn(raw, key) : null, p = inPrev ? tripDayOn(raw, prev) : null;
-          const work = slotsMinutesOnDay(d?.work_slots, p?.work_slots);
-          const travel = slotsMinutesOnDay(d?.travel_slots, p?.travel_slots);
-          out.tripWork += work; out.tripTravel += travel; out.trip += work + travel;
-        } else if (event.type === "oncall") {
-          const slot = { start_time: raw.start_time, end_time: raw.end_time };
-          out.oncall += slotsMinutesOnDay(inToday ? [slot] : [], inPrev ? [slot] : []);
+          out.tripWork += d.workMin; out.tripTravel += d.travelMin; out.trip += d.minutes;
+        } else {
+          out.oncall += d.minutes;
         }
       });
       ["task", "trip", "tripWork", "tripTravel", "oncall"].forEach(k => { out[k] = Math.round(out[k]); });
@@ -7307,17 +7341,45 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     function openCalendarDayEvents(dateKey, resource = "") {
       const events = getCalendarDayEvents(dateKey, resource);
+      // elementi del giorno prima che proseguono dopo mezzanotte (es. reperibilità 23:00–01:00)
+      const prevDay = addDateDaysKey(dateKey, -1);
+      getCalendarDayEvents(prevDay, resource)
+        .filter(e => !events.some(x => x.type === e.type && x.id === e.id))
+        .forEach(e => { const d = calendarEventDayDetail(e, dateKey); if (d.minutes) { e._fromPrev = true; events.push(e); } });
       if (!events.length) return openQuickCreateForDate(dateKey, resource);
+      const details = new Map(events.map(e => [e, calendarEventDayDetail(e, dateKey)]));
+      const typeOrder = { task: 1, trip: 2, oncall: 3, unavailable: 4 };
+      events.sort((a, b) => (typeOrder[a.type] || 99) - (typeOrder[b.type] || 99) || details.get(a).first - details.get(b).first || String(a.title || "").localeCompare(String(b.title || ""), "it"));
+      // totale del giorno con le stesse regole del calendario (filtri attivi, anche la parte dopo mezzanotte del giorno prima)
+      const prevKey = addDateDaysKey(dateKey, -1);
+      const dayEvents = getCalendarEvents().filter(calendarEventMatchesFilters).filter(e => !resource || calendarEventPeople(e).includes(resource));
+      dayEvents.forEach(e => { e._keys = calendarEventDateKeys(e); e._set = new Set(e._keys); });
+      const dayTotals = calendarDayHours(dayEvents.filter(e => e._set.has(dateKey) || e._set.has(prevKey)), dateKey);
+      const dayTotal = dayTotals.task + dayTotals.trip + dayTotals.oncall;
+      const hoursBox = (d) => {
+        if (!d.minutes) return ["task", "trip", "oncall"].includes(d.type) ? `<div class="day-ev-hours none">nessun orario</div>` : "";
+        const lines = [];
+        const split = d.work.length && d.travel.length;
+        if (d.work.length) lines.push(`${split ? `<b>Lavoro ${formatHoursShort(d.workMin)}</b> ` : ""}${intervalsText(d.work)}`);
+        if (d.travel.length) lines.push(`<b>Viaggio${split ? " " + formatHoursShort(d.travelMin) : ""}</b> ${intervalsText(d.travel)}`);
+        if (d.legacy) lines.push(`${formatMinutes(d.legacy)} registrati senza orario`);
+        return `<div class="day-ev-hours"><div class="day-ev-total">${formatHoursShort(d.minutes)}</div>${lines.map(l => `<div class="day-ev-range">${l}</div>`).join("")}</div>`;
+      };
 
       document.getElementById("editModalTitle").textContent = `${resource ? resource + " · " : ""}${new Intl.DateTimeFormat("it-IT", { weekday:"long", day:"numeric", month:"long" }).format(parseDateKey(dateKey)).replace(/^./, c => c.toUpperCase())}`;
       document.getElementById("editModalBody").innerHTML = `
-        <div class="mini-meta" style="margin-bottom:12px;">${events.length} ${events.length === 1 ? "elemento" : "elementi"} in questa giornata. Clicca per aprire.</div>
+        <div class="day-ev-summary">
+          <div class="day-ev-summary-total"><span>Totale ore del giorno</span><strong>${dayTotal ? formatHoursShort(dayTotal) : "—"}</strong></div>
+          ${dayTotal ? calendarHoursHtml(dayTotals).replace('class="calendar-hours', 'class="calendar-hours day-ev-chips') : `<div class="mini-meta">Nessun orario registrato in questa giornata.</div>`}
+        </div>
+        <div class="mini-meta" style="margin-bottom:12px;">${events.length} ${events.length === 1 ? "elemento" : "elementi"} in questa giornata. Clicca per aprire. Pausa pranzo 13–14 e pause non conteggiate.</div>
         <div class="day-events-modal-list">
           ${events.map(event => {
             const statusClass = event.type === "task" ? statusTone(event.raw?.status) : "";
             return `
               <div class="day-events-modal-item ${event.type} ${statusClass}" onclick="${calendarOpenFunction(event)}">
-                <div class="day-events-modal-type">${escapeHtml(calendarTypeLabel(event.type))}</div>
+                ${hoursBox({ ...details.get(event), type: event.type })}
+                <div class="day-events-modal-type">${escapeHtml(calendarTypeLabel(event.type))}${event._fromPrev ? " · prosegue dal giorno prima" : ""}</div>
                 <div class="day-events-modal-title">${escapeHtml(event.title || "-")}</div>
                 <div class="day-events-modal-meta">${escapeHtml(event.subtitle || "-")}</div>
                 ${event.type === "task" && event.raw?.status ? `<div class="day-event-status-badge">${statusBadge(event.raw.status)}${isTaskOverdue(event.raw) ? ` <span class="badge plain tone-blocked">In ritardo</span>` : ""}</div>` : ""}
