@@ -3,7 +3,7 @@
      senza connessione si apre l'ultima versione salvata.
    - I dati (Supabase) NON passano da qui: restano sempre in tempo reale.
    Quando si pubblica una nuova versione basta cambiare CACHE_VERSION. */
-const CACHE_VERSION = "railops-v55.3";
+const CACHE_VERSION = "railops-v55.5";
 const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js";
 const SHELL = [
   "./",
@@ -42,7 +42,8 @@ self.addEventListener("fetch", (event) => {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_VERSION);
       try {
-        const fresh = await fetch(request);
+        // "no-cache": chiede sempre al sito se c'è una versione nuova (senza aspettare la cache del browser)
+        const fresh = await fetch(request.url, { cache: "no-cache", credentials: "same-origin" });
         if (fresh && fresh.ok) cache.put("./", fresh.clone());
         return fresh;
       } catch (e) {
