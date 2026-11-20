@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v56.0 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v56.1 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v56.0" />
+  <meta name="app-version" content="v56.1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -426,6 +426,15 @@
     .calendar-event.oncall{background:var(--oncall-bg);color:var(--oncall-ink);border-color:var(--oncall-bd)}
     .calendar-event.overdue:not(.cont-left){box-shadow:inset 3px 0 0 var(--danger)}
     .calendar-event.focused{outline:2px solid var(--primary);outline-offset:1px;z-index:2}
+    .calendar-hours{margin-top:auto;display:flex;flex-wrap:wrap;gap:3px;padding-top:4px;border-top:1px dashed var(--border);min-width:0}
+    .calendar-hours.none{border-top-color:transparent;padding-top:0}
+    .cal-h{display:inline-flex;align-items:baseline;gap:3px;font-size:10.5px;line-height:1.25;font-weight:800;padding:1px 5px;border-radius:5px;border:1px solid transparent;white-space:nowrap;font-variant-numeric:tabular-nums}
+    .cal-h b{font-weight:600;opacity:.8}
+    .cal-h.task{background:var(--soft-2);color:var(--text);border-color:var(--border)}
+    .cal-h.trip{background:var(--trip-bg);color:var(--trip-ink);border-color:var(--trip-bd)}
+    .cal-h.oncall{background:var(--oncall-bg);color:var(--oncall-ink);border-color:var(--oncall-bd)}
+    .cal-h.tot{background:transparent;color:var(--text);padding-left:2px}
+    .calendar-view-day .cal-h{font-size:12.5px;padding:2px 8px}
     .calendar-more{font-size:11px;color:var(--muted);font-weight:800;padding:2px 5px;border-radius:6px;cursor:pointer}
     .calendar-more:hover{background:var(--soft-2);color:var(--text)}
     .calendar-view-day .calendar-day{min-height:220px;cursor:default}
@@ -623,6 +632,7 @@
       .calendar-day{min-height:96px;padding:5px;border-radius:9px}
       .calendar-event{font-size:10.5px;padding:3px 5px;height:48px}
       .calendar-lane-empty{height:48px}
+      .cal-h{font-size:9.5px;padding:0 4px}
       .calendar-event.cont-right{margin-right:-12px}
       .calendar-event.cont-left{margin-left:-6px}
       .calendar-list-item{grid-template-columns:minmax(0,1fr) auto}
@@ -676,6 +686,7 @@
     <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></symbol>
     <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
     <symbol id="i-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
     <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
     <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/></symbol>
@@ -943,6 +954,7 @@
               <select id="calendarVehicleFilter" class="select" onchange="renderCalendar()"><option value="">Tutte le commesse</option></select>
               <select id="calendarSystemFilter" class="select" onchange="renderCalendar()"><option value="">Tutti i sistemi</option></select>
               <button class="btn ghost small hidden" id="calendarFiltersReset" onclick="clearCalendarFilters()">Azzera filtri</button>
+              <button class="btn ghost small" id="calendarHoursToggle" onclick="toggleCalendarHours()" aria-pressed="true" title="Mostra o nascondi il riepilogo delle ore in ogni giorno"><svg class="ico"><use href="#i-clock"/></svg><span>Nascondi ore</span></button>
               <button class="btn ghost small hidden" id="calendarSizeReset" onclick="resetCalendarSizes()" title="Riporta tutti i giorni alla grandezza standard">Dimensioni standard</button>
             </div>
             <div class="legend">
@@ -2646,9 +2658,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v56.0";
+    const APP_VERSION = "v56.1";
     const APP_RELEASE_DATE = "20/11/2026";
     const CHANGELOG = [
+      { v: "v56.1", date: "20/11/2026", items: ["Calendario: in ogni giorno il riepilogo delle ore di Attività, Trasferta (lavoro + viaggio) e Reperibilità, con il totale quando ce n'è più di uno; stesse regole del rapportino (pausa pranzo 13–14 e pause escluse) e segue i filtri attivi", "Pulsante «Nascondi ore / Mostra ore» per toglierlo quando non serve; la scelta resta salvata sul dispositivo"] },
       { v: "v56.0", date: "20/11/2026", items: ["Rapportino pagina 2: ore lavoro e ore viaggio compilate in automatico dai registri tempo (una riga per giorno e POS, data e totale del giorno uniti se nello stesso giorno ci sono più POS); la pausa pranzo 13–14 e le pause indicate negli slot non vengono conteggiate", "Rapportino pagina 3: nome e cognome dell'operatore e firma inserita in automatico", "Anagrafiche: nuova sezione «Firme operatori» per caricare le firme (anche tutte insieme, con i file FIRMA_NOME_COGNOME.png); i bordi bianchi vengono ritagliati e la firma è condivisa su tutti i dispositivi", "Anteprima delle ore nella finestra del rapportino, con avviso per i giorni senza orari"] },
       { v: "v55.9", date: "20/11/2026", items: ["Calendario: i giorni si possono allargare/stringere (bordo destro) e alzare/abbassare (bordo inferiore o angolo); doppio clic sul bordo per tornare alla grandezza standard; pulsante «Dimensioni standard» per ripristinare tutto", "Con un'altezza maggiore si vedono più elementi per giorno; le dimensioni restano salvate su ogni dispositivo, separate per vista mese/settimana/giorno"] },
       { v: "v55.8", date: "20/11/2026", items: ["Rapportino: nella colonna ATTIVITÀ compare «Tipo di intervento - Nome attività»; più attività dello stesso tipo nello stesso giorno vengono unite sotto un unico tipo", "Rapportino: avviso per le attività a cui manca il tipo di intervento", "Rapportino: i testi lunghi nella colonna ATTIVITÀ vengono rimpiccioliti per stare interi nella cella"] },
@@ -6850,6 +6863,13 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const days = getVisibleCalendarDays(calendarCurrentDate);
       const todayKey = todayDateKey();
 
+      const hoursBtn = document.getElementById("calendarHoursToggle");
+      if (hoursBtn) {
+        hoursBtn.classList.toggle("hidden", mode === "resources");
+        hoursBtn.setAttribute("aria-pressed", String(calendarHoursVisible()));
+        hoursBtn.querySelector("span").textContent = calendarHoursVisible() ? "Nascondi ore" : "Mostra ore";
+      }
+
       if (mode === "resources") {
         weekdays.style.display = "none";
         grid.style.display = "block";
@@ -6871,6 +6891,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
       const currentMonth = calendarCurrentDate.getMonth();
       const sizes = getCalendarSizes(mode);
+      const showHours = calendarHoursVisible();
+      const dayHours = key => calendarDayHours(events, key);
       const dayCell = (day, inner, count, col = 0, row = 0) => {
         const key = toDateKey(day);
         const outside = mode === "month" && day.getMonth() !== currentMonth ? "outside" : "";
@@ -6883,6 +6905,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         return `<div class="calendar-day ${outside} ${weekend} ${today} ${focusedDay} ${picked} ${sized}" data-day-key="${key}" data-col="${col}" data-row="${row}" onclick="handleCalendarDayClick('${key}')" title="${count ? "Apri gli elementi del giorno" : "Crea un nuovo elemento"}">
           <div class="calendar-day-number"><span>${day.getDate()}</span>${count ? `<span class="calendar-count ${count >= 4 ? "busy" : ""}">${count}</span>` : ""}</div>
           <div class="calendar-events">${inner}</div>
+          ${showHours ? calendarHoursHtml(dayHours(key)) : ""}
           ${handle("x", "Trascina per allargare o stringere")}${handle("y", "Trascina per alzare o abbassare")}${handle("xy", "Trascina per ridimensionare")}
         </div>`;
       };
@@ -6918,7 +6941,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         // con un'altezza personalizzata si mostrano tante corsie quante ne stanno nella cella
         let maxLanes = defaultLanes;
         if (sizes.rows[row]) {
-          const usable = sizes.rows[row] - 34;
+          const usable = sizes.rows[row] - 34 - (showHours ? 24 : 0);
           const fitAll = Math.max(0, Math.floor(usable / laneHeight));
           maxLanes = lanes.length <= fitAll ? fitAll : Math.max(0, Math.floor((usable - 18) / laneHeight));
         }
@@ -6943,6 +6966,83 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       grid.innerHTML = html;
       applyCalendarSizes(mode, Math.ceil(days.length / 7));
       renderCalendarList(events, days);
+    }
+
+    /* ---- riepilogo ore in ogni giorno del calendario (attività / trasferte / reperibilità) ---- */
+    const CAL_HOURS_KEY = "railops_calendar_hours";
+
+    function calendarHoursVisible() {
+      return storeGet(CAL_HOURS_KEY) !== "0";
+    }
+
+    function toggleCalendarHours() {
+      storeSet(CAL_HOURS_KEY, calendarHoursVisible() ? "0" : "1");
+      renderCalendar();
+    }
+
+    // Minuti di una lista di slot che cadono nel giorno: quelli del giorno stesso più la parte dopo mezzanotte del giorno prima.
+    // Stesse regole del rapportino: pause degli slot e pausa pranzo 13–14 escluse.
+    function slotsMinutesOnDay(slotsToday, slotsYesterday) {
+      let total = 0;
+      (slotsToday || []).forEach(slot => rapportinoSlotIntervals(slot).forEach(([a, b]) => { if (a < 1440) total += Math.min(b, 1440) - a; }));
+      (slotsYesterday || []).forEach(slot => rapportinoSlotIntervals(slot).forEach(([a, b]) => { if (b > 1440) total += b - Math.max(a, 1440); }));
+      return total;
+    }
+
+    function taskSlotsOnDate(task, key) {
+      const slots = [];
+      let legacy = 0;
+      normalizeTaskLogs(task.daily_logs).forEach(log => {
+        const range = eachDateInRange(log.start_date || log.log_date || log.end_date, log.end_date || log.start_date || log.log_date);
+        if (!range.includes(key)) return;
+        if (log.work_slots.length) slots.push(...log.work_slots);
+        else if (log.time_spent_minutes !== "") legacy += Number(log.time_spent_minutes || 0) / Math.max(1, range.length);
+      });
+      return { slots, legacy };
+    }
+
+    function tripDayOn(trip, key) {
+      return normalizeTripDays(trip.daily_logs).find(d => d.day_date === key) || null;
+    }
+
+    // Ore del giorno per tipo, sugli elementi visibili (rispetta i filtri del calendario)
+    function calendarDayHours(events, key) {
+      const prev = addDateDaysKey(key, -1);
+      const out = { task: 0, trip: 0, tripWork: 0, tripTravel: 0, oncall: 0 };
+      events.forEach(event => {
+        const inToday = event._set.has(key), inPrev = event._set.has(prev);
+        if (!inToday && !inPrev) return;
+        const raw = event.raw;
+        if (event.type === "task") {
+          const today = inToday ? taskSlotsOnDate(raw, key) : { slots: [], legacy: 0 };
+          const before = inPrev ? taskSlotsOnDate(raw, prev).slots : [];
+          out.task += slotsMinutesOnDay(today.slots, before) + today.legacy;
+        } else if (event.type === "trip") {
+          const d = inToday ? tripDayOn(raw, key) : null, p = inPrev ? tripDayOn(raw, prev) : null;
+          const work = slotsMinutesOnDay(d?.work_slots, p?.work_slots);
+          const travel = slotsMinutesOnDay(d?.travel_slots, p?.travel_slots);
+          out.tripWork += work; out.tripTravel += travel; out.trip += work + travel;
+        } else if (event.type === "oncall") {
+          const slot = { start_time: raw.start_time, end_time: raw.end_time };
+          out.oncall += slotsMinutesOnDay(inToday ? [slot] : [], inPrev ? [slot] : []);
+        }
+      });
+      Object.keys(out).forEach(k => { out[k] = Math.round(out[k]); });
+      return out;
+    }
+
+    function formatHoursShort(min) {
+      const h = Math.floor(min / 60), m = min % 60;
+      return m ? `${h}h${String(m).padStart(2, "0")}` : `${h}h`;
+    }
+
+    function calendarHoursHtml(h) {
+      const parts = [];
+      if (h.task) parts.push(`<span class="cal-h task" title="Attività: ${formatMinutes(h.task)}"><b>Att</b>${formatHoursShort(h.task)}</span>`);
+      if (h.trip) parts.push(`<span class="cal-h trip" title="Trasferta: ${formatMinutes(h.trip)} (lavoro ${formatMinutes(h.tripWork)} · viaggio ${formatMinutes(h.tripTravel)})"><b>Tras</b>${formatHoursShort(h.trip)}</span>`);
+      if (h.oncall) parts.push(`<span class="cal-h oncall" title="Reperibilità: ${formatMinutes(h.oncall)}"><b>Rep</b>${formatHoursShort(h.oncall)}</span>`);
+      if (parts.length > 1) parts.push(`<span class="cal-h tot" title="Totale del giorno: ${formatMinutes(h.task + h.trip + h.oncall)}"><b>Tot</b>${formatHoursShort(h.task + h.trip + h.oncall)}</span>`);
+      return `<div class="calendar-hours${parts.length ? "" : " none"}" aria-label="Ore del giorno">${parts.join("")}</div>`;
     }
 
     /* ---- dimensioni dei giorni del calendario (salvate su questo dispositivo, per vista) ---- */
