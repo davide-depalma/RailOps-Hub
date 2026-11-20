@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v55.9 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v56.0 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v55.9" />
+  <meta name="app-version" content="v56.0" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -503,6 +503,17 @@
     .registry-card-body{padding:12px 14px 14px}
     .registry-add{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px}
     .registry-list{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
+    .signature-thumb{width:150px;height:46px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:#fff;border:1px dashed var(--border);border-radius:8px;overflow:hidden}
+    .signature-thumb img{max-width:100%;max-height:100%;object-fit:contain}
+    .signature-item{flex-wrap:wrap}
+    .signature-who{min-width:0;flex:1 1 240px;display:flex;align-items:center;gap:12px}
+    .signature-who>div:last-child{min-width:0;flex:1}
+    @media (max-width:560px){.signature-thumb{width:110px;height:40px}.signature-item .registry-actions{margin-left:auto}}
+    .signature-add{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .signature-add>*{flex:0 0 auto;cursor:pointer}
+    .rapp-signature{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .check-inline{display:inline-flex;align-items:center;gap:6px;font-weight:500;margin:0;text-transform:none;letter-spacing:0}
+    .check-inline input{width:auto;margin:0}
     .registry-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border);background:var(--soft);border-radius:10px;padding:6px 6px 6px 10px}
     .registry-value{font-size:13px;font-weight:700;word-break:break-word}
     .registry-actions{display:flex;gap:0;flex:0 0 auto}
@@ -1098,6 +1109,7 @@
         <div class="operator-card-note">
           Le anagrafiche sono condivise su tutti i dispositivi. Un valore rimosso non sarà più selezionabile nei nuovi inserimenti, ma resta negli elementi già creati.
         </div>
+        <div id="signaturePanel"></div>
         <div id="registryGrid" class="registry-grid"></div>
       </section>
 
@@ -2634,9 +2646,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v55.9";
+    const APP_VERSION = "v56.0";
     const APP_RELEASE_DATE = "20/11/2026";
     const CHANGELOG = [
+      { v: "v56.0", date: "20/11/2026", items: ["Rapportino pagina 2: ore lavoro e ore viaggio compilate in automatico dai registri tempo (una riga per giorno e POS, data e totale del giorno uniti se nello stesso giorno ci sono più POS); la pausa pranzo 13–14 e le pause indicate negli slot non vengono conteggiate", "Rapportino pagina 3: nome e cognome dell'operatore e firma inserita in automatico", "Anagrafiche: nuova sezione «Firme operatori» per caricare le firme (anche tutte insieme, con i file FIRMA_NOME_COGNOME.png); i bordi bianchi vengono ritagliati e la firma è condivisa su tutti i dispositivi", "Anteprima delle ore nella finestra del rapportino, con avviso per i giorni senza orari"] },
       { v: "v55.9", date: "20/11/2026", items: ["Calendario: i giorni si possono allargare/stringere (bordo destro) e alzare/abbassare (bordo inferiore o angolo); doppio clic sul bordo per tornare alla grandezza standard; pulsante «Dimensioni standard» per ripristinare tutto", "Con un'altezza maggiore si vedono più elementi per giorno; le dimensioni restano salvate su ogni dispositivo, separate per vista mese/settimana/giorno"] },
       { v: "v55.8", date: "20/11/2026", items: ["Rapportino: nella colonna ATTIVITÀ compare «Tipo di intervento - Nome attività»; più attività dello stesso tipo nello stesso giorno vengono unite sotto un unico tipo", "Rapportino: avviso per le attività a cui manca il tipo di intervento", "Rapportino: i testi lunghi nella colonna ATTIVITÀ vengono rimpiccioliti per stare interi nella cella"] },
       { v: "v55.7", date: "20/11/2026", items: ["Attività: nuovo campo obbligatorio «Tipo di intervento» (da remoto, in sede, misto) prima del nome; il titolo diventa «Intervento da remoto - Nome attività» e compare così anche nel rapportino", "I tipi di intervento si possono modificare in Anagrafiche"] },
@@ -5837,6 +5850,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           </div>
         `;
       }).join("");
+      renderSignaturePanel();
     }
 
     function openEditRegistryItem(category, value) {
@@ -8044,6 +8058,123 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       return entries.sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start || kindOrder[a.kind] - kindOrder[b.kind]);
     }
 
+    /* ---------- Rapportino · pagina 2 (ore lavoro / ore viaggio) ---------- */
+    const RAPP_HOURS_FIRST_ROW = 44;
+    const RAPP_HOURS_MAX_ROWS = 14;
+    const RAPP_LUNCH = [13 * 60, 14 * 60]; // pausa pranzo 13:00–14:00, non conteggiata
+
+    function subtractInterval(list, cut) {
+      const out = [];
+      list.forEach(([s, e]) => {
+        if (cut[1] <= s || cut[0] >= e) { out.push([s, e]); return; }
+        if (cut[0] > s) out.push([s, cut[0]]);
+        if (cut[1] < e) out.push([cut[1], e]);
+      });
+      return out;
+    }
+
+    function mergeIntervals(list) {
+      const sorted = list.filter(([s, e]) => e > s).map(i => [...i]).sort((a, b) => a[0] - b[0]);
+      const out = [];
+      sorted.forEach(i => {
+        const last = out[out.length - 1];
+        if (last && i[0] <= last[1]) last[1] = Math.max(last[1], i[1]);
+        else out.push(i);
+      });
+      return out;
+    }
+
+    // Intervalli effettivi di uno slot in minuti dall'inizio del giorno (oltre 1440 = giorno dopo),
+    // tolte la pausa dello slot e la pausa pranzo 13–14.
+    function rapportinoSlotIntervals(slot) {
+      const t = v => minutesFromTime(formatTimeValue(v));
+      const s = t(slot?.start_time);
+      let e = t(slot?.end_time);
+      if (s === null || e === null) return [];
+      if (e <= s) e += 1440;
+      let list = [[s, e]];
+      const ps = t(slot.pause_start_time), pe = t(slot.pause_end_time);
+      if (ps !== null && pe !== null) {
+        const a = ps + (ps < s ? 1440 : 0);
+        const b = pe + (pe < s ? 1440 : 0);
+        if (b > a) list = subtractInterval(list, [a, b]);
+      } else if (Number(slot.break_duration_minutes) > 0 && !(s < RAPP_LUNCH[1] && e > RAPP_LUNCH[0])) {
+        // pausa indicata solo in minuti (fuori dall'orario di pranzo): si accorcia la fine dello slot
+        list = [[s, Math.max(s, e - Number(slot.break_duration_minutes))]];
+      }
+      [0, 1440].forEach(off => { list = subtractInterval(list, [RAPP_LUNCH[0] + off, RAPP_LUNCH[1] + off]); });
+      return list.filter(([a, b]) => b > a);
+    }
+
+    // Righe della pagina 2: una per giorno + POS, ordinate per orario d'inizio.
+    // Max 3 coppie DALLE/ALLE di lavoro e 2 di viaggio per riga: se servono di più si aggiunge una riga per lo stesso giorno.
+    function buildRapportinoHours(entries, keys, posOf) {
+      const inWeek = new Set(keys);
+      const rows = new Map();
+      const rowFor = (date, pos) => {
+        const key = `${date}|${pos}`;
+        if (!rows.has(key)) rows.set(key, { date, pos, work: [], travel: [] });
+        return rows.get(key);
+      };
+      const add = (date, pos, type, intervals) => {
+        intervals.forEach(([a, b]) => {
+          if (a < 1440 && inWeek.has(date)) rowFor(date, pos)[type].push([a, Math.min(b, 1440)]);
+          if (b > 1440) {
+            const next = addDateDaysKey(date, 1);
+            if (inWeek.has(next)) rowFor(next, pos)[type].push([Math.max(a, 1440) - 1440, b - 1440]);
+          }
+        });
+      };
+      entries.forEach(e => {
+        const pos = posOf(e.matricola);
+        rowFor(e.date, pos);
+        if (e.kind === "task") {
+          normalizeTaskLogs(e.item.daily_logs)
+            .filter(log => eachDateInRange(log.start_date || log.log_date || log.end_date, log.end_date || log.start_date || log.log_date).includes(e.date))
+            .forEach(log => log.work_slots.forEach(slot => add(e.date, pos, "work", rapportinoSlotIntervals(slot))));
+        } else if (e.kind === "trip") {
+          const day = normalizeTripDays(e.item.daily_logs).find(d => d.day_date === e.date);
+          (day?.work_slots || []).forEach(slot => add(e.date, pos, "work", rapportinoSlotIntervals(slot)));
+          (day?.travel_slots || []).forEach(slot => add(e.date, pos, "travel", rapportinoSlotIntervals(slot)));
+        } else {
+          add(e.date, pos, "work", rapportinoSlotIntervals({ start_time: e.item.start_time, end_time: e.item.end_time }));
+        }
+      });
+      const list = [...rows.values()].map(r => {
+        const work = mergeIntervals(r.work), travel = mergeIntervals(r.travel);
+        const first = Math.min(work[0]?.[0] ?? 9999, travel[0]?.[0] ?? 9999);
+        return { ...r, work, travel, first };
+      }).sort((a, b) => a.date.localeCompare(b.date) || a.first - b.first || a.pos - b.pos);
+
+      const physical = [];
+      list.forEach(r => {
+        const n = Math.max(1, Math.ceil(r.work.length / 3), Math.ceil(r.travel.length / 2));
+        for (let i = 0; i < n; i++) {
+          const work = r.work.slice(i * 3, i * 3 + 3), travel = r.travel.slice(i * 2, i * 2 + 2);
+          const sum = l => l.reduce((t, [a, b]) => t + (Math.min(b, 1439) - a), 0);
+          physical.push({ date: r.date, pos: r.pos, work, travel, workMinutes: sum(work), travelMinutes: sum(travel) });
+        }
+      });
+      const empty = [...new Set(list.filter(r => !r.work.length && !r.travel.length).map(r => r.date))];
+      return { rows: physical, emptyDates: empty };
+    }
+
+    // Gruppi di righe consecutive con la stessa data (la cella DATA e il TOTALE del giorno vengono uniti)
+    function rapportinoDateGroups(rows) {
+      const groups = [];
+      rows.forEach((r, i) => {
+        const last = groups[groups.length - 1];
+        if (last && last.date === r.date) last.end = i;
+        else groups.push({ date: r.date, start: i, end: i });
+      });
+      return groups;
+    }
+
+    function minutesToHHMM(min) {
+      const m = Math.min(min, 1439);
+      return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+    }
+
     function buildRapportino(resource, startKey, opts = {}) {
       const keys = weekKeysFrom(startKey);
       const luogoBase = String(opts.luogo || "BIT").trim() || "BIT";
@@ -8105,7 +8236,12 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const noLogs = [...new Set(entries.filter(e => e.kind === "task" && !normalizeTaskLogs(e.item.daily_logs).length).map(e => e.item.title))];
       if (noLogs.length) warnings.push(`Senza registro tempo (usate le date dell'attività): ${noLogs.join(", ")}.`);
 
-      return { resource, startKey, keys, entries, pos, rows: rowList, cliente, warnings, fileName: rapportinoFileName(startKey, resource) };
+      // Pagina 2 — ore
+      const hours = buildRapportinoHours(entries, keys, posOf);
+      if (hours.rows.length > RAPP_HOURS_MAX_ROWS) warnings.push(`Pagina 2: servono ${hours.rows.length} righe di ore, nel modello ne entrano ${RAPP_HOURS_MAX_ROWS}. Le ultime ${hours.rows.length - RAPP_HOURS_MAX_ROWS} non verranno scritte.`);
+      if (hours.emptyDates.length) warnings.push(`Pagina 2: nessun orario registrato per ${hours.emptyDates.map(k => formatDate(k)).join(", ")} — le ore di quei giorni restano da compilare a mano.`);
+
+      return { resource, startKey, keys, entries, pos, rows: rowList, hours: hours.rows, cliente, warnings, fileName: rapportinoFileName(startKey, resource) };
     }
 
     // Cella ATTIVITÀ: "Tipo di intervento - Nome attività". Più attività dello stesso tipo nello stesso giorno:
@@ -8142,6 +8278,49 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       return xml.replace(re, cell);
     }
 
+    // Scrive (o toglie, con formula null) la formula di una cella mantenendo lo stile del modello.
+    // Il valore già calcolato serve ai programmi che non ricalcolano all'apertura (anteprime, LibreOffice, telefoni).
+    function xmlSetFormula(xml, ref, formula, cachedValue = 0, styleIndex = null) {
+      const re = new RegExp(`<c r="${ref}"([^>]*?)(?:/>|>[\\s\\S]*?</c>)`);
+      const match = xml.match(re);
+      if (!match) throw new Error(`cella ${ref} non trovata nel modello`);
+      const style = styleIndex !== null && styleIndex !== undefined ? ` s="${styleIndex}"` : (match[1].match(/\ss="\d+"/) || [""])[0];
+      const v = Math.round(Number(cachedValue || 0) * 1e6) / 1e6;
+      return xml.replace(re, formula ? `<c r="${ref}"${style}><f>${xmlEscape(formula)}</f><v>${v}</v></c>` : `<c r="${ref}"${style}/>`);
+    }
+
+    // Inserisce la firma (PNG) nel riquadro FIRMA dell'operatore (N62:V63), proporzionata.
+    async function addSignatureToXlsx(zip, signature) {
+      const EMU = 9525; // EMU per pixel
+      const maxW = 2600000, maxH = 360000;
+      const w = signature.width || 400, h = signature.height || 100;
+      const scale = Math.min(maxW / (w * EMU), maxH / (h * EMU));
+      const cx = Math.round(w * EMU * scale), cy = Math.round(h * EMU * scale);
+      const rowOff = Math.max(0, Math.min(180000, Math.round((390000 - cy) / 2)));
+      zip.file("xl/media/firma_operatore.png", signature.blob);
+
+      const ctPath = "[Content_Types].xml";
+      let ct = await zip.file(ctPath).async("string");
+      if (!/Extension="png"/i.test(ct)) ct = ct.replace("<Default ", '<Default Extension="png" ContentType="image/png"/><Default ');
+      zip.file(ctPath, ct);
+
+      const relPath = "xl/drawings/_rels/drawing1.xml.rels";
+      const rel = '<Relationship Id="rIdFirma" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/firma_operatore.png"/>';
+      const existing = zip.file(relPath) ? await zip.file(relPath).async("string") : "";
+      zip.file(relPath, existing
+        ? existing.replace("</Relationships>", `${rel}</Relationships>`)
+        : `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rel}</Relationships>`);
+
+      const drawPath = "xl/drawings/drawing1.xml";
+      let drawing = await zip.file(drawPath).async("string");
+      if (!/xmlns:r=/.test(drawing)) drawing = drawing.replace("<xdr:wsDr ", '<xdr:wsDr xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ');
+      const anchor = `<xdr:oneCellAnchor><xdr:from><xdr:col>14</xdr:col><xdr:colOff>414130</xdr:colOff><xdr:row>61</xdr:row><xdr:rowOff>${rowOff}</xdr:rowOff></xdr:from><xdr:ext cx="${cx}" cy="${cy}"/>`
+        + `<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="5001" name="Firma operatore"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr>`
+        + `<xdr:blipFill><a:blip r:embed="rIdFirma"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>`
+        + `<xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`;
+      zip.file(drawPath, drawing.replace("</xdr:wsDr>", `${anchor}</xdr:wsDr>`));
+    }
+
     async function generateRapportinoXlsx(data, header) {
       const JSZip = await loadScriptOnce(JSZIP_URL, "JSZip");
       const b64 = document.getElementById("rapportinoTemplate").textContent.replace(/\s+/g, "");
@@ -8169,7 +8348,61 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         set(`T${r}`, row.tr);
       });
 
+      // PAGINA 2 — ore lavoro / ore viaggio
+      const hourRows = (data.hours || []).slice(0, RAPP_HOURS_MAX_ROWS);
+      const groups = rapportinoDateGroups(hourRows);
+      const H0 = RAPP_HOURS_FIRST_ROW;
+      const timeVal = min => Math.min(min, 1439) / 1440;
+      hourRows.forEach((row, i) => {
+        const r = H0 + i;
+        set(`A${r}`, String(row.pos));
+        row.work.forEach(([a, b], k) => { set(`${"FHJ"[k]}${r}`, timeVal(a), "num"); set(`${"GIK"[k]}${r}`, timeVal(b), "num"); });
+        row.travel.forEach(([a, b], k) => { set(`${"OQ"[k]}${r}`, timeVal(a), "num"); set(`${"PR"[k]}${r}`, timeVal(b), "num"); });
+      });
+      // data e totale del giorno centrati verticalmente nelle celle unite
+      const dateStyle = await addStyleVariant(zip, xml.match(/<c r="C44"[^>]*\ss="(\d+)"/)?.[1], { vertical: "center" });
+      const totalStyle = await addStyleVariant(zip, xml.match(/<c r="U44"[^>]*\ss="(\d+)"/)?.[1], { vertical: "center" });
+      groups.forEach(g => set(`C${H0 + g.start}`, excelDateSerial(g.date), "num", dateStyle));
+      // formule riscritte senza "formule condivise", così le celle unite del totale restano coerenti
+      const groupAt = new Map(groups.map(g => [g.start, g]));
+      const insideGroup = new Set(groups.flatMap(g => Array.from({ length: g.end - g.start }, (_, k) => g.start + k + 1)));
+      for (let i = 0; i < RAPP_HOURS_MAX_ROWS; i++) {
+        const r = H0 + i;
+        const row = hourRows[i];
+        const hrs = k => row ? row[k] / 60 : 0;
+        xml = xmlSetFormula(xml, `L${r}`, `ABS(G${r}-F${r}+I${r}-H${r}+K${r}-J${r})*1440/60`, hrs("workMinutes"));
+        xml = xmlSetFormula(xml, `S${r}`, `ABS(P${r}-O${r}+R${r}-Q${r})*1440/60`, hrs("travelMinutes"));
+        const g = groupAt.get(i);
+        if (g) {
+          const total = hourRows.slice(g.start, g.end + 1).reduce((t, x) => t + (x.workMinutes + x.travelMinutes) / 60, 0);
+          const f = g.end > g.start ? `SUM(L${r}:L${H0 + g.end},S${r}:S${H0 + g.end})` : `SUM(L${r},S${r})`;
+          xml = xmlSetFormula(xml, `U${r}`, f, total, totalStyle);
+        } else if (insideGroup.has(i)) xml = xmlSetFormula(xml, `U${r}`, null);
+        else xml = xmlSetFormula(xml, `U${r}`, `SUM(L${r},S${r})`);
+      }
+      groups.filter(g => g.end > g.start).forEach(g => {
+        const r1 = H0 + g.start, r2 = H0 + g.end;
+        for (let r = r1; r <= r2; r++) {
+          xml = xml.replace(`<mergeCell ref="C${r}:E${r}"/>`, "").replace(`<mergeCell ref="U${r}:V${r}"/>`, "");
+        }
+        xml = xml.replace("</mergeCells>", `<mergeCell ref="C${r1}:E${r2}"/><mergeCell ref="U${r1}:V${r2}"/></mergeCells>`);
+      });
+      xml = xml.replace(/<mergeCells count="\d+">([\s\S]*?)<\/mergeCells>/, (m, inner) => `<mergeCells count="${(inner.match(/<mergeCell /g) || []).length}">${inner}</mergeCells>`);
+
+      // PAGINA 3 — operatore Tesmec Rail e firma
+      set("P60", firstNameOf(data.resource));
+      set("P61", surnameOf(data.resource));
+      if (header.signature?.blob) await addSignatureToXlsx(zip, header.signature);
+
       zip.file(sheetPath, xml);
+      // le formule sono state riscritte: si toglie la catena di calcolo, Excel la ricrea all'apertura
+      if (zip.file("xl/calcChain.xml")) {
+        zip.remove("xl/calcChain.xml");
+        const ctPath = "[Content_Types].xml";
+        zip.file(ctPath, (await zip.file(ctPath).async("string")).replace(/<Override[^>]*calcChain[^>]*\/>/, ""));
+        const relPath = "xl/_rels/workbook.xml.rels";
+        zip.file(relPath, (await zip.file(relPath).async("string")).replace(/<Relationship[^>]*calcChain[^>]*\/>/, ""));
+      }
       // ricalcolo delle formule all'apertura
       let wb = await zip.file("xl/workbook.xml").async("string");
       wb = wb.replace(/<calcPr([^>]*?)\/>/, (m, attrs) => /fullCalcOnLoad/.test(attrs) ? m : `<calcPr${attrs} fullCalcOnLoad="1"/>`);
@@ -8178,7 +8411,12 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     }
 
     // Duplica lo stile di una cella aggiungendo "riduci per adattare" (shrinkToFit). Restituisce l'indice del nuovo stile.
-    async function addShrinkToFitStyle(zip, baseIndex) {
+    function addShrinkToFitStyle(zip, baseIndex) {
+      return addStyleVariant(zip, baseIndex, { shrinkToFit: "1" });
+    }
+
+    // Duplica lo stile di una cella aggiungendo attributi di allineamento. Restituisce l'indice del nuovo stile (null se non possibile).
+    async function addStyleVariant(zip, baseIndex, alignAttrs) {
       if (baseIndex === undefined || baseIndex === null) return null;
       const path = "xl/styles.xml";
       let styles = await zip.file(path).async("string");
@@ -8187,11 +8425,19 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const xfs = block[2].match(/<xf\b[^>]*?(?:\/>|>[\s\S]*?<\/xf>)/g) || [];
       const base = xfs[Number(baseIndex)];
       if (!base) return null;
+      const withAttrs = (attrs = "") => {
+        let a = attrs;
+        Object.entries(alignAttrs).forEach(([k, v]) => {
+          a = new RegExp(`\\s${k}="[^"]*"`).test(a) ? a.replace(new RegExp(`\\s${k}="[^"]*"`), ` ${k}="${v}"`) : `${a} ${k}="${v}"`;
+        });
+        return `<alignment${a}/>`;
+      };
       let clone;
-      if (/<alignment\b/.test(base)) clone = base.replace(/<alignment\b([^>]*?)\/>/, (m, a) => /shrinkToFit/.test(a) ? m : `<alignment${a} shrinkToFit="1"/>`);
-      else if (/\/>$/.test(base)) clone = base.replace(/\/>$/, `><alignment shrinkToFit="1"/></xf>`);
-      else clone = base.replace(/<\/xf>$/, `<alignment shrinkToFit="1"/></xf>`);
-      if (!/applyAlignment=/.test(clone)) clone = clone.replace(/^<xf\b/, '<xf applyAlignment="1"');
+      if (/<alignment\b/.test(base)) clone = base.replace(/<alignment\b([^>]*?)\/>/, (m, a) => withAttrs(a));
+      else if (/\/>$/.test(base)) clone = base.replace(/\/>$/, `>${withAttrs()}</xf>`);
+      else if (/<protection\b/.test(base)) clone = base.replace(/<protection\b/, `${withAttrs()}<protection`);
+      else clone = base.replace(/<\/xf>$/, `${withAttrs()}</xf>`);
+      clone = /applyAlignment=/.test(clone) ? clone.replace(/applyAlignment="[^"]*"/, 'applyAlignment="1"') : clone.replace(/^<xf\b/, '<xf applyAlignment="1"');
       const newIndex = xfs.length;
       styles = styles.replace(block[0], `<cellXfs count="${newIndex + 1}">${block[2]}${clone}</cellXfs>`);
       zip.file(path, styles);
@@ -8207,6 +8453,215 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
+
+    /* ---------- Firme operatori (PNG nello storage condiviso, cartella "firme/") ---------- */
+    const SIGNATURE_FOLDER = "firme";
+    let signatureIndex = null;            // Map slug → { name, updated_at } dei file presenti
+    let signatureIndexError = "";
+    let signatureIndexLoading = null;
+    const signatureCache = new Map();     // slug → { blob, url, width, height }
+
+    function plainName(value) {
+      return String(value || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    }
+
+    function signatureSlug(person) {
+      return plainName(person).replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+    }
+
+    function signaturePath(person) {
+      return `${SIGNATURE_FOLDER}/${signatureSlug(person)}.png`;
+    }
+
+    // FIRMA_DAVIDE_DE PALMA.png / firma-de-palma-davide.png → "Davide De Palma"
+    function personFromSignatureFile(fileName) {
+      const base = plainName(String(fileName || "").replace(/\.[a-z0-9]+$/i, "")).replace(/^firma[\s_-]*/, "");
+      const compact = base.replace(/[^a-z0-9]/g, "");
+      if (!compact) return null;
+      return people.find(p => {
+        const parts = plainName(p).split(/\s+/).filter(Boolean);
+        const direct = parts.join(""), reversed = [...parts.slice(1), parts[0]].join("");
+        return compact === direct || compact === reversed;
+      }) || null;
+    }
+
+    async function loadSignatureIndex(force = false) {
+      if (signatureIndex && !force) return signatureIndex;
+      if (signatureIndexLoading && !force) return signatureIndexLoading;
+      signatureIndexLoading = (async () => {
+        try {
+          const { data, error } = await sb.storage.from(ATTACHMENT_BUCKET).list(SIGNATURE_FOLDER, { limit: 500 });
+          if (error) throw error;
+          signatureIndex = new Map((data || []).filter(f => /\.png$/i.test(f.name)).map(f => [f.name.replace(/\.png$/i, ""), { name: f.name, updated_at: f.updated_at || f.created_at || "" }]));
+          signatureIndexError = "";
+        } catch (error) {
+          signatureIndex = signatureIndex || new Map();
+          signatureIndexError = error?.message || String(error);
+        } finally {
+          signatureIndexLoading = null;
+        }
+        return signatureIndex;
+      })();
+      return signatureIndexLoading;
+    }
+
+    function imageSize(blob) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => { resolve({ width: img.naturalWidth, height: img.naturalHeight, url }); };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("immagine non leggibile")); };
+        img.src = url;
+      });
+    }
+
+    // Firma di una persona (scaricata una volta e tenuta in memoria). null se non c'è.
+    async function getSignature(person) {
+      const slug = signatureSlug(person);
+      if (!slug) return null;
+      const index = await loadSignatureIndex();
+      if (!index.has(slug)) return null;
+      const version = index.get(slug).updated_at;
+      const cached = signatureCache.get(slug);
+      if (cached && cached.version === version) return cached;
+      const { data, error } = await sb.storage.from(ATTACHMENT_BUCKET).download(signaturePath(person));
+      if (error || !data) return null;
+      const blob = data.type === "image/png" ? data : new Blob([await data.arrayBuffer()], { type: "image/png" });
+      const size = await imageSize(blob).catch(() => null);
+      if (!size) return null;
+      if (cached?.url) URL.revokeObjectURL(cached.url);
+      const entry = { blob, url: size.url, width: size.width, height: size.height, version };
+      signatureCache.set(slug, entry);
+      return entry;
+    }
+
+    // Converte in PNG, ritaglia i bordi bianchi/trasparenti e limita la larghezza (le firme scansionate hanno molto margine).
+    async function prepareSignaturePng(file) {
+      const { width, height, url } = await imageSize(file);
+      try {
+        const img = await new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = url; });
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        let { data } = ctx.getImageData(0, 0, width, height);
+        let top = height, left = width, right = -1, bottom = -1;
+        for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+          const i = (y * width + x) * 4;
+          const ink = data[i + 3] > 24 && (data[i] < 225 || data[i + 1] < 225 || data[i + 2] < 225);
+          if (ink) { if (x < left) left = x; if (x > right) right = x; if (y < top) top = y; if (y > bottom) bottom = y; }
+        }
+        data = null;
+        if (right < 0) throw new Error("l'immagine sembra vuota");
+        const pad = Math.round(Math.max(right - left, bottom - top) * 0.03) + 2;
+        left = Math.max(0, left - pad); top = Math.max(0, top - pad);
+        right = Math.min(width - 1, right + pad); bottom = Math.min(height - 1, bottom + pad);
+        const cw = right - left + 1, ch = bottom - top + 1;
+        const scale = Math.min(1, 1200 / cw);
+        const out = document.createElement("canvas");
+        out.width = Math.max(1, Math.round(cw * scale)); out.height = Math.max(1, Math.round(ch * scale));
+        out.getContext("2d").drawImage(canvas, left, top, cw, ch, 0, 0, out.width, out.height);
+        return await new Promise((resolve, reject) => out.toBlob(b => b ? resolve(b) : reject(new Error("conversione PNG non riuscita")), "image/png"));
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    }
+
+    async function uploadSignature(person, file) {
+      if (!person) throw new Error("persona non indicata");
+      if (!/^image\//.test(file.type || "") && !/\.(png|jpe?g|webp)$/i.test(file.name || "")) throw new Error(`${file.name}: serve un'immagine PNG o JPG`);
+      if (file.size > 8 * 1024 * 1024) throw new Error(`${file.name}: file troppo grande (max 8 MB)`);
+      const png = await prepareSignaturePng(file);
+      const path = signaturePath(person);
+      let { error } = await sb.storage.from(ATTACHMENT_BUCKET).upload(path, png, { upsert: true, cacheControl: "60", contentType: "image/png" });
+      if (error) {
+        await sb.storage.from(ATTACHMENT_BUCKET).remove([path]);
+        ({ error } = await sb.storage.from(ATTACHMENT_BUCKET).upload(path, png, { upsert: false, cacheControl: "60", contentType: "image/png" }));
+      }
+      if (error) throw error;
+      signatureCache.delete(signatureSlug(person));
+      await loadSignatureIndex(true);
+      // la nuova firma è subito disponibile anche se l'elenco del server non è ancora aggiornato
+      if (!signatureIndex.has(signatureSlug(person))) signatureIndex.set(signatureSlug(person), { name: `${signatureSlug(person)}.png`, updated_at: new Date().toISOString() });
+    }
+
+    async function deleteSignature(person) {
+      if (!(await uiConfirm(`La firma di ${person} verrà eliminata e non sarà più inserita nei rapportini.`, { title: "Eliminare la firma?", confirmLabel: "Elimina", danger: true }))) return;
+      const { error } = await sb.storage.from(ATTACHMENT_BUCKET).remove([signaturePath(person)]);
+      if (error) return showToast("Errore eliminazione firma: " + error.message, { type: "error" });
+      signatureCache.delete(signatureSlug(person));
+      signatureIndex?.delete(signatureSlug(person));
+      showToast(`Firma di ${person} eliminata`, { type: "success" });
+      renderSignaturePanel();
+    }
+
+    async function handleSignatureUpload(input, person) {
+      const files = [...(input.files || [])];
+      input.value = "";
+      if (!files.length) return;
+      const done = [], failed = [];
+      setLoading(true);
+      try {
+        for (const file of files) {
+          const target = person || personFromSignatureFile(file.name);
+          if (!target) { failed.push(`${file.name}: nome non riconosciuto (usa FIRMA_NOME_COGNOME.png)`); continue; }
+          try { await uploadSignature(target, file); done.push(target); }
+          catch (error) { failed.push(`${file.name}: ${error?.message || error}`); }
+        }
+      } finally {
+        setLoading(false);
+      }
+      if (done.length) showToast(`Firma caricata: ${done.join(", ")}`, { type: "success" });
+      if (failed.length) showToast(failed.join(" · "), { type: "error", duration: 9000 });
+      renderSignaturePanel();
+      if (document.getElementById("rappSignatureBox")) refreshRapportinoSignature();
+    }
+
+    async function renderSignaturePanel() {
+      const box = document.getElementById("signaturePanel");
+      if (!box) return;
+      const draw = () => {
+        const rows = people.map(person => {
+          const slug = signatureSlug(person);
+          const has = signatureIndex?.has(slug);
+          const cached = signatureCache.get(slug);
+          return `
+            <div class="registry-item signature-item">
+              <div class="signature-who">
+                <div class="signature-thumb">${has ? (cached ? `<img src="${cached.url}" alt="Firma di ${escapeHtml(person)}">` : `<span class="mini-meta">caricamento…</span>`) : `<span class="mini-meta">nessuna firma</span>`}</div>
+                <div style="min-width:0"><div class="registry-value">${escapeHtml(person)}</div><div class="mini-meta" style="font-size:11.5px">${has ? "firma presente" : "manca la firma"}</div></div>
+              </div>
+              <div class="registry-actions">
+                <button type="button" class="btn ghost small" title="${has ? "Sostituisci" : "Carica"} firma" onclick="this.nextElementSibling.click()">${icon("upload")}${has ? "Sostituisci" : "Carica"}</button><input type="file" accept="image/png,image/jpeg,image/webp" hidden onchange="handleSignatureUpload(this, ${jsArg(person)})">
+                ${has ? `<button type="button" class="btn ghost icon" title="Elimina firma" aria-label="Elimina firma di ${escapeHtml(person)}" onclick="deleteSignature(${jsArg(person)})">${icon("x")}</button>` : ""}
+              </div>
+            </div>`;
+        }).join("");
+        box.innerHTML = `
+          <div class="registry-card" style="margin-bottom:16px">
+            <div class="registry-card-header">
+              <h3>Firme operatori</h3>
+              <p>Usate nel rapportino settimanale (riquadro “Per operatore Tesmec Rail”). Puoi caricarle una per una o tutte insieme: i file chiamati <b>FIRMA_NOME_COGNOME.png</b> vengono abbinati in automatico. Bordi bianchi e trasparenti vengono ritagliati.</p>
+            </div>
+            <div class="registry-card-body">
+              <div class="registry-add signature-add">
+                <button type="button" class="btn small" onclick="this.nextElementSibling.click()">${icon("upload")}Carica più firme</button><input type="file" accept="image/png,image/jpeg,image/webp" multiple hidden onchange="handleSignatureUpload(this, null)">
+                <button type="button" class="btn secondary small" onclick="signatureIndex=null;renderSignaturePanel()">${icon("refresh")}Aggiorna</button>
+              </div>
+              ${signatureIndexError ? `<div class="operator-card-note" style="background:#fff7e6;border-color:#f2d49b;color:#7a4a00">${icon("alert")}Non riesco a leggere le firme dal server: ${escapeHtml(signatureIndexError)}</div>` : ""}
+              <div class="registry-list">${rows || `<div class="empty">Nessuna persona in anagrafica.</div>`}</div>
+            </div>
+          </div>`;
+      };
+      if (!signatureIndex) { box.innerHTML = `<div class="registry-card" style="margin-bottom:16px"><div class="registry-card-header"><h3>Firme operatori</h3><p>Caricamento…</p></div></div>`; await loadSignatureIndex(); }
+      draw();
+      // miniature
+      const missing = people.filter(p => signatureIndex?.has(signatureSlug(p)) && !signatureCache.has(signatureSlug(p)));
+      if (missing.length) {
+        await Promise.all(missing.map(p => getSignature(p).catch(() => null)));
+        if (document.getElementById("signaturePanel")) draw();
+      }
     }
 
     function openRapportinoDialog(resource) {
@@ -8227,6 +8682,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           <div class="field"><label>Compilato da</label><input id="rappAuthor" class="input" value="${escapeHtml(currentUser?.name || "")}"></div>
           <div class="field"><label>Luogo per le attività in sede</label><input id="rappLuogo" class="input" value="${escapeHtml(luogo)}"></div>
           <div class="field full" id="rappClienteBox"></div>
+          <div class="field full" id="rappSignatureBox"></div>
         </div>
         <div id="rappPreview" style="margin-top:14px"></div>
         <div class="form-actions">
@@ -8234,9 +8690,38 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           <button type="button" class="btn" id="rappDownloadBtn" onclick="downloadRapportino()">${icon("download")}Scarica Excel</button>
         </div>`;
       ["rappResource", "rappWeek"].forEach(id => document.getElementById(id).addEventListener("change", () => refreshRapportino(true)));
+      document.getElementById("rappResource").addEventListener("change", refreshRapportinoSignature);
       document.getElementById("rappLuogo").addEventListener("input", () => refreshRapportino(false));
       refreshRapportino(true);
+      refreshRapportinoSignature();
       showModal();
+    }
+
+    let rappSignature = null;
+
+    // Riquadro firma nel dialogo del rapportino: anteprima se c'è, altrimenti caricamento al volo.
+    async function refreshRapportinoSignature() {
+      const box = document.getElementById("rappSignatureBox");
+      const person = document.getElementById("rappResource")?.value;
+      if (!box || !person) return;
+      rappSignature = null;
+      box.innerHTML = `<label>Firma operatore</label><div class="mini-meta">Cerco la firma di ${escapeHtml(person)}…</div>`;
+      const sig = await getSignature(person).catch(() => null);
+      if (document.getElementById("rappResource")?.value !== person) return;
+      rappSignature = sig;
+      const upload = `<button type="button" class="btn secondary small" style="margin-left:0" onclick="this.nextElementSibling.click()">${icon("upload")}${sig ? "Sostituisci" : "Carica la firma"}</button><input type="file" accept="image/png,image/jpeg,image/webp" hidden onchange="handleSignatureUpload(this, ${jsArg(person)})">`;
+      box.innerHTML = sig
+        ? `<label>Firma operatore</label>
+           <div class="rapp-signature">
+             <div class="signature-thumb"><img src="${sig.url}" alt="Firma di ${escapeHtml(person)}"></div>
+             <label class="check-inline"><input type="checkbox" id="rappUseSignature" checked> Inserisci la firma nel rapportino</label>
+             ${upload}
+           </div>`
+        : `<label>Firma operatore</label>
+           <div class="rapp-signature">
+             <span class="mini-meta">${signatureIndexError ? `Firme non raggiungibili (${escapeHtml(signatureIndexError)}).` : `Nessuna firma per ${escapeHtml(person)}: il riquadro FIRMA resterà vuoto.`}</span>
+             ${upload}
+           </div>`;
     }
 
     function shiftRapportinoWeek(delta) {
@@ -8278,6 +8763,19 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const rowsHtml = data.rows.map((r, i) => `<tr${i >= RAPP_MAX_ROWS ? ' style="opacity:.45"' : ""}>
           <td style="text-align:center">${r.pos}</td><td style="white-space:nowrap">${escapeHtml(dayFmt.format(parseDateKey(r.date)))}</td>
           <td>${escapeHtml(r.luogo)}</td><td>${escapeHtml(r.attivita || "-")}</td><td>${escapeHtml(r.tr || "")}</td></tr>`).join("");
+      const hoursFmt = m => (m / 60).toLocaleString("it-IT", { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+      const span = l => l.map(([a, b]) => `${minutesToHHMM(a)}–${minutesToHHMM(b)}`).join(", ");
+      const hourGroups = rapportinoDateGroups(data.hours);
+      const hoursHtml = data.hours.map((h, i) => {
+        const g = hourGroups.find(x => x.start <= i && i <= x.end);
+        const dayTot = data.hours.slice(g.start, g.end + 1).reduce((t, x) => t + x.workMinutes + x.travelMinutes, 0);
+        return `<tr${i >= RAPP_HOURS_MAX_ROWS ? ' style="opacity:.45"' : ""}>
+          <td style="text-align:center">${h.pos}</td>
+          ${g.start === i ? `<td rowspan="${g.end - g.start + 1}" style="white-space:nowrap;vertical-align:middle">${escapeHtml(dayFmt.format(parseDateKey(h.date)))}</td>` : ""}
+          <td>${h.work.length ? `${span(h.work)} <span class="mini-meta">(${hoursFmt(h.workMinutes)} h)</span>` : '<span class="mini-meta">—</span>'}</td>
+          <td>${h.travel.length ? `${span(h.travel)} <span class="mini-meta">(${hoursFmt(h.travelMinutes)} h)</span>` : ""}</td>
+          ${g.start === i ? `<td rowspan="${g.end - g.start + 1}" style="text-align:right;vertical-align:middle"><b>${hoursFmt(dayTot)}</b></td>` : ""}</tr>`;
+      }).join("");
       document.getElementById("rappPreview").innerHTML = `
         <div class="mini-meta" style="margin-bottom:6px">Nome file: <b>${escapeHtml(data.fileName)}</b></div>
         ${data.warnings.map(w => `<div class="operator-card-note" style="background:#fff7e6;border-color:#f2d49b;color:#7a4a00">${icon("alert")}${escapeHtml(w)}</div>`).join("")}
@@ -8288,7 +8786,12 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           <thead><tr><th>POS</th><th>Data</th><th>Luogo</th><th>Attività</th><th>Trasferta / Reperib.</th></tr></thead>
           <tbody>${rowsHtml || `<tr><td colspan="5"><div class="empty">Nessuna riga</div></td></tr>`}</tbody>
         </table></div>
-        <div class="mini-meta" style="margin-top:8px">Le pagine 2 e 3 (ore, note e firme) restano vuote in questa versione.</div>`;
+        <div class="field-label" style="margin-top:14px">Pagina 2 · ore lavoro e viaggio (pausa pranzo 13–14 esclusa)</div>
+        <div class="table-wrap"><table style="min-width:560px">
+          <thead><tr><th>POS</th><th>Data</th><th>Ore lavoro</th><th>Ore viaggio</th><th style="text-align:right">Totale</th></tr></thead>
+          <tbody>${hoursHtml || `<tr><td colspan="5"><div class="empty">Nessuna riga</div></td></tr>`}</tbody>
+        </table></div>
+        <div class="mini-meta" style="margin-top:8px">Note e colonna GUIDA restano da compilare a mano. Pagina 3: nome e cognome di ${escapeHtml(data.resource)} e firma (se caricata).</div>`;
       document.getElementById("rappDownloadBtn").disabled = !data.entries.length;
     }
 
@@ -8303,7 +8806,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       btn.disabled = true;
       setLoading(true);
       try {
-        const blob = await generateRapportinoXlsx(rappData, { cliente, compilatoDa });
+        const useSignature = document.getElementById("rappUseSignature")?.checked && rappSignature?.blob;
+        const blob = await generateRapportinoXlsx(rappData, { cliente, compilatoDa, signature: useSignature ? rappSignature : null });
         downloadBlob(rappData.fileName, blob);
         showToast(`Rapportino creato: ${rappData.fileName}`, { type: "success" });
         closeEditModal(true);
