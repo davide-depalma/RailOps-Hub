@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v56.1 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v56.2 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v56.1" />
+  <meta name="app-version" content="v56.2" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -431,6 +431,14 @@
     .cal-h{display:inline-flex;align-items:baseline;gap:3px;font-size:10.5px;line-height:1.25;font-weight:800;padding:1px 5px;border-radius:5px;border:1px solid transparent;white-space:nowrap;font-variant-numeric:tabular-nums}
     .cal-h b{font-weight:600;opacity:.8}
     .cal-h.task{background:var(--soft-2);color:var(--text);border-color:var(--border)}
+    .cal-h.task.st-todo{background:var(--todo-bg);color:var(--todo-ink);border-color:var(--todo-bd)}
+    .cal-h.task.st-progress{background:var(--prog-bg);color:var(--prog-ink);border-color:var(--prog-bd)}
+    .cal-h.task.st-done{background:var(--done-bg);color:var(--done-ink);border-color:var(--done-bd)}
+    .cal-h.task.st-blocked{background:var(--block-bg);color:var(--block-ink);border-color:var(--block-bd)}
+    .calendar-hours-btn{display:inline-flex;align-items:center;gap:3px;height:22px;min-width:22px;padding:0 5px;border-radius:999px;border:1px solid var(--border);background:var(--surface,#fff);color:var(--muted);font:inherit;font-size:11px;font-weight:800;cursor:pointer;line-height:1;position:relative;z-index:3}
+    .calendar-hours-btn .ico{width:13px;height:13px}
+    .calendar-hours-btn:hover{border-color:var(--border-strong);color:var(--text)}
+    .calendar-hours-btn.on{background:var(--primary);border-color:var(--primary);color:#fff}
     .cal-h.trip{background:var(--trip-bg);color:var(--trip-ink);border-color:var(--trip-bd)}
     .cal-h.oncall{background:var(--oncall-bg);color:var(--oncall-ink);border-color:var(--oncall-bd)}
     .cal-h.tot{background:transparent;color:var(--text);padding-left:2px}
@@ -954,7 +962,6 @@
               <select id="calendarVehicleFilter" class="select" onchange="renderCalendar()"><option value="">Tutte le commesse</option></select>
               <select id="calendarSystemFilter" class="select" onchange="renderCalendar()"><option value="">Tutti i sistemi</option></select>
               <button class="btn ghost small hidden" id="calendarFiltersReset" onclick="clearCalendarFilters()">Azzera filtri</button>
-              <button class="btn ghost small" id="calendarHoursToggle" onclick="toggleCalendarHours()" aria-pressed="true" title="Mostra o nascondi il riepilogo delle ore in ogni giorno"><svg class="ico"><use href="#i-clock"/></svg><span>Nascondi ore</span></button>
               <button class="btn ghost small hidden" id="calendarSizeReset" onclick="resetCalendarSizes()" title="Riporta tutti i giorni alla grandezza standard">Dimensioni standard</button>
             </div>
             <div class="legend">
@@ -2658,9 +2665,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v56.1";
+    const APP_VERSION = "v56.2";
     const APP_RELEASE_DATE = "20/11/2026";
     const CHANGELOG = [
+      { v: "v56.2", date: "20/11/2026", items: ["Calendario: le ore si aprono e chiudono giorno per giorno con il pulsante orologio in alto a destra di ogni giornata (al posto del numero di elementi); aperto mostra il totale del giorno", "Le ore delle attività sono colorate in base allo stato (da fare, in corso, completata, bloccata)", "Tolto il pulsante generale «Nascondi ore»"] },
       { v: "v56.1", date: "20/11/2026", items: ["Calendario: in ogni giorno il riepilogo delle ore di Attività, Trasferta (lavoro + viaggio) e Reperibilità, con il totale quando ce n'è più di uno; stesse regole del rapportino (pausa pranzo 13–14 e pause escluse) e segue i filtri attivi", "Pulsante «Nascondi ore / Mostra ore» per toglierlo quando non serve; la scelta resta salvata sul dispositivo"] },
       { v: "v56.0", date: "20/11/2026", items: ["Rapportino pagina 2: ore lavoro e ore viaggio compilate in automatico dai registri tempo (una riga per giorno e POS, data e totale del giorno uniti se nello stesso giorno ci sono più POS); la pausa pranzo 13–14 e le pause indicate negli slot non vengono conteggiate", "Rapportino pagina 3: nome e cognome dell'operatore e firma inserita in automatico", "Anagrafiche: nuova sezione «Firme operatori» per caricare le firme (anche tutte insieme, con i file FIRMA_NOME_COGNOME.png); i bordi bianchi vengono ritagliati e la firma è condivisa su tutti i dispositivi", "Anteprima delle ore nella finestra del rapportino, con avviso per i giorni senza orari"] },
       { v: "v55.9", date: "20/11/2026", items: ["Calendario: i giorni si possono allargare/stringere (bordo destro) e alzare/abbassare (bordo inferiore o angolo); doppio clic sul bordo per tornare alla grandezza standard; pulsante «Dimensioni standard» per ripristinare tutto", "Con un'altezza maggiore si vedono più elementi per giorno; le dimensioni restano salvate su ogni dispositivo, separate per vista mese/settimana/giorno"] },
@@ -6863,13 +6871,6 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const days = getVisibleCalendarDays(calendarCurrentDate);
       const todayKey = todayDateKey();
 
-      const hoursBtn = document.getElementById("calendarHoursToggle");
-      if (hoursBtn) {
-        hoursBtn.classList.toggle("hidden", mode === "resources");
-        hoursBtn.setAttribute("aria-pressed", String(calendarHoursVisible()));
-        hoursBtn.querySelector("span").textContent = calendarHoursVisible() ? "Nascondi ore" : "Mostra ore";
-      }
-
       if (mode === "resources") {
         weekdays.style.display = "none";
         grid.style.display = "block";
@@ -6891,8 +6892,9 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
       const currentMonth = calendarCurrentDate.getMonth();
       const sizes = getCalendarSizes(mode);
-      const showHours = calendarHoursVisible();
-      const dayHours = key => calendarDayHours(events, key);
+      const openHours = calendarOpenHourDays();
+      const hoursCache = new Map();
+      const dayHours = key => { if (!hoursCache.has(key)) hoursCache.set(key, calendarDayHours(events, key)); return hoursCache.get(key); };
       const dayCell = (day, inner, count, col = 0, row = 0) => {
         const key = toDateKey(day);
         const outside = mode === "month" && day.getMonth() !== currentMonth ? "outside" : "";
@@ -6901,11 +6903,14 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         const focusedDay = activeCalendarEntityId && events.some(e => e.id === activeCalendarEntityId && e.type === activeCalendarEntityType && e._set.has(key)) ? "focused-day" : "";
         const picked = key === calendarPickedDate ? "picked" : "";
         const sized = sizes.rows[row] ? "sized" : "";
+        const h = dayHours(key);
+        const hoursTotal = h.task + h.trip + h.oncall;
+        const hoursOpen = !!hoursTotal && openHours.has(key);
         const handle = (type, label) => `<span class="cal-rz cal-rz-${type}" title="${label} · doppio clic per tornare alla grandezza standard" onpointerdown="startCalendarResize(event, '${type}', ${col}, ${row})" onclick="event.stopPropagation()" ondblclick="event.stopPropagation(); resetCalendarSize('${type}', ${row})"></span>`;
         return `<div class="calendar-day ${outside} ${weekend} ${today} ${focusedDay} ${picked} ${sized}" data-day-key="${key}" data-col="${col}" data-row="${row}" onclick="handleCalendarDayClick('${key}')" title="${count ? "Apri gli elementi del giorno" : "Crea un nuovo elemento"}">
-          <div class="calendar-day-number"><span>${day.getDate()}</span>${count ? `<span class="calendar-count ${count >= 4 ? "busy" : ""}">${count}</span>` : ""}</div>
+          <div class="calendar-day-number"><span>${day.getDate()}</span>${hoursTotal ? `<button type="button" class="calendar-hours-btn ${hoursOpen ? "on" : ""}" aria-pressed="${hoursOpen}" title="${hoursOpen ? "Nascondi" : "Mostra"} le ore del giorno · ${count} element${count === 1 ? "o" : "i"}" aria-label="${hoursOpen ? "Nascondi" : "Mostra"} le ore del ${day.getDate()}" onclick="toggleCalendarDayHours(event, '${key}')">${icon("clock")}${hoursOpen ? `<span>${formatHoursShort(hoursTotal)}</span>` : ""}</button>` : ""}</div>
           <div class="calendar-events">${inner}</div>
-          ${showHours ? calendarHoursHtml(dayHours(key)) : ""}
+          ${hoursOpen ? calendarHoursHtml(h) : ""}
           ${handle("x", "Trascina per allargare o stringere")}${handle("y", "Trascina per alzare o abbassare")}${handle("xy", "Trascina per ridimensionare")}
         </div>`;
       };
@@ -6941,7 +6946,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         // con un'altezza personalizzata si mostrano tante corsie quante ne stanno nella cella
         let maxLanes = defaultLanes;
         if (sizes.rows[row]) {
-          const usable = sizes.rows[row] - 34 - (showHours ? 24 : 0);
+          const rowOpen = weekKeys.some(k => openHours.has(k) && (dayHours(k).task + dayHours(k).trip + dayHours(k).oncall) > 0);
+          const usable = sizes.rows[row] - 34 - (rowOpen ? 24 : 0);
           const fitAll = Math.max(0, Math.floor(usable / laneHeight));
           maxLanes = lanes.length <= fitAll ? fitAll : Math.max(0, Math.floor((usable - 18) / laneHeight));
         }
@@ -6971,12 +6977,19 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     /* ---- riepilogo ore in ogni giorno del calendario (attività / trasferte / reperibilità) ---- */
     const CAL_HOURS_KEY = "railops_calendar_hours";
 
-    function calendarHoursVisible() {
-      return storeGet(CAL_HOURS_KEY) !== "0";
+    // Giorni con il riepilogo ore aperto (salvati su questo dispositivo)
+    function calendarOpenHourDays() {
+      try {
+        const list = JSON.parse(storeGet(CAL_HOURS_KEY) || "[]");
+        return new Set(Array.isArray(list) ? list : []);
+      } catch { return new Set(); }
     }
 
-    function toggleCalendarHours() {
-      storeSet(CAL_HOURS_KEY, calendarHoursVisible() ? "0" : "1");
+    function toggleCalendarDayHours(event, key) {
+      event?.stopPropagation();
+      const open = calendarOpenHourDays();
+      if (open.has(key)) open.delete(key); else open.add(key);
+      storeSet(CAL_HOURS_KEY, JSON.stringify([...open].sort().slice(-400)));
       renderCalendar();
     }
 
@@ -7008,7 +7021,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     // Ore del giorno per tipo, sugli elementi visibili (rispetta i filtri del calendario)
     function calendarDayHours(events, key) {
       const prev = addDateDaysKey(key, -1);
-      const out = { task: 0, trip: 0, tripWork: 0, tripTravel: 0, oncall: 0 };
+      const out = { task: 0, taskByTone: {}, trip: 0, tripWork: 0, tripTravel: 0, oncall: 0 };
       events.forEach(event => {
         const inToday = event._set.has(key), inPrev = event._set.has(prev);
         if (!inToday && !inPrev) return;
@@ -7016,7 +7029,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         if (event.type === "task") {
           const today = inToday ? taskSlotsOnDate(raw, key) : { slots: [], legacy: 0 };
           const before = inPrev ? taskSlotsOnDate(raw, prev).slots : [];
-          out.task += slotsMinutesOnDay(today.slots, before) + today.legacy;
+          const minutes = slotsMinutesOnDay(today.slots, before) + today.legacy;
+          const tone = statusTone(raw.status);
+          out.task += minutes;
+          if (minutes) out.taskByTone[tone] = (out.taskByTone[tone] || 0) + minutes;
         } else if (event.type === "trip") {
           const d = inToday ? tripDayOn(raw, key) : null, p = inPrev ? tripDayOn(raw, prev) : null;
           const work = slotsMinutesOnDay(d?.work_slots, p?.work_slots);
@@ -7027,7 +7043,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           out.oncall += slotsMinutesOnDay(inToday ? [slot] : [], inPrev ? [slot] : []);
         }
       });
-      Object.keys(out).forEach(k => { out[k] = Math.round(out[k]); });
+      ["task", "trip", "tripWork", "tripTravel", "oncall"].forEach(k => { out[k] = Math.round(out[k]); });
+      Object.keys(out.taskByTone).forEach(k => { out.taskByTone[k] = Math.round(out.taskByTone[k]); });
       return out;
     }
 
@@ -7038,10 +7055,13 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     function calendarHoursHtml(h) {
       const parts = [];
-      if (h.task) parts.push(`<span class="cal-h task" title="Attività: ${formatMinutes(h.task)}"><b>Att</b>${formatHoursShort(h.task)}</span>`);
+      const toneLabel = { todo: "da fare", progress: "in corso / in attesa", done: "completate", blocked: "bloccate" };
+      ["todo", "progress", "done", "blocked"].forEach(tone => {
+        const m = h.taskByTone?.[tone];
+        if (m) parts.push(`<span class="cal-h task st-${tone}" title="Attività ${toneLabel[tone]}: ${formatMinutes(m)}"><b>Att</b>${formatHoursShort(m)}</span>`);
+      });
       if (h.trip) parts.push(`<span class="cal-h trip" title="Trasferta: ${formatMinutes(h.trip)} (lavoro ${formatMinutes(h.tripWork)} · viaggio ${formatMinutes(h.tripTravel)})"><b>Tras</b>${formatHoursShort(h.trip)}</span>`);
       if (h.oncall) parts.push(`<span class="cal-h oncall" title="Reperibilità: ${formatMinutes(h.oncall)}"><b>Rep</b>${formatHoursShort(h.oncall)}</span>`);
-      if (parts.length > 1) parts.push(`<span class="cal-h tot" title="Totale del giorno: ${formatMinutes(h.task + h.trip + h.oncall)}"><b>Tot</b>${formatHoursShort(h.task + h.trip + h.oncall)}</span>`);
       return `<div class="calendar-hours${parts.length ? "" : " none"}" aria-label="Ore del giorno">${parts.join("")}</div>`;
     }
 
