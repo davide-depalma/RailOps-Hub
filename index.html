@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v55.7 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v55.8 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v55.7" />
+  <meta name="app-version" content="v55.8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -2618,9 +2618,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v55.7";
+    const APP_VERSION = "v55.8";
     const APP_RELEASE_DATE = "20/11/2026";
     const CHANGELOG = [
+      { v: "v55.8", date: "20/11/2026", items: ["Rapportino: nella colonna ATTIVITÀ compare «Tipo di intervento - Nome attività»; più attività dello stesso tipo nello stesso giorno vengono unite sotto un unico tipo", "Rapportino: avviso per le attività a cui manca il tipo di intervento", "Rapportino: i testi lunghi nella colonna ATTIVITÀ vengono rimpiccioliti per stare interi nella cella"] },
       { v: "v55.7", date: "20/11/2026", items: ["Attività: nuovo campo obbligatorio «Tipo di intervento» (da remoto, in sede, misto) prima del nome; il titolo diventa «Intervento da remoto - Nome attività» e compare così anche nel rapportino", "I tipi di intervento si possono modificare in Anagrafiche"] },
       { v: "v55.6", date: "20/11/2026", items: ["Anagrafiche: ogni valore si può modificare (con aggiornamento facoltativo degli elementi già creati), riordinare con le frecce e cercare; per ogni valore si vede in quanti elementi è usato", "Rapportino: il nome del file contiene sempre giorno di inizio e di fine (es. 2026_11_09-15_Rapportino_Settimanale_De Palma)"] },
       { v: "v55.5", date: "20/11/2026", items: ["Gli aggiornamenti pubblicati su GitHub arrivano all'app installata alla prima apertura, senza attendere la cache del browser"] },
@@ -7914,7 +7915,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         } else {
           const row = rows.get(key) || { date: e.date, pos: n, kind: "task", luogo: tripSame?.place || luogoBase, attivita: "", tr: tripSame ? "Trasferta" : "", titles: [], sources: [] };
           if (e.title && !row.titles.includes(e.title)) row.titles.push(e.title);
-          row.attivita = row.titles.join(" + ");
+          row.attivita = rapportinoActivityText(row.titles);
           row.sources.push(e.item);
           rows.set(key, row);
         }
@@ -7946,10 +7947,25 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (!entries.length) warnings.push(`Nessuna attività, trasferta o reperibilità di ${resource} in questa settimana.`);
       if (pos.length > RAPP_MAX_POS) warnings.push(`Ci sono ${pos.length} matricole: nel modello ne entrano ${RAPP_MAX_POS}. Le altre (${pos.slice(RAPP_MAX_POS).join(", ")}) non verranno scritte.`);
       if (rowList.length > RAPP_MAX_ROWS) warnings.push(`Ci sono ${rowList.length} righe: nel modello ne entrano ${RAPP_MAX_ROWS}. Le ultime ${rowList.length - RAPP_MAX_ROWS} non verranno scritte.`);
+      const noType = [...new Set(entries.filter(e => e.kind === "task" && !splitTaskTitle(e.item.title).type).map(e => e.item.title))];
+      if (noType.length) warnings.push(`Attività senza tipo di intervento (aprile e scegli da remoto / in sede / misto): ${noType.join(", ")}.`);
       const noLogs = [...new Set(entries.filter(e => e.kind === "task" && !normalizeTaskLogs(e.item.daily_logs).length).map(e => e.item.title))];
       if (noLogs.length) warnings.push(`Senza registro tempo (usate le date dell'attività): ${noLogs.join(", ")}.`);
 
       return { resource, startKey, keys, entries, pos, rows: rowList, cliente, warnings, fileName: rapportinoFileName(startKey, resource) };
+    }
+
+    // Cella ATTIVITÀ: "Tipo di intervento - Nome attività". Più attività dello stesso tipo nello stesso giorno:
+    // "Intervento in sede - A + B"; tipi diversi: "Intervento in sede - A + Intervento da remoto - B".
+    function rapportinoActivityText(titles) {
+      const groups = [];
+      titles.forEach(title => {
+        const { type, name } = splitTaskTitle(title);
+        let group = groups.find(g => g.type === type);
+        if (!group) { group = { type, names: [] }; groups.push(group); }
+        if (name && !group.names.includes(name)) group.names.push(name);
+      });
+      return groups.map(g => g.type ? `${g.type} - ${g.names.join(" + ")}` : g.names.join(" + ")).join(" + ");
     }
 
     function excelDateSerial(key) {
@@ -7962,11 +7978,11 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     }
 
     // Scrive un valore in una cella del foglio mantenendo lo stile (bordi, formato) del modello.
-    function xmlSetCell(xml, ref, value, kind = "str") {
+    function xmlSetCell(xml, ref, value, kind = "str", styleIndex = null) {
       const re = new RegExp(`<c r="${ref}"([^>]*?)(?:/>|>[\\s\\S]*?</c>)`);
       const match = xml.match(re);
       if (!match) throw new Error(`cella ${ref} non trovata nel modello`);
-      const style = (match[1].match(/\ss="\d+"/) || [""])[0];
+      const style = styleIndex !== null ? ` s="${styleIndex}"` : (match[1].match(/\ss="\d+"/) || [""])[0];
       const cell = kind === "num"
         ? `<c r="${ref}"${style}><v>${Number(value)}</v></c>`
         : `<c r="${ref}"${style} t="inlineStr"><is><t xml:space="preserve">${xmlEscape(value)}</t></is></c>`;
@@ -7979,10 +7995,12 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const zip = await JSZip.loadAsync(b64, { base64: true });
       const sheetPath = "xl/worksheets/sheet1.xml";
       let xml = await zip.file(sheetPath).async("string");
-      const set = (ref, value, kind) => {
+      const set = (ref, value, kind, styleIndex = null) => {
         if (value === null || value === undefined || value === "") return;
-        xml = xmlSetCell(xml, ref, value, kind);
+        xml = xmlSetCell(xml, ref, value, kind, styleIndex);
       };
+      // stile "riduci per adattare" per la colonna ATTIVITÀ: i testi lunghi restano interi nella cella
+      const shrinkStyle = await addShrinkToFitStyle(zip, xml.match(/<c r="G11"[^>]*\ss="(\d+)"/)?.[1]);
 
       // PAGINA 1 — intestazione
       set("T1", header.compilatoDa);
@@ -7994,7 +8012,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         set(`A${r}`, row.pos, "num");
         set(`C${r}`, excelDateSerial(row.date), "num");
         set(`E${r}`, row.luogo);
-        set(`G${r}`, row.attivita);
+        set(`G${r}`, row.attivita, "str", shrinkStyle);
         set(`T${r}`, row.tr);
       });
 
@@ -8004,6 +8022,27 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       wb = wb.replace(/<calcPr([^>]*?)\/>/, (m, attrs) => /fullCalcOnLoad/.test(attrs) ? m : `<calcPr${attrs} fullCalcOnLoad="1"/>`);
       zip.file("xl/workbook.xml", wb);
       return zip.generateAsync({ type: "blob", compression: "DEFLATE", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    }
+
+    // Duplica lo stile di una cella aggiungendo "riduci per adattare" (shrinkToFit). Restituisce l'indice del nuovo stile.
+    async function addShrinkToFitStyle(zip, baseIndex) {
+      if (baseIndex === undefined || baseIndex === null) return null;
+      const path = "xl/styles.xml";
+      let styles = await zip.file(path).async("string");
+      const block = styles.match(/<cellXfs count="(\d+)">([\s\S]*?)<\/cellXfs>/);
+      if (!block) return null;
+      const xfs = block[2].match(/<xf\b[^>]*?(?:\/>|>[\s\S]*?<\/xf>)/g) || [];
+      const base = xfs[Number(baseIndex)];
+      if (!base) return null;
+      let clone;
+      if (/<alignment\b/.test(base)) clone = base.replace(/<alignment\b([^>]*?)\/>/, (m, a) => /shrinkToFit/.test(a) ? m : `<alignment${a} shrinkToFit="1"/>`);
+      else if (/\/>$/.test(base)) clone = base.replace(/\/>$/, `><alignment shrinkToFit="1"/></xf>`);
+      else clone = base.replace(/<\/xf>$/, `<alignment shrinkToFit="1"/></xf>`);
+      if (!/applyAlignment=/.test(clone)) clone = clone.replace(/^<xf\b/, '<xf applyAlignment="1"');
+      const newIndex = xfs.length;
+      styles = styles.replace(block[0], `<cellXfs count="${newIndex + 1}">${block[2]}${clone}</cellXfs>`);
+      zip.file(path, styles);
+      return newIndex;
     }
 
     function downloadBlob(filename, blob) {
