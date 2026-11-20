@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v55.8 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v55.9 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v55.8" />
+  <meta name="app-version" content="v55.9" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -381,6 +381,21 @@
     .calendar-weekday{text-align:center;color:var(--muted);font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.06em;padding:4px}
     .calendar-day{min-height:150px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px 8px 6px;display:flex;flex-direction:column;gap:4px;min-width:0;cursor:pointer;transition:border-color .12s}
     .calendar-day:hover{border-color:var(--border-strong)}
+    /* ridimensionamento dei giorni */
+    .calendar-day{position:relative}
+    .calendar-day.sized{min-height:0!important;overflow:hidden}
+    .calendar-view-day .calendar-day.sized{overflow:auto}
+    .cal-rz{position:absolute;z-index:4;touch-action:none;border-radius:4px;transition:background .12s}
+    .cal-rz-x{top:6px;right:-6px;width:11px;bottom:6px;cursor:col-resize}
+    .cal-rz-y{left:6px;bottom:-6px;height:11px;right:6px;cursor:row-resize}
+    .cal-rz-xy{right:-6px;bottom:-6px;width:16px;height:16px;cursor:nwse-resize;z-index:5}
+    .cal-rz:hover,.cal-rz.active{background:rgba(31,79,216,.28)}
+    .calendar-day:hover .cal-rz-xy:not(:hover){background:linear-gradient(135deg,transparent 55%,var(--border-strong) 55%,var(--border-strong) 65%,transparent 65%,transparent 75%,var(--border-strong) 75%,var(--border-strong) 85%,transparent 85%)}
+    .calendar-view-day .cal-rz-x,.calendar-view-day .cal-rz-xy{display:none}
+    body.cal-resizing,body.cal-resizing *{user-select:none!important;-webkit-user-select:none!important}
+    body.cal-resizing-x,body.cal-resizing-x *{cursor:col-resize!important}
+    body.cal-resizing-y,body.cal-resizing-y *{cursor:row-resize!important}
+    body.cal-resizing-xy,body.cal-resizing-xy *{cursor:nwse-resize!important}
     .calendar-day.outside{background:var(--soft);opacity:.6}
     .calendar-day.weekend{background:#fbfcfd}
     .calendar-day.today{border-color:var(--primary);box-shadow:0 0 0 3px rgba(31,79,216,.1)}
@@ -917,6 +932,7 @@
               <select id="calendarVehicleFilter" class="select" onchange="renderCalendar()"><option value="">Tutte le commesse</option></select>
               <select id="calendarSystemFilter" class="select" onchange="renderCalendar()"><option value="">Tutti i sistemi</option></select>
               <button class="btn ghost small hidden" id="calendarFiltersReset" onclick="clearCalendarFilters()">Azzera filtri</button>
+              <button class="btn ghost small hidden" id="calendarSizeReset" onclick="resetCalendarSizes()" title="Riporta tutti i giorni alla grandezza standard">Dimensioni standard</button>
             </div>
             <div class="legend">
               <span class="legend-item"><span class="legend-dot dot-trip"></span>Trasferta</span>
@@ -2618,9 +2634,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v55.8";
+    const APP_VERSION = "v55.9";
     const APP_RELEASE_DATE = "20/11/2026";
     const CHANGELOG = [
+      { v: "v55.9", date: "20/11/2026", items: ["Calendario: i giorni si possono allargare/stringere (bordo destro) e alzare/abbassare (bordo inferiore o angolo); doppio clic sul bordo per tornare alla grandezza standard; pulsante «Dimensioni standard» per ripristinare tutto", "Con un'altezza maggiore si vedono più elementi per giorno; le dimensioni restano salvate su ogni dispositivo, separate per vista mese/settimana/giorno"] },
       { v: "v55.8", date: "20/11/2026", items: ["Rapportino: nella colonna ATTIVITÀ compare «Tipo di intervento - Nome attività»; più attività dello stesso tipo nello stesso giorno vengono unite sotto un unico tipo", "Rapportino: avviso per le attività a cui manca il tipo di intervento", "Rapportino: i testi lunghi nella colonna ATTIVITÀ vengono rimpiccioliti per stare interi nella cella"] },
       { v: "v55.7", date: "20/11/2026", items: ["Attività: nuovo campo obbligatorio «Tipo di intervento» (da remoto, in sede, misto) prima del nome; il titolo diventa «Intervento da remoto - Nome attività» e compare così anche nel rapportino", "I tipi di intervento si possono modificare in Anagrafiche"] },
       { v: "v55.6", date: "20/11/2026", items: ["Anagrafiche: ogni valore si può modificare (con aggiornamento facoltativo degli elementi già creati), riordinare con le frecce e cercare; per ogni valore si vede in quanti elementi è usato", "Rapportino: il nome del file contiene sempre giorno di inizio e di fine (es. 2026_11_09-15_Rapportino_Settimanale_De Palma)"] },
@@ -6822,6 +6839,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (mode === "resources") {
         weekdays.style.display = "none";
         grid.style.display = "block";
+        grid.style.gridTemplateRows = "";
+        document.getElementById("calendarSizeReset")?.classList.add("hidden");
         grid.innerHTML = plannerHtml(days, events);
         renderCalendarList(events, days);
         return;
@@ -6837,16 +6856,20 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         : ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"]).map(day => `<div class="calendar-weekday">${day}</div>`).join("");
 
       const currentMonth = calendarCurrentDate.getMonth();
-      const dayCell = (day, inner, count) => {
+      const sizes = getCalendarSizes(mode);
+      const dayCell = (day, inner, count, col = 0, row = 0) => {
         const key = toDateKey(day);
         const outside = mode === "month" && day.getMonth() !== currentMonth ? "outside" : "";
         const weekend = day.getDay() === 0 || day.getDay() === 6 ? "weekend" : "";
         const today = key === todayKey ? "today" : "";
         const focusedDay = activeCalendarEntityId && events.some(e => e.id === activeCalendarEntityId && e.type === activeCalendarEntityType && e._set.has(key)) ? "focused-day" : "";
         const picked = key === calendarPickedDate ? "picked" : "";
-        return `<div class="calendar-day ${outside} ${weekend} ${today} ${focusedDay} ${picked}" data-day-key="${key}" onclick="handleCalendarDayClick('${key}')" title="${count ? "Apri gli elementi del giorno" : "Crea un nuovo elemento"}">
+        const sized = sizes.rows[row] ? "sized" : "";
+        const handle = (type, label) => `<span class="cal-rz cal-rz-${type}" title="${label} · doppio clic per tornare alla grandezza standard" onpointerdown="startCalendarResize(event, '${type}', ${col}, ${row})" onclick="event.stopPropagation()" ondblclick="event.stopPropagation(); resetCalendarSize('${type}', ${row})"></span>`;
+        return `<div class="calendar-day ${outside} ${weekend} ${today} ${focusedDay} ${picked} ${sized}" data-day-key="${key}" data-col="${col}" data-row="${row}" onclick="handleCalendarDayClick('${key}')" title="${count ? "Apri gli elementi del giorno" : "Crea un nuovo elemento"}">
           <div class="calendar-day-number"><span>${day.getDate()}</span>${count ? `<span class="calendar-count ${count >= 4 ? "busy" : ""}">${count}</span>` : ""}</div>
           <div class="calendar-events">${inner}</div>
+          ${handle("x", "Trascina per allargare o stringere")}${handle("y", "Trascina per alzare o abbassare")}${handle("xy", "Trascina per ridimensionare")}
         </div>`;
       };
 
@@ -6854,14 +6877,17 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         const key = toDateKey(days[0]);
         const dayEvents = events.filter(e => e._set.has(key)).sort((a, b) => (CALENDAR_TYPE_ORDER[a.type] || 9) - (CALENDAR_TYPE_ORDER[b.type] || 9));
         grid.innerHTML = dayCell(days[0], dayEvents.map(e => calendarEventHtml(e)).join("") || `<div class="empty" style="margin-top:8px">Nessun elemento in questa giornata. Clicca qui per crearne uno.</div>`, dayEvents.length);
+        applyCalendarSizes(mode, 1);
         renderCalendarList(events, days);
         return;
       }
 
       // Mese / settimana: le barre degli eventi di più giorni restano sulla stessa riga ("corsia") per tutta la settimana.
-      const maxLanes = mode === "month" ? 3 : 10;
+      const defaultLanes = mode === "month" ? 3 : 10;
+      const laneHeight = (mode === "week" ? 70 : (isMobileLayout() ? 48 : 54)) + 3;
       let html = "";
       for (let w = 0; w < days.length; w += 7) {
+        const row = w / 7;
         const week = days.slice(w, w + 7);
         const weekKeys = week.map(toDateKey);
         const items = events
@@ -6875,6 +6901,13 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           item.keys.forEach(k => lanes[lane].add(k));
           item.lane = lane;
         });
+        // con un'altezza personalizzata si mostrano tante corsie quante ne stanno nella cella
+        let maxLanes = defaultLanes;
+        if (sizes.rows[row]) {
+          const usable = sizes.rows[row] - 34;
+          const fitAll = Math.max(0, Math.floor(usable / laneHeight));
+          maxLanes = lanes.length <= fitAll ? fitAll : Math.max(0, Math.floor((usable - 18) / laneHeight));
+        }
         week.forEach((day, index) => {
           const key = weekKeys[index];
           const dayItems = items.filter(item => item.keys.includes(key));
@@ -6890,11 +6923,131 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
             inner += calendarEventHtml(item.event, { contLeft: index > 0 && item.event._set.has(prevKey), contRight: index < 6 && item.event._set.has(nextKey) });
           }
           if (hidden > 0) inner += `<div class="calendar-more" onclick="event.stopPropagation(); openCalendarDayEvents('${key}')">+${hidden} altr${hidden === 1 ? "o" : "i"}</div>`;
-          html += dayCell(day, inner, dayItems.length);
+          html += dayCell(day, inner, dayItems.length, index, row);
         });
       }
       grid.innerHTML = html;
+      applyCalendarSizes(mode, Math.ceil(days.length / 7));
       renderCalendarList(events, days);
+    }
+
+    /* ---- dimensioni dei giorni del calendario (salvate su questo dispositivo, per vista) ---- */
+    const CAL_SIZES_KEY = "railops_calendar_sizes";
+    const CAL_MIN_ROW = 70, CAL_MAX_ROW = 1200, CAL_MIN_COL = 0.3;
+
+    function getCalendarSizes(mode) {
+      let all = {};
+      try { all = JSON.parse(storeGet(CAL_SIZES_KEY) || "{}") || {}; } catch { all = {}; }
+      const s = all[mode] || {};
+      const cols = Array.isArray(s.cols) && s.cols.length === 7 && s.cols.every(n => Number(n) > 0) ? s.cols.map(Number) : null;
+      return { cols, rows: s.rows && typeof s.rows === "object" ? s.rows : {} };
+    }
+
+    function saveCalendarSizes(mode, sizes) {
+      let all = {};
+      try { all = JSON.parse(storeGet(CAL_SIZES_KEY) || "{}") || {}; } catch { all = {}; }
+      all[mode] = { cols: sizes.cols, rows: sizes.rows };
+      storeSet(CAL_SIZES_KEY, JSON.stringify(all));
+    }
+
+    function calendarColumnsTemplate(cols) {
+      return cols ? cols.map(w => `minmax(0,${w}fr)`).join(" ") : "repeat(7,minmax(0,1fr))";
+    }
+
+    function applyCalendarSizes(mode, rowCount) {
+      const grid = document.getElementById("calendarGrid");
+      const weekdays = document.getElementById("calendarWeekdays");
+      const sizes = getCalendarSizes(mode);
+      if (mode !== "day") {
+        const template = calendarColumnsTemplate(sizes.cols);
+        grid.style.gridTemplateColumns = template;
+        weekdays.style.gridTemplateColumns = template;
+      }
+      grid.style.gridTemplateRows = Array.from({ length: rowCount }, (_, i) => sizes.rows[i] ? `${sizes.rows[i]}px` : "auto").join(" ");
+      const customized = !!sizes.cols || Object.keys(sizes.rows).length > 0;
+      document.getElementById("calendarSizeReset")?.classList.toggle("hidden", !customized);
+    }
+
+    function startCalendarResize(event, type, col, row) {
+      if (event.button !== undefined && event.button !== 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const mode = document.getElementById("calendarViewMode")?.value || "month";
+      const grid = document.getElementById("calendarGrid");
+      const weekdays = document.getElementById("calendarWeekdays");
+      const handle = event.currentTarget;
+      const cell = handle.closest(".calendar-day");
+      const sizes = getCalendarSizes(mode);
+      const startX = event.clientX, startY = event.clientY;
+      // larghezze attuali in pixel (servono come pesi)
+      const firstRow = [...grid.querySelectorAll('.calendar-day[data-row="0"]')];
+      const startCols = (sizes.cols || [1, 1, 1, 1, 1, 1, 1]).map((w, i) => firstRow[i] ? firstRow[i].getBoundingClientRect().width : w * 100);
+      const neighbor = col < 6 ? col + 1 : col - 1;
+      const startHeight = cell.getBoundingClientRect().height;
+      const rowCells = [...grid.querySelectorAll(`.calendar-day[data-row="${row}"]`)];
+      let cols = startCols.slice();
+      let height = sizes.rows[row] || null;
+      let moved = false;
+      handle.classList.add("active");
+      document.body.classList.add("cal-resizing", `cal-resizing-${type}`);
+      try { handle.setPointerCapture(event.pointerId); } catch { /* ok */ }
+
+      const onMove = (e) => {
+        const dx = e.clientX - startX, dy = e.clientY - startY;
+        if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
+        if ((type === "x" || type === "xy") && mode !== "day") {
+          const total = startCols[col] + startCols[neighbor];
+          const min = Math.max(40, total * CAL_MIN_COL / (1 + CAL_MIN_COL));
+          const delta = col < 6 ? dx : -dx;
+          const a = Math.min(total - min, Math.max(min, startCols[col] + delta));
+          cols = startCols.slice();
+          cols[col] = a;
+          cols[neighbor] = total - a;
+          const template = calendarColumnsTemplate(cols.map(w => Math.round(w)));
+          grid.style.gridTemplateColumns = template;
+          weekdays.style.gridTemplateColumns = template;
+        }
+        if (type === "y" || type === "xy") {
+          height = Math.round(Math.min(CAL_MAX_ROW, Math.max(CAL_MIN_ROW, startHeight + dy)));
+          const rowsTemplate = grid.style.gridTemplateRows.split(" ");
+          rowsTemplate[row] = `${height}px`;
+          grid.style.gridTemplateRows = rowsTemplate.join(" ");
+          rowCells.forEach(c => c.classList.add("sized"));
+        }
+      };
+      const onUp = () => {
+        handle.removeEventListener("pointermove", onMove);
+        handle.removeEventListener("pointerup", onUp);
+        handle.removeEventListener("pointercancel", onUp);
+        handle.classList.remove("active");
+        document.body.classList.remove("cal-resizing", "cal-resizing-x", "cal-resizing-y", "cal-resizing-xy");
+        if (!moved) return;
+        const next = getCalendarSizes(mode);
+        if ((type === "x" || type === "xy") && mode !== "day") next.cols = cols.map(w => Math.round(w));
+        if ((type === "y" || type === "xy") && height) next.rows[row] = height;
+        saveCalendarSizes(mode, next);
+        renderCalendar();
+      };
+      handle.addEventListener("pointermove", onMove);
+      handle.addEventListener("pointerup", onUp);
+      handle.addEventListener("pointercancel", onUp);
+    }
+
+    // Doppio clic sul bordo: bordo laterale → larghezze standard, bordo inferiore → altezza standard della riga, angolo → entrambe
+    function resetCalendarSize(type, row) {
+      const mode = document.getElementById("calendarViewMode")?.value || "month";
+      const sizes = getCalendarSizes(mode);
+      if (type === "x" || type === "xy") sizes.cols = null;
+      if (type === "y" || type === "xy") delete sizes.rows[row];
+      saveCalendarSizes(mode, sizes);
+      renderCalendar();
+    }
+
+    function resetCalendarSizes() {
+      const mode = document.getElementById("calendarViewMode")?.value || "month";
+      saveCalendarSizes(mode, { cols: null, rows: {} });
+      renderCalendar();
+      showToast("Giorni riportati alla grandezza standard", { type: "success" });
     }
 
     function plannerHtml(days, events) {
