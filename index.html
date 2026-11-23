@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v57.0 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v57.5 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v57.0" />
+  <meta name="app-version" content="v57.5" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
+  <script>
+    // tema applicato subito (prima del disegno) per evitare il lampo bianco
+    (function () {
+      var pref = "auto";
+      try { pref = localStorage.getItem("railops_theme") || "auto"; } catch (e) {}
+      var dark = pref === "dark" || (pref === "auto" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    })();
+  </script>
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="RailOps" />
@@ -49,9 +58,50 @@
       --block-bg:#fde8e8; --block-ink:#9b1c1c; --block-bd:#f5b0b0; --block-dot:#dc2626;
       --unav-bg:#f0eaff; --unav-ink:#5b21b6; --unav-bd:#d4c2fd; --unav-dot:#8b5cf6;
       --oncall-bg:#fbeedd; --oncall-ink:#7c3f13; --oncall-bd:#e6c08f; --oncall-dot:#c2711c;
+      --issue-bg:#fdeaf4; --issue-ink:#9d174d; --issue-bd:#f4b4d4; --issue-dot:#db2777;
       --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
       --bottom-nav-h:0px;
+      /* toni aggiuntivi (per il tema scuro) */
+      --text-2:#334155; --primary-bd:#c9d8ff; --hover-bg:#f4f7ff; --border-soft:#eef1f5; --weekend-bg:#fbfcfd;
+      --tint-blue:#f5f8ff; --tint-violet:#faf7ff;
+      --warn-bg:#fff7e6; --warn-bd:#f2d49b; --warn-ink:#7a4a00; --warn-bg-2:#fffaf0; --warn-bd-2:#f2dcae;
+      --danger-bg-2:#fff6f6; --danger-bd-2:#f5c2c2; --good-bg:#f2fbf5; --good-bd:#bfe6cc;
+      --issue-bg-2:#fff6fa; --issue-bd-2:#f4c9dd; --high-bg:#fff1dc; --high-ink:#9a4a00;
+      color-scheme:light;
     }
+    /* ===================== TEMA SCURO ===================== */
+    :root[data-theme="dark"]{
+      --bg:#0b111c; --panel:#121a29; --soft:#0f1724; --soft-2:#1a2435; --text:#e6ebf2; --muted:#98a6ba; --muted-2:#6b7a90;
+      --border:#243146; --border-strong:#34445e;
+      --primary:#4c7dff; --primary-hover:#3a6cf2; --primary-soft:#172447; --primary-ink:#b3c8ff;
+      --success:#22c55e; --warning:#f59e0b; --danger:#f05252; --danger-soft:#3a1719;
+      --shadow:0 1px 2px rgba(0,0,0,.35),0 6px 20px rgba(0,0,0,.25);
+      --shadow-pop:0 18px 50px rgba(0,0,0,.55);
+      --sidebar:#070c15; --sidebar-2:#121a29; --sidebar-text:#e2e8f0; --sidebar-muted:#8a97ab;
+      --trip-bg:#13234a; --trip-ink:#b3c8ff; --trip-bd:#294178; --trip-dot:#5b8cff;
+      --todo-bg:#1b2536; --todo-ink:#cbd5e1; --todo-bd:#33425a; --todo-dot:#94a3b8;
+      --prog-bg:#352a0c; --prog-ink:#f6d27c; --prog-bd:#634c12; --prog-dot:#e6a817;
+      --done-bg:#0e2c1d; --done-ink:#8ee3ae; --done-bd:#1d5737; --done-dot:#2fbf67;
+      --block-bg:#3a1517; --block-ink:#fca5a5; --block-bd:#74292d; --block-dot:#ef4444;
+      --unav-bg:#251a44; --unav-ink:#cbbdfd; --unav-bd:#47367f; --unav-dot:#a78bfa;
+      --oncall-bg:#33220f; --oncall-ink:#f3c690; --oncall-bd:#66441a; --oncall-dot:#e58a2e;
+      --issue-bg:#3a1429; --issue-ink:#f9a8d4; --issue-bd:#742a52; --issue-dot:#ec4899;
+      --text-2:#cbd5e1; --primary-bd:#2a3f78; --hover-bg:#17223a; --border-soft:#1c273a; --weekend-bg:#0f1624;
+      --tint-blue:#121f3d; --tint-violet:#1a1633;
+      --warn-bg:#33270e; --warn-bd:#6b5113; --warn-ink:#f6d27c; --warn-bg-2:#2c220d; --warn-bd-2:#5c4512;
+      --danger-bg-2:#2f1416; --danger-bd-2:#6b2a2d; --good-bg:#0f2a1c; --good-bd:#1f5236;
+      --issue-bg-2:#2e1222; --issue-bd-2:#5e2343; --high-bg:#36230c; --high-ink:#f5b86b;
+      color-scheme:dark;
+    }
+    :root[data-theme="dark"] img.invert-dark{filter:invert(1) hue-rotate(180deg)}
+    /* menu a tendina nativi (Windows/Chrome): le voci prendono i colori del tema, non bianco con testo chiaro */
+    select option,select optgroup{background-color:var(--panel);color:var(--text)}
+    select optgroup{color:var(--muted)}
+    .scope-picker select option,.scope-picker select optgroup{background-color:var(--panel);color:var(--text)}
+    :root[data-theme="dark"] .modal-backdrop,:root[data-theme="dark"] .confirm-backdrop{background:rgba(0,0,0,.6)}
+    :root[data-theme="dark"] .btn.secondary:hover,:root[data-theme="dark"] .icon-btn:hover{background:var(--soft-2)}
+    :root[data-theme="dark"] .toast{box-shadow:0 10px 30px rgba(0,0,0,.5)}
+    .theme-btn .ico{width:17px;height:17px}
     *{box-sizing:border-box}
     html{height:100%;-webkit-text-size-adjust:100%}
     body{margin:0;min-height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.45;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
@@ -70,7 +120,7 @@
 
     /* ===================== LOGIN ===================== */
     .auth-screen{min-height:100vh;display:grid;place-items:center;padding:calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));background:radial-gradient(1200px 600px at 10% 0%,#1f4fd8 0%,transparent 60%),linear-gradient(135deg,#0f172a,#1e3a8a)}
-    .auth-card{width:min(440px,100%);background:#fff;border-radius:20px;box-shadow:0 25px 70px rgba(0,0,0,.3);padding:28px}
+    .auth-card{width:min(440px,100%);background:var(--panel);border-radius:20px;box-shadow:0 25px 70px rgba(0,0,0,.3);padding:28px}
     .auth-logo{width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,#1f4fd8,#00a3ff);display:grid;place-items:center;color:#fff;font-size:24px;font-weight:900;margin-bottom:14px}
     .auth-card h1{margin:0;font-size:26px;letter-spacing:-.03em}
     .auth-card p{color:var(--muted);line-height:1.45;margin:6px 0 18px}
@@ -97,23 +147,32 @@
     .nav button.active{background:rgba(59,130,246,.18);color:#fff}
     .nav button.active svg{color:#93b4ff}
     .nav-badge{margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:1px 7px}
+    .nav-badge.issue{background:var(--issue-dot)}
+    .issues-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+    .issues-grid .alert-item{display:flex;flex-direction:column;gap:2px;margin:0}
+    .issues-grid .alert-item.resolved{background:var(--soft);border-color:var(--border);border-left-color:var(--done-dot)}
+    .issues-grid .alert-actions{margin-top:auto;padding-top:8px}
+    .issue-history{font-size:12px;color:var(--muted);margin-top:4px}
+    .issue-history summary{cursor:pointer;font-weight:700}
+    .issue-history li{margin:3px 0}
+    @media(max-width:760px){.issues-grid{grid-template-columns:minmax(0,1fr)}}
     .user-box{margin-top:auto;padding:12px;border-radius:12px;background:rgba(255,255,255,.05);font-size:12px;color:var(--sidebar-muted);display:flex;align-items:center;gap:10px}
     .user-box .avatar{width:32px;height:32px;border-radius:50%;background:#334155;color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px;flex:0 0 auto}
     .user-box strong{display:block;color:#fff;font-size:13px;word-break:break-word}
     .user-box button{margin-left:auto;border:0;background:rgba(255,255,255,.08);color:#e2e8f0;border-radius:8px;padding:6px 8px;font-size:12px;font-weight:700;cursor:pointer}
-    .sidebar-float-toggle{display:none;position:fixed;left:12px;top:12px;z-index:60;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:10px;padding:8px;box-shadow:var(--shadow);cursor:pointer}
+    .sidebar-float-toggle{display:none;position:fixed;left:12px;top:12px;z-index:60;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:10px;padding:8px;box-shadow:var(--shadow);cursor:pointer}
     .app.sidebar-collapsed .sidebar-float-toggle{display:grid;place-items:center}
     .main{padding:20px 24px 28px;min-width:0}
     .app.sidebar-collapsed .main{padding-left:64px}
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
     .topbar h1{margin:0;font-size:24px;letter-spacing:-.025em;line-height:1.15}
     .topbar .page-sub{margin:3px 0 0;color:var(--muted);font-size:13px}
-    .scope-picker{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:3px 4px 3px 10px;border:1px solid var(--border);background:#fff;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);max-width:100%;cursor:pointer}
+    .scope-picker{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:3px 4px 3px 10px;border:1px solid var(--border);background:var(--panel);border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);max-width:100%;cursor:pointer}
     .scope-picker .ico{width:15px;height:15px;flex:0 0 auto}
     .scope-picker .scope-label{text-transform:uppercase;font-size:10.5px;letter-spacing:.06em;font-weight:850}
     .scope-picker select{border:0;background:transparent;font:inherit;font-weight:800;color:var(--text);padding:3px 4px;min-width:0;max-width:260px;cursor:pointer;outline:none;text-overflow:ellipsis}
     .scope-picker:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(31,79,216,.12)}
-    .scope-picker.not-me{background:#fff7e6;border-color:#f2d49b;color:#7a4a00}
+    .scope-picker.not-me{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-ink)}
     .scope-picker.hidden{display:none}
     .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     .sync-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600;padding:0 4px}
@@ -130,20 +189,20 @@
     /* ===================== BOTTONI E INPUT ===================== */
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid transparent;background:var(--primary);color:#fff;border-radius:10px;padding:9px 14px;font-weight:700;font-size:14px;cursor:pointer;line-height:1.2;white-space:nowrap;transition:background .15s,border-color .15s}
     .btn:hover{background:var(--primary-hover)}
-    .btn.secondary{background:#fff;color:var(--text);border-color:var(--border)}
+    .btn.secondary{background:var(--panel);color:var(--text);border-color:var(--border)}
     .btn.secondary:hover{background:var(--soft);border-color:var(--border-strong)}
     .btn.ghost{background:transparent;color:var(--muted);border-color:transparent}
     .btn.ghost:hover{background:var(--soft-2);color:var(--text)}
     .btn.danger{background:var(--danger);color:#fff}
     .btn.danger:hover{background:#a61b1b}
-    .btn.danger-soft{background:#fff;color:var(--danger);border-color:#f3c2c2}
+    .btn.danger-soft{background:var(--panel);color:var(--danger);border-color:var(--danger-bd-2)}
     .btn.danger-soft:hover{background:var(--danger-soft)}
     .btn.small{padding:6px 10px;font-size:13px;border-radius:8px}
     .btn.icon{padding:7px;width:34px;height:34px}
     .btn:disabled{opacity:.55;cursor:not-allowed}
-    .icon-btn{border:1px solid var(--border);background:#fff;border-radius:10px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+    .icon-btn{border:1px solid var(--border);background:var(--panel);border-radius:10px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
     .icon-btn:hover{background:var(--soft);color:var(--text)}
-    .input,.select,.textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:9px 11px;background:#fff;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
+    .input,.select,.textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:9px 11px;background:var(--panel);color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s}
     .select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
     .textarea{resize:vertical;min-height:84px}
     .input:focus,.select:focus,.textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(31,79,216,.12)}
@@ -153,7 +212,7 @@
     .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
     .field.full{grid-column:1/-1}
     .form-section-title{grid-column:1/-1;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-top:1px solid var(--border);padding-top:14px;margin-top:2px}
-    .form-actions{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;position:sticky;bottom:-18px;background:#fff;padding:12px 0 2px;border-top:1px solid var(--border)}
+    .form-actions{margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;position:sticky;bottom:-18px;background:var(--panel);padding:12px 0 2px;border-top:1px solid var(--border)}
     .form-actions .spacer{flex:1}
     .select-search{display:flex;flex-direction:column;gap:6px}
     .select-search .input{padding:7px 10px;font-size:14px}
@@ -162,7 +221,7 @@
     .check-wrap{display:flex;flex-direction:column;gap:8px}
     .check-search{padding:7px 10px!important;font-size:14px!important}
     .check-grid{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid var(--border);border-radius:12px;background:var(--soft);max-height:190px;overflow:auto}
-    .check-item{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:#334155;border:1px solid var(--border);background:#fff;border-radius:999px;padding:5px 11px 5px 8px;cursor:pointer;user-select:none;transition:background .12s,border-color .12s}
+    .check-item{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--text-2);border:1px solid var(--border);background:var(--panel);border-radius:999px;padding:5px 11px 5px 8px;cursor:pointer;user-select:none;transition:background .12s,border-color .12s}
     .check-item:hover{border-color:var(--border-strong)}
     .check-item input{margin:0;accent-color:var(--primary)}
     .check-item:has(input:checked){background:var(--primary-soft);border-color:#a9c1ff;color:var(--primary-ink);font-weight:700}
@@ -178,7 +237,8 @@
     .panel-header h2{margin:0;font-size:16px;letter-spacing:-.01em}
     .panel-body{padding:16px}
     .panel-sub{font-size:12.5px;color:var(--muted);margin-top:2px}
-    .cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:16px}
+    .cards{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px;margin-bottom:16px}
+    .card.kpi.tone-issue-card .stat-value{color:var(--issue-dot)}
     .card{padding:14px 16px}
     .card.kpi{cursor:pointer;transition:transform .12s,box-shadow .12s,border-color .12s;text-align:left;font:inherit;color:inherit}
     .card.kpi:hover{transform:translateY(-1px);border-color:var(--border-strong);box-shadow:0 8px 22px rgba(15,23,42,.08)}
@@ -194,14 +254,14 @@
     .mini-list{display:flex;flex-direction:column;gap:8px}
     .mini-item{border:1px solid var(--border);background:var(--soft);border-radius:12px;padding:10px 12px}
     .mini-item[onclick]{cursor:pointer;transition:border-color .12s,background .12s}
-    .mini-item[onclick]:hover{border-color:var(--border-strong);background:#fff}
+    .mini-item[onclick]:hover{border-color:var(--border-strong);background:var(--panel)}
     .mini-title{font-weight:750;margin-bottom:2px}
     .mini-meta{color:var(--muted);font-size:12.5px;line-height:1.45}
-    .operator-card-note{border:1px solid #c9d8ff;background:var(--primary-soft);color:var(--primary-ink);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.45;margin:0 0 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .operator-card-note{border:1px solid var(--primary-bd);background:var(--primary-soft);color:var(--primary-ink);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.45;margin:0 0 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
     .operator-card-note .btn{margin-left:auto}
     .pill{border:1px solid var(--border);border-radius:999px;padding:4px 10px;display:inline-flex;font-size:12px;background:var(--soft)}
     .select.filter-active{border-color:var(--primary);background-color:var(--primary-soft);color:var(--primary-ink);font-weight:700}
-    .filter-chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);font-weight:700;font-size:12px;padding:4px 6px 4px 10px;border:1px solid #c9d8ff}
+    .filter-chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:var(--primary-soft);color:var(--primary-ink);font-weight:700;font-size:12px;padding:4px 6px 4px 10px;border:1px solid var(--primary-bd)}
     .filter-chip button{border:0;background:rgba(31,79,216,.12);color:inherit;border-radius:50%;width:18px;height:18px;cursor:pointer;display:grid;place-items:center;font-size:12px;line-height:1}
 
     /* ===================== BADGE E STATI ===================== */
@@ -212,12 +272,27 @@
     .tone-progress{background:var(--prog-bg);color:var(--prog-ink)}
     .tone-done{background:var(--done-bg);color:var(--done-ink)}
     .tone-blocked{background:var(--block-bg);color:var(--block-ink)}
+    .tone-issue{background:var(--issue-bg);color:var(--issue-ink)}
+    .status-pill.tone-issue{border-color:var(--issue-bd)}
+    .dot-issue{background:var(--issue-dot)}
+    .calendar-event-status.st-issue:before{background:var(--issue-dot)}
+    .calendar-event.task.issue{background:var(--issue-bg);color:var(--issue-ink);border-color:var(--issue-bd)}
+    .cal-h.task.st-issue{background:var(--issue-bg);color:var(--issue-ink);border-color:var(--issue-bd)}
+    .calendar-list-item.issue{border-left-color:var(--issue-dot)}
+    .planner .bar.issue{background:var(--issue-dot)}
+    .day-events-modal-item.task.issue{border-left-color:var(--issue-dot)}
+    .alert-item.issue{background:var(--issue-bg-2);border-color:var(--issue-bd-2);border-left-color:var(--issue-dot)}
+    .alert-item .alert-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+    .alert-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+    .issue-note{font-size:13px;margin:3px 0 2px;color:var(--issue-ink);font-weight:600;white-space:pre-wrap;word-break:break-word}
+    .dash-stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+    .issue-note-field textarea{min-height:70px}
     .tone-trip{background:var(--trip-bg);color:var(--trip-ink)}
     .tone-unav{background:var(--unav-bg);color:var(--unav-ink)}
     .tone-oncall{background:var(--oncall-bg);color:var(--oncall-ink)}
-    .medium{background:#f1f5f9;color:#475569}
-    .high{background:#fff1dc;color:#9a4a00}
-    .urgent{background:#fde8e8;color:#b42318}
+    .medium{background:var(--soft-2);color:var(--text-2)}
+    .high{background:var(--high-bg);color:var(--high-ink)}
+    .urgent{background:var(--block-bg);color:var(--block-ink)}
     .status-pill{appearance:none;-webkit-appearance:none;border:1px solid transparent;border-radius:999px;padding:5px 26px 5px 11px;font-size:13px;font-weight:750;cursor:pointer;max-width:100%;background-repeat:no-repeat;background-position:right 9px center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
     .status-pill.tone-todo{border-color:var(--todo-bd)} .status-pill.tone-progress{border-color:var(--prog-bd)} .status-pill.tone-done{border-color:var(--done-bd)} .status-pill.tone-blocked{border-color:var(--block-bd)}
     .status-pill:focus{outline:2px solid var(--primary);outline-offset:1px}
@@ -240,7 +315,7 @@
     th{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;background:var(--soft);white-space:nowrap}
     tbody tr:last-child td{border-bottom:0}
     tr.row-link{cursor:pointer}
-    tr.row-link:hover td{background:#f8fbff}
+    tr.row-link:hover td{background:var(--hover-bg)}
     .data-table{min-width:900px}
     .data-table td.actions-cell{width:1%;white-space:nowrap}
     .row-actions{display:flex;gap:6px;flex-wrap:nowrap;align-items:center;justify-content:flex-end}
@@ -248,12 +323,12 @@
     .cell-sub{color:var(--muted);font-size:12.5px;margin-top:2px}
     .activity-text-preview{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:3px;line-height:1.4}
     .task-update-latest{font-size:12px;color:var(--muted);margin-top:5px}
-    .task-update-latest b{color:#334155}
-    .attachment-chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;background:var(--soft-2);color:#334155;font-size:11.5px;font-weight:700;padding:2px 8px;margin-top:5px}
+    .task-update-latest b{color:var(--text-2)}
+    .attachment-chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;background:var(--soft-2);color:var(--text-2);font-size:11.5px;font-weight:700;padding:2px 8px;margin-top:5px}
     .list-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;color:var(--muted);font-size:12.5px;flex-wrap:wrap}
 
     /* menu contestuale */
-    .menu-pop{position:fixed;z-index:120;min-width:190px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-pop);padding:6px;display:none}
+    .menu-pop{position:fixed;z-index:120;min-width:190px;background:var(--panel);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-pop);padding:6px;display:none}
     .menu-pop.show{display:block}
     .menu-pop button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:9px 10px;border-radius:8px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;text-align:left}
     .menu-pop button:hover,.menu-pop button:focus{background:var(--soft-2);outline:none}
@@ -264,15 +339,15 @@
     /* ===================== MODALI, CONFERME, TOAST ===================== */
     .modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:90;display:none;align-items:center;justify-content:center;padding:18px}
     .modal-backdrop.show{display:flex}
-    .modal{width:min(1040px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 28px 90px rgba(0,0,0,.32);display:flex;flex-direction:column}
-    .modal-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;top:0;background:#fff;z-index:3}
+    .modal{width:min(1040px,100%);max-height:92vh;overflow:auto;background:var(--panel);border-radius:18px;box-shadow:0 28px 90px rgba(0,0,0,.32);display:flex;flex-direction:column}
+    .modal-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;top:0;background:var(--panel);z-index:3}
     .modal-header h2{margin:0;font-size:17px}
     .modal-body{padding:18px}
     .confirm-backdrop{z-index:150}
-    .confirm-box{width:min(480px,100%);background:#fff;border-radius:16px;box-shadow:var(--shadow-pop);padding:20px}
+    .confirm-box{width:min(480px,100%);background:var(--panel);border-radius:16px;box-shadow:var(--shadow-pop);padding:20px}
     .confirm-box h3{margin:0 0 8px;font-size:17px}
-    .confirm-box .confirm-msg{color:#334155;line-height:1.5;white-space:pre-line}
-    .confirm-box ol{margin:10px 0 0;padding-left:20px;color:#334155;max-height:240px;overflow:auto;font-size:13.5px}
+    .confirm-box .confirm-msg{color:var(--text-2);line-height:1.5;white-space:pre-line}
+    .confirm-box ol{margin:10px 0 0;padding-left:20px;color:var(--text-2);max-height:240px;overflow:auto;font-size:13.5px}
     .confirm-box ol li{margin-bottom:6px}
     .confirm-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
     .toast-stack{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:160;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:max-content;max-width:min(440px,calc(100vw - 36px))}
@@ -287,7 +362,7 @@
     .attachment-box{border:1px dashed var(--border-strong);border-radius:12px;background:var(--soft);padding:12px}
     .attachment-box .mini-meta{margin-top:6px}
     .attachment-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-    .attachment-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 10px}
+    .attachment-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border);background:var(--panel);border-radius:10px;padding:9px 10px}
     .attachment-name{font-weight:700;font-size:13px;word-break:break-word}
     .attachment-meta{color:var(--muted);font-size:12px;margin-top:2px}
     .attachment-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
@@ -298,10 +373,10 @@
     .day-card-head{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:10px}
     .day-card-head .field{min-width:160px}
     .day-card-head .day-totals{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;align-items:center}
-    .day-total{font-size:12px;font-weight:750;border-radius:999px;padding:4px 10px;background:#fff;border:1px solid var(--border);white-space:nowrap}
+    .day-total{font-size:12px;font-weight:750;border-radius:999px;padding:4px 10px;background:var(--panel);border:1px solid var(--border);white-space:nowrap}
     .day-total b{font-weight:850}
     .day-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-    .slot-block{background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px}
+    .slot-block{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:10px}
     .slot-block-title{font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
     .slot-block-title .kpi-dot{width:7px;height:7px}
     .travel-slots-list,.work-slots-list{display:flex;flex-direction:column;gap:6px}
@@ -317,14 +392,14 @@
     .travel-slots-help,.work-slots-help{font-size:11px;color:var(--muted);line-height:1.35}
     .day-card-foot{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
     .day-card-foot .input{flex:1 1 220px}
-    .legacy-time-note{border:1px solid #f1d08a;background:#fff8e7;color:#7c4a03;border-radius:10px;padding:8px;font-size:12px;font-weight:700;margin-bottom:8px}
+    .legacy-time-note{border:1px solid var(--warn-bd);background:var(--warn-bg);color:var(--warn-ink);border-radius:10px;padding:8px;font-size:12px;font-weight:700;margin-bottom:8px}
     .daily-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
     .daily-summary{font-size:12.5px;color:var(--muted);font-weight:600;margin-left:auto}
 
     /* aggiornamenti attività */
     .task-updates-box{border:1px solid var(--border);background:var(--soft);border-radius:14px;padding:12px}
     .task-updates-list{display:flex;flex-direction:column;gap:10px}
-    .task-update-row{border:1px solid var(--border);background:#fff;border-radius:12px;padding:12px}
+    .task-update-row{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:12px}
     .task-update-top{display:grid;grid-template-columns:170px 1fr auto;gap:10px;align-items:end}
     .task-update-heading{font-size:11.5px;font-weight:850;color:var(--primary);letter-spacing:.03em;text-transform:uppercase;margin-bottom:8px}
     .task-update-row .textarea{min-height:80px}
@@ -333,15 +408,15 @@
     .task-update-view-text{white-space:pre-wrap;line-height:1.5}
     .activity-full-text{white-space:pre-wrap;line-height:1.55;font-size:14px;border:1px solid var(--border);background:var(--soft);border-radius:12px;padding:12px;max-height:420px;overflow:auto}
     .activity-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
-    .activity-detail-item{border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 10px}
+    .activity-detail-item{border:1px solid var(--border);background:var(--panel);border-radius:10px;padding:9px 10px}
     .activity-detail-label{font-size:10.5px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
 
     /* ===================== DASHBOARD ===================== */
     .alert-list{display:flex;flex-direction:column;gap:8px}
     .alert-item{border:1px solid var(--border);background:var(--soft);border-radius:12px;padding:10px 12px;border-left-width:4px}
-    .alert-item.danger{background:#fff6f6;border-color:#f5c2c2;border-left-color:var(--danger)}
-    .alert-item.warning{background:#fffaf0;border-color:#f2dcae;border-left-color:#d99a06}
-    .alert-item.good{background:#f2fbf5;border-color:#bfe6cc;border-left-color:#16a34a}
+    .alert-item.danger{background:var(--danger-bg-2);border-color:var(--danger-bd-2);border-left-color:var(--danger)}
+    .alert-item.warning{background:var(--warn-bg-2);border-color:var(--warn-bd-2);border-left-color:#d99a06}
+    .alert-item.good{background:var(--good-bg);border-color:var(--good-bd);border-left-color:#16a34a}
     .alert-item.clickable{cursor:pointer}
     .alert-item.clickable:hover{filter:brightness(.985)}
     .alert-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
@@ -372,11 +447,11 @@
     .calendar-day.picked{border-color:#d97706;box-shadow:0 0 0 3px rgba(217,119,6,.22)}
     .calendar-day.picked .calendar-day-number > span:first-child{background:#d97706;color:#fff;border-radius:999px;padding:0 7px}
     .planner th.picked{background:#d97706;color:#fff}
-    .planner td.picked{background:#fff7e6}
-    .picked-note{background:#fff7e6;border-color:#f2d49b;color:#7a4a00}
+    .planner td.picked{background:var(--warn-bg)}
+    .picked-note{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-ink)}
     .segmented{display:inline-flex;background:var(--soft-2);border-radius:10px;padding:3px;gap:2px;margin-left:auto}
     .segmented button{border:0;background:transparent;padding:6px 11px;border-radius:8px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer}
-    .segmented button.active{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(15,23,42,.12)}
+    .segmented button.active{background:var(--panel);color:var(--text);box-shadow:0 1px 3px rgba(15,23,42,.12)}
     .calendar-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
     .calendar-filters .select{width:auto;flex:1 1 150px;max-width:230px;padding-top:7px;padding-bottom:7px;font-size:14px}
     .legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
@@ -386,7 +461,7 @@
     .calendar-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
     .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
     .calendar-weekday{text-align:center;color:var(--muted);font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.06em;padding:4px}
-    .calendar-day{min-height:150px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px 8px 6px;display:flex;flex-direction:column;gap:4px;min-width:0;cursor:pointer;transition:border-color .12s}
+    .calendar-day{min-height:150px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:8px 8px 6px;display:flex;flex-direction:column;gap:4px;min-width:0;cursor:pointer;transition:border-color .12s}
     .calendar-day:hover{border-color:var(--border-strong)}
     /* ridimensionamento dei giorni */
     .calendar-day{position:relative}
@@ -404,7 +479,7 @@
     body.cal-resizing-y,body.cal-resizing-y *{cursor:row-resize!important}
     body.cal-resizing-xy,body.cal-resizing-xy *{cursor:nwse-resize!important}
     .calendar-day.outside{background:var(--soft);opacity:.6}
-    .calendar-day.weekend{background:#fbfcfd}
+    .calendar-day.weekend{background:var(--weekend-bg)}
     .calendar-day.today{border-color:var(--primary);box-shadow:0 0 0 3px rgba(31,79,216,.1)}
     .calendar-day.focused-day{border-color:var(--primary)}
     .calendar-day-number{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:13px;font-weight:800;height:22px;line-height:20px;flex:0 0 auto}
@@ -442,7 +517,7 @@
     .cal-h.task.st-progress{background:var(--prog-bg);color:var(--prog-ink);border-color:var(--prog-bd)}
     .cal-h.task.st-done{background:var(--done-bg);color:var(--done-ink);border-color:var(--done-bd)}
     .cal-h.task.st-blocked{background:var(--block-bg);color:var(--block-ink);border-color:var(--block-bd)}
-    .calendar-hours-btn{display:inline-flex;align-items:center;justify-content:center;gap:3px;height:20px;min-width:20px;padding:0 4px;margin:0;box-sizing:border-box;border-radius:999px;border:1px solid var(--border);background:var(--surface,#fff);color:var(--muted);font:inherit;font-size:11px;font-weight:800;cursor:pointer;line-height:1;position:relative;z-index:3}
+    .calendar-hours-btn{display:inline-flex;align-items:center;justify-content:center;gap:3px;height:20px;min-width:20px;padding:0 4px;margin:0;box-sizing:border-box;border-radius:999px;border:1px solid var(--border);background:var(--panel);color:var(--muted);font:inherit;font-size:11px;font-weight:800;cursor:pointer;line-height:1;position:relative;z-index:3}
     .calendar-hours-btn .ico{width:13px;height:13px}
     .calendar-hours-btn:hover{border-color:var(--border-strong);color:var(--text)}
     .calendar-hours-btn.on{background:var(--primary);border-color:var(--primary);color:#fff}
@@ -461,21 +536,21 @@
     .calendar-view-week .calendar-event-title{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
     .calendar-view-week .calendar-day{min-height:200px}
     .calendar-list{display:flex;flex-direction:column;gap:6px}
-    .calendar-list-item{display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:center;border:1px solid var(--border);border-left-width:4px;background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
+    .calendar-list-item{display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:center;border:1px solid var(--border);border-left-width:4px;background:var(--panel);border-radius:10px;padding:8px 12px;cursor:pointer}
     .calendar-list-item:hover{background:var(--soft)}
-    .calendar-list-item .when{font-size:12.5px;font-weight:750;color:#334155}
+    .calendar-list-item .when{font-size:12.5px;font-weight:750;color:var(--text-2)}
     .calendar-list-item.trip{border-left-color:var(--trip-dot)} .calendar-list-item.todo{border-left-color:var(--todo-dot)} .calendar-list-item.progress{border-left-color:var(--prog-dot)} .calendar-list-item.done{border-left-color:var(--done-dot)} .calendar-list-item.blocked{border-left-color:var(--block-dot)} .calendar-list-item.unavailable{border-left-color:var(--unav-dot)} .calendar-list-item.oncall{border-left-color:var(--oncall-dot)}
     /* pianificazione risorse */
     .planner{border-collapse:separate;border-spacing:0;min-width:100%}
-    .planner th,.planner td{padding:0;border-bottom:1px solid var(--border);border-right:1px solid #eef1f5;font-size:11px;vertical-align:middle}
-    .planner th{background:#fff;text-align:center;padding:5px 0;position:sticky;top:0;z-index:2;letter-spacing:0;text-transform:none;font-size:11px}
-    .planner th.wkend,.planner td.wkend{background:#f8fafc}
+    .planner th,.planner td{padding:0;border-bottom:1px solid var(--border);border-right:1px solid var(--border-soft);font-size:11px;vertical-align:middle}
+    .planner th{background:var(--panel);text-align:center;padding:5px 0;position:sticky;top:0;z-index:2;letter-spacing:0;text-transform:none;font-size:11px}
+    .planner th.wkend,.planner td.wkend{background:var(--weekend-bg)}
     .planner th.today{color:#fff;background:var(--primary)}
-    .planner .who{position:sticky;left:0;z-index:3;background:#fff;min-width:150px;max-width:180px;padding:8px 10px;font-size:13px;font-weight:750;text-align:left;border-right:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .planner .who{position:sticky;left:0;z-index:3;background:var(--panel);min-width:150px;max-width:180px;padding:8px 10px;font-size:13px;font-weight:750;text-align:left;border-right:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .planner thead .who{z-index:4}
     .planner td.cell{min-width:28px;height:46px;cursor:pointer;position:relative}
     .planner .lane-empty{height:8px}
-    .planner td.cell:hover{background:#f1f5ff}
+    .planner td.cell:hover{background:var(--hover-bg)}
     .planner .bars{display:flex;flex-direction:column;gap:2px;padding:3px 0}
     .planner .bar{height:8px}
     .planner .bar.trip{background:var(--trip-dot)} .planner .bar.todo{background:var(--todo-dot)} .planner .bar.progress{background:var(--prog-dot)} .planner .bar.done{background:var(--done-dot)} .planner .bar.blocked{background:var(--block-dot)} .planner .bar.unavailable{background:var(--unav-dot)} .planner .bar.oncall{background:var(--oncall-dot)}
@@ -483,7 +558,7 @@
     .planner .bar.end{margin-right:3px;border-top-right-radius:4px;border-bottom-right-radius:4px}
     .planner .conflict{position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:var(--danger)}
     .day-events-modal-list{display:flex;flex-direction:column;gap:8px}
-    .day-events-modal-item{border:1px solid var(--border);border-left-width:5px;border-radius:12px;padding:10px 12px;background:#fff;cursor:pointer}
+    .day-events-modal-item{border:1px solid var(--border);border-left-width:5px;border-radius:12px;padding:10px 12px;background:var(--panel);cursor:pointer}
     .day-events-modal-item:hover{background:var(--soft)}
     .day-events-modal-item.trip{border-left-color:var(--trip-dot)}
     .day-events-modal-item.task.todo{border-left-color:var(--todo-dot)} .day-events-modal-item.task.progress{border-left-color:var(--prog-dot)} .day-events-modal-item.task.done{border-left-color:var(--done-dot)} .day-events-modal-item.task.blocked{border-left-color:var(--block-dot)}
@@ -519,10 +594,10 @@
     .resource-weekdays,.resource-mini-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
     .resource-weekdays{margin-bottom:5px}
     .resource-weekday{text-align:center;color:var(--muted);font-size:11px;font-weight:850;text-transform:uppercase;padding:4px}
-    .resource-day{min-height:70px;border:1px solid var(--border);border-radius:10px;background:#fff;padding:6px;font-size:12px}
+    .resource-day{min-height:70px;border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:6px;font-size:12px}
     .resource-day.outside{opacity:.4;background:var(--soft)}
-    .resource-day.busy{border-color:var(--trip-bd);background:#f5f8ff}
-    .resource-day.unavailable{border-color:var(--unav-bd);background:#faf7ff}
+    .resource-day.busy{border-color:var(--trip-bd);background:var(--tint-blue)}
+    .resource-day.unavailable{border-color:var(--unav-bd);background:var(--tint-violet)}
     .resource-day-number{font-weight:850;margin-bottom:3px}
     .resource-tags{display:flex;flex-direction:column;gap:3px}
     .resource-tag{display:inline-flex;width:max-content;max-width:100%;border-radius:6px;padding:2px 6px;font-size:10.5px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -533,7 +608,7 @@
 
     /* anagrafiche, backup, licenza, log accessi */
     .registry-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-    .registry-card{border:1px solid var(--border);background:#fff;border-radius:14px;overflow:hidden}
+    .registry-card{border:1px solid var(--border);background:var(--panel);border-radius:14px;overflow:hidden}
     .registry-card-header{padding:14px 14px 10px;border-bottom:1px solid var(--border)}
     .registry-card-header h3{margin:0 0 3px;font-size:15px}
     .registry-card-header p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.4}
@@ -557,17 +632,17 @@
     .registry-actions .btn.icon{width:30px;height:30px;padding:5px}
     .registry-list{max-height:360px}
     .registry-meta{font-size:12px;color:var(--muted);margin-bottom:8px}
-    .backup-note{border:1px solid #c9d8ff;background:var(--primary-soft);color:var(--primary-ink);border-radius:12px;padding:12px;margin-bottom:14px;line-height:1.45;font-size:13.5px}
+    .backup-note{border:1px solid var(--primary-bd);background:var(--primary-soft);color:var(--primary-ink);border-radius:12px;padding:12px;margin-bottom:14px;line-height:1.45;font-size:13.5px}
     .backup-group-title{font-size:12px;font-weight:850;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:18px 0 8px}
     .backup-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-    .backup-card{border:1px solid var(--border);background:#fff;border-radius:14px;padding:14px;display:flex;flex-direction:column}
-    .backup-card.primary{background:#f5f8ff;border-color:#c9d8ff}
-    .backup-card.warning{background:#fffaf0;border-color:#f2dcae}
+    .backup-card{border:1px solid var(--border);background:var(--panel);border-radius:14px;padding:14px;display:flex;flex-direction:column}
+    .backup-card.primary{background:var(--tint-blue);border-color:var(--primary-bd)}
+    .backup-card.warning{background:var(--warn-bg-2);border-color:var(--warn-bd-2)}
     .backup-card h3{margin:0 0 4px;font-size:15px}
     .backup-card p{margin:0 0 12px;color:var(--muted);font-size:12.5px;line-height:1.45;flex:1}
     .backup-card .select{margin-bottom:8px}
     .backup-actions{display:flex;gap:8px;flex-wrap:wrap}
-    .license-hero{border:1px solid #c9d8ff;background:var(--primary-soft);color:var(--primary-ink);border-radius:16px;padding:18px;margin-bottom:14px}
+    .license-hero{border:1px solid var(--primary-bd);background:var(--primary-soft);color:var(--primary-ink);border-radius:16px;padding:18px;margin-bottom:14px}
     .license-hero h3{margin:0 0 6px;font-size:20px}
     .license-hero p{margin:0;line-height:1.55}
     .license-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -581,12 +656,12 @@
     .access-stat-value{font-size:20px;font-weight:850;margin-top:2px}
 
     /* PWA: barra offline, installazione, aree sicure (notch) */
-    .offline-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #f2d49b;background:#fff7e6;color:#7a4a00;border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:13px;font-weight:600}
+    .offline-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--warn-bd);background:var(--warn-bg);color:var(--warn-ink);border-radius:12px;padding:10px 12px;margin-bottom:14px;font-size:13px;font-weight:600}
     .offline-banner .btn{margin-left:auto}
-    .install-steps{margin:10px 0 0;padding-left:20px;line-height:1.6;color:#334155}
+    .install-steps{margin:10px 0 0;padding-left:20px;line-height:1.6;color:var(--text-2)}
     .install-steps li{margin-bottom:6px}
     .install-steps .kbd{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border);border-radius:6px;padding:1px 6px;background:var(--soft);font-weight:700;font-size:13px}
-    .auth-install{margin-top:14px;border:1px solid #c9d8ff;background:var(--primary-soft);color:var(--primary-ink);border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.45}
+    .auth-install{margin-top:14px;border:1px solid var(--primary-bd);background:var(--primary-soft);color:var(--primary-ink);border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.45}
     .auth-install .btn{margin-top:8px;width:100%}
     @media (display-mode: standalone){
       .sidebar{padding-top:calc(18px + env(safe-area-inset-top))}
@@ -601,7 +676,7 @@
 
     /* ===================== RESPONSIVE ===================== */
     @media(max-width:1200px){
-      .cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .cards{grid-template-columns:repeat(4,minmax(0,1fr))}
       .resource-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
       .backup-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
@@ -628,6 +703,7 @@
       .topbar h1{font-size:21px}
       .topbar .actions{display:none}
       .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+      .cards > .card:last-child:nth-child(odd){grid-column:1 / -1}
       .card{padding:12px}
       .stat-value{font-size:24px}
       .form-grid{grid-template-columns:minmax(0,1fr)}
@@ -670,7 +746,7 @@
       .data-table{min-width:0}
       .data-table thead{display:none}
       .data-table,.data-table tbody,.data-table tr,.data-table td{display:block;width:100%}
-      .data-table tr{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;padding:10px 12px;background:#fff}
+      .data-table tr{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;padding:10px 12px;background:var(--panel)}
       .data-table td{border:0;padding:4px 0}
       .data-table td[data-label]:not(.no-label):before{content:attr(data-label);display:block;font-size:10.5px;font-weight:850;text-transform:uppercase;letter-spacing:.05em;color:var(--muted-2);margin-bottom:1px}
       .data-table td.actions-cell{width:100%;padding-top:8px;margin-top:4px;border-top:1px solid var(--border)}
@@ -678,7 +754,7 @@
       .data-table td.empty-cell:before{display:none}
       .toast-stack{left:12px;right:12px;transform:none;width:auto;bottom:calc(var(--bottom-nav-h) + 12px + env(safe-area-inset-bottom));max-width:none;align-items:stretch}
       body.modal-open .toast-stack{bottom:auto;top:calc(12px + env(safe-area-inset-top))}
-      .bottom-nav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:55;background:#fff;border-top:1px solid var(--border);padding:4px 4px calc(4px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(15,23,42,.06)}
+      .bottom-nav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:55;background:var(--panel);border-top:1px solid var(--border);padding:4px 4px calc(4px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(15,23,42,.06)}
       .bottom-nav button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;font-weight:700;color:var(--muted);padding:6px 0;cursor:pointer;border-radius:10px}
       .bottom-nav button.active{color:var(--primary)}
       .bottom-nav .bn-plus span.plus{width:42px;height:42px;border-radius:14px;background:var(--primary);color:#fff;display:grid;place-items:center;margin-top:-14px;box-shadow:0 8px 18px rgba(31,79,216,.35)}
@@ -714,6 +790,9 @@
     <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></symbol>
     <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
     <symbol id="i-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
     <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
@@ -758,6 +837,7 @@
     <div class="brand-logo">R</div>
     <strong>RailOps Hub</strong>
     <span class="sync-status" data-sync><span class="sync-dot"></span><span class="sync-label">Offline</span></span>
+    <button class="icon-btn theme-btn" type="button" data-theme-btn onclick="cycleTheme()" style="background:rgba(255,255,255,.1);border:0;color:#fff;flex:0 0 auto" aria-label="Cambia tema"><svg class="ico"><use href="#i-auto"/></svg></button>
   </div>
 
   <div class="drawer-backdrop" id="backdrop" onclick="toggleMenu(false)"></div>
@@ -776,6 +856,7 @@
         <button data-section="calendario" onclick="showSection('calendario')"><svg class="ico"><use href="#i-calendar"/></svg>Calendario</button>
         <button data-section="trasferte" onclick="showSection('trasferte')"><svg class="ico"><use href="#i-trip"/></svg>Trasferte</button>
         <button data-section="attivita" onclick="showSection('attivita')"><svg class="ico"><use href="#i-task"/></svg>Attività<span class="nav-badge hidden" id="navOverdueBadge"></span></button>
+        <button data-section="segnalazioni" onclick="showSection('segnalazioni')"><svg class="ico"><use href="#i-alert"/></svg>Segnalazioni<span class="nav-badge issue hidden" id="navIssuesBadge"></span></button>
         <button data-section="reperibilita" onclick="showSection('reperibilita')"><svg class="ico"><use href="#i-phone"/></svg>Reperibilità</button>
         <button data-section="indisponibilita" onclick="showSection('indisponibilita')"><svg class="ico"><use href="#i-userx"/></svg>Indisponibilità</button>
         <div class="nav-group-title">Analisi</div>
@@ -804,6 +885,7 @@
         </div>
         <div class="actions">
           <span class="sync-status" data-sync title="Stato sincronizzazione"><span class="sync-dot"></span><span class="sync-label">Offline</span></span>
+          <button class="btn secondary icon theme-btn" type="button" data-theme-btn onclick="cycleTheme()" title="Tema" aria-label="Cambia tema"><svg class="ico"><use href="#i-auto"/></svg></button>
           <button class="btn secondary icon" type="button" onclick="manualRefresh()" title="Aggiorna dati" aria-label="Aggiorna dati"><svg class="ico"><use href="#i-refresh"/></svg></button>
           <button class="btn" type="button" onclick="openNewMenu(this)" aria-haspopup="menu"><svg class="ico"><use href="#i-plus"/></svg>Nuovo</button>
         </div>
@@ -817,6 +899,7 @@
           <button class="card kpi tone-danger" onclick="openTasksQuick('overdue')"><div class="stat-label"><span class="kpi-dot dot-blocked"></span>In ritardo</div><div class="stat-value" id="statTasksOverdue">0</div></button>
           <button class="card kpi tone-warning" onclick="openTasksQuick('due7')"><div class="stat-label"><span class="kpi-dot dot-progress"></span>Scadenza 7 giorni</div><div class="stat-value" id="statTasksDue7">0</div></button>
           <button class="card kpi" onclick="openTasksQuick('blocked')"><div class="stat-label"><span class="kpi-dot dot-blocked"></span>Bloccate</div><div class="stat-value" id="statTasksBlocked">0</div></button>
+          <button class="card kpi tone-issue-card" onclick="openTasksQuick('issues')"><div class="stat-label"><span class="kpi-dot dot-issue"></span>Segnalazioni aperte</div><div class="stat-value" id="statTasksIssues">0</div></button>
         </div>
 
         <div class="grid-2">
@@ -824,9 +907,15 @@
             <div class="panel-header"><div><h2>Oggi</h2><div class="panel-sub" id="todayLabel"></div></div><button class="btn secondary small" onclick="openTodayCalendar()">Vista giorno</button></div>
             <div class="panel-body"><div id="todayPanel" class="today-grid"></div></div>
           </div>
-          <div class="panel">
-            <div class="panel-header"><h2>Priorità operative</h2><button class="btn secondary small" onclick="showSection('attivita')">Tutte le attività</button></div>
-            <div class="panel-body"><div id="dashboardAlerts" class="alert-list"></div></div>
+          <div class="dash-stack">
+            <div class="panel">
+              <div class="panel-header"><h2>Priorità operative</h2><button class="btn secondary small" onclick="showSection('attivita')">Tutte le attività</button></div>
+              <div class="panel-body"><div id="dashboardAlerts" class="alert-list"></div></div>
+            </div>
+            <div class="panel" id="issuesPanel">
+              <div class="panel-header"><div><h2><span class="kpi-dot dot-issue" style="margin-right:6px"></span>Segnalazioni aperte</h2><div class="panel-sub">Attività concluse in parte: c'è ancora qualcosa da risolvere</div></div><button class="btn secondary small" onclick="openTasksQuick('issues')">Vedi tutte</button></div>
+              <div class="panel-body"><div id="dashboardIssues" class="alert-list"></div></div>
+            </div>
           </div>
         </div>
 
@@ -880,6 +969,7 @@
           </div>
           <div class="panel-body">
             <div id="taskQuickFilterBox" class="hidden" style="margin-bottom:10px"></div>
+            <div id="taskIssuesNote" class="hidden" style="margin-bottom:10px"></div>
             <div class="toolbar">
               <input id="taskSearch" class="input" type="search" placeholder="Cerca attività, veicolo, descrizione…" oninput="renderTasks()">
               <select id="taskQuickSelect" class="select" onchange="taskQuickFilter = this.value; renderTasks()" aria-label="Scadenza e situazione">
@@ -898,6 +988,30 @@
               <button class="btn ghost" onclick="clearTaskFilters()">Azzera filtri</button>
             </div>
             <div class="table-wrap"><table class="data-table"><thead><tr><th>Stato</th><th>Priorità</th><th style="min-width:260px">Attività</th><th>Commessa / Veicolo</th><th>Risorse</th><th>Periodo / Tempo</th><th></th></tr></thead><tbody id="tasksTable"></tbody></table></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="segnalazioni" class="section">
+        <div class="panel">
+          <div class="panel-header">
+            <div><h2><span class="kpi-dot dot-issue" style="margin-right:6px"></span><span id="issuesTitle">Segnalazioni aperte</span></h2><div class="panel-sub" id="issuesCount"></div></div>
+            <div class="segmented" id="issuesModeSwitch" role="tablist">
+              <button data-mode="open" onclick="setIssuesMode('open')">Aperte</button>
+              <button data-mode="resolved" onclick="setIssuesMode('resolved')">Risolte</button>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="toolbar">
+              <input id="issuesSearch" class="input" type="search" placeholder="Cerca segnalazione, attività, matricola, nota…" oninput="renderIssues()">
+              <select id="issuesSort" class="select" onchange="renderIssues()" aria-label="Ordina">
+                <option value="old">Più vecchie prima</option>
+                <option value="new">Più recenti prima</option>
+                <option value="vehicle">Per commessa / veicolo</option>
+              </select>
+            </div>
+            <div class="mini-meta" style="margin:-4px 0 12px">Qui finiscono le attività concluse solo in parte. Per aprirne una: stato «Segnalazione aperta» nell'attività, oppure «Segnala» nelle Priorità operative della Dashboard.</div>
+            <div id="issuesList" class="issues-grid"></div>
           </div>
         </div>
       </section>
@@ -991,6 +1105,7 @@
               <span class="legend-item"><span class="legend-dot dot-progress"></span>In corso / in attesa</span>
               <span class="legend-item"><span class="legend-dot dot-done"></span>Completata</span>
               <span class="legend-item"><span class="legend-dot dot-blocked"></span>Bloccata / in ritardo</span>
+              <span class="legend-item"><span class="legend-dot dot-issue"></span>Segnalazione aperta</span>
               <span class="legend-item"><span class="legend-dot dot-unav"></span>Indisponibilità</span>
               <span class="legend-item"><span class="legend-dot dot-oncall"></span>Reperibilità</span>
             </div>
@@ -2652,7 +2767,13 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     const SIDEBAR_STORAGE_KEY = "railops_sidebar_collapsed";
     const ACCESS_SESSION_KEY = "railops_access_session_id";
     let systems = ["Varie","SERVICE","TrackSys","TrackSys External","CatSys","CatSysVis Longitudinal","CatSysVis Transversal","Compensation","DSMS","IPDC","ITunHS","MPS","NETI","Odometry","SISVision","THMS"];
-    let taskStatuses = ["Da fare","In corso","In attesa cliente","In attesa materiale","Da verificare","Test completato","Report da inviare","Completata","Bloccata"];
+    let taskStatuses = ["Da fare","In corso","In attesa cliente","In attesa materiale","Da verificare","Test completato","Report da inviare","Segnalazione aperta","Completata","Bloccata"];
+    // lo stato "Segnalazione aperta" è sempre disponibile, anche se non è (ancora) nelle anagrafiche del database
+    function withIssueStatus(list) {
+      if (list.some(s => s.toLowerCase() === "segnalazione aperta")) return list;
+      const i = list.indexOf("Completata");
+      return i >= 0 ? [...list.slice(0, i), "Segnalazione aperta", ...list.slice(i)] : [...list, "Segnalazione aperta"];
+    }
     let tripStatuses = ["Pianificata","In corso","Conclusa","Bloccata"];
     let taskPriorities = ["Media","Alta","Urgente"];
     let unavailabilityReasons = ["Ferie","Malattia","Permesso","Formazione","Altro"];
@@ -2687,9 +2808,14 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v57.0";
+    const APP_VERSION = "v57.5";
     const APP_RELEASE_DATE = "23/11/2026";
     const CHANGELOG = [
+      { v: "v57.5", date: "23/11/2026", items: ["Modalità scura: le voci dei menu a tendina (es. selettore Vista) ora sono leggibili anche su Windows"] },
+      { v: "v57.4", date: "23/11/2026", items: ["Nuova modalità scura per tutta l'app (schermate, finestre, calendario, moduli)", "Pulsante tema in alto (e nella barra del telefono): Automatico (segue il dispositivo) → Scuro → Chiaro; la scelta resta salvata sul dispositivo", "PDF e rapportino Excel restano sempre chiari per la stampa"] },
+      { v: "v57.3", date: "23/11/2026", items: ["Ore: la pausa pranzo automatica 13:00–14:00 si applica solo se nello slot non è indicata nessuna pausa; se la pausa è indicata (es. 13:30–14:00) vale quella. Calendario, finestra del giorno, rapportino e registro giornaliero ora danno lo stesso totale", "Il «Netto» del registro giornaliero tiene conto della pausa pranzo automatica quando non c'è una pausa indicata"] },
+      { v: "v57.2", date: "23/11/2026", items: ["Nuova sezione «Segnalazioni» nel menu (sotto Attività), con il numero di segnalazioni aperte: le attività in «Segnalazione aperta» finiscono lì e non compaiono più nell'elenco Attività", "Vista Aperte / Risolte, ricerca, ordinamento, storico delle note; pulsanti Risolta, Aggiorna nota, Riapri e Calendario", "Contatore e riquadro della Dashboard portano alla nuova sezione"] },
+      { v: "v57.1", date: "23/11/2026", items: ["Nuovo stato attività «Segnalazione aperta» per le attività concluse solo in parte: non risultano più in ritardo, in scadenza o aperte", "Passando a «Segnalazione aperta» (dal menu stato, dalla modifica o dal pulsante «Segnala» nelle Priorità operative) l'app chiede cosa resta da fare; la nota viene salvata negli aggiornamenti dell'attività", "Dashboard: contatore e riquadro «Segnalazioni aperte» nella colonna di destra, con nota, giorni di apertura e pulsanti «Risolta» e «Aggiorna nota»", "Attività: filtro rapido «Segnalazioni aperte»; colore dedicato (rosa) in calendario, liste e finestra del giorno"] },
       { v: "v57.0", date: "23/11/2026", items: ["Nuova «Vista» in alto: all'apertura l'app mostra solo i dati dell'operatore che ha fatto l'accesso (Dashboard, Calendario, Attività, Trasferte, Reperibilità, Indisponibilità, Risorse, Report)", "Dal selettore si passa a «Tutte le risorse» o a una singola risorsa; il filtro risorsa di ogni sezione è lo stesso selettore, quindi cambiarlo in un punto lo cambia ovunque", "Quando non stai guardando i tuoi dati il selettore diventa arancione", "Report CSV/PDF e report testuale seguono la vista; backup JSON, backup completo e log restano sempre completi", "Nuove attività, trasferte, indisponibilità e reperibilità propongono già la persona della vista"] },
       { v: "v56.5", date: "23/11/2026", items: ["Rapportino: corretto l'orario che in alcune celle compariva come numero (es. 0,58 invece di 14:00) — nel modello alcune celle DALLE/ALLE, soprattutto ORE VIAGGIO dalla riga 48 in giù, non avevano il formato orario; ora viene impostato sempre", "Rapportino: date e testi della pagina 1 mantengono i bordi della propria riga; la pagina 1 usa le righe 11–33 del modello"] },
       { v: "v56.4", date: "20/11/2026", items: ["Calendario: le barre degli elementi su più giorni sono di nuovo perfettamente allineate anche nei giorni con il pulsante delle ore (l'intestazione del giorno ha ora un'altezza fissa)"] },
@@ -3139,6 +3265,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const value = String(status || "").trim().toLowerCase();
       if (["completata", "conclusa", "test completato", "chiusa", "completato"].includes(value)) return "done";
       if (["bloccata", "bloccato", "annullata"].includes(value)) return "blocked";
+      if (value === "segnalazione aperta") return "issue";
       if (value === "in corso" || value.startsWith("in attesa") || value === "in lavorazione") return "progress";
       return "todo";
     }
@@ -3180,7 +3307,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (category === "vehicles") vehicles = clean;
       if (category === "people") people = clean;
       if (category === "systems") systems = clean;
-      if (category === "task_statuses") taskStatuses = clean;
+      if (category === "task_statuses") taskStatuses = withIssueStatus(clean);
       if (category === "trip_statuses") tripStatuses = clean;
       if (category === "priorities") taskPriorities = clean;
       if (category === "unavailability_reasons") unavailabilityReasons = clean;
@@ -3591,6 +3718,39 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       realtimeTimer = setTimeout(() => loadAllData(), 400);
     }
 
+    /* ===================== TEMA CHIARO / SCURO ===================== */
+    const THEME_KEY = "railops_theme";
+    const THEME_LABELS = { auto: "Tema automatico (come il dispositivo)", light: "Tema chiaro", dark: "Tema scuro" };
+    const THEME_ICONS = { auto: "i-auto", light: "i-sun", dark: "i-moon" };
+
+    function themePreference() {
+      const v = storeGet(THEME_KEY);
+      return ["auto", "light", "dark"].includes(v) ? v : "auto";
+    }
+
+    function applyTheme() {
+      const pref = themePreference();
+      const dark = pref === "dark" || (pref === "auto" && window.matchMedia?.("(prefers-color-scheme: dark)").matches);
+      document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#070c15" : "#0f172a");
+      document.querySelectorAll("[data-theme-btn]").forEach(btn => {
+        btn.title = `${THEME_LABELS[pref]} · clic per cambiare`;
+        btn.setAttribute("aria-label", `${THEME_LABELS[pref]}: clic per cambiare`);
+        const use = btn.querySelector("use");
+        if (use) use.setAttribute("href", "#" + THEME_ICONS[pref]);
+      });
+    }
+
+    // Automatico → Scuro → Chiaro → Automatico
+    function cycleTheme() {
+      const next = { auto: "dark", dark: "light", light: "auto" }[themePreference()];
+      storeSet(THEME_KEY, next);
+      applyTheme();
+      showToast(THEME_LABELS[next]);
+    }
+
+    try { window.matchMedia?.("(prefers-color-scheme: dark)").addEventListener("change", () => { if (themePreference() === "auto") applyTheme(); }); } catch { /* browser vecchi */ }
+
     async function manualRefresh() {
       await loadAllData();
       showToast("Dati aggiornati", { type: "success" });
@@ -3931,6 +4091,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
             <div class="field full mini-meta" id="taskTitlePreview" style="margin-top:-6px"></div>
             <div class="field"><label>Commessa / Veicolo <span class="req">*</span></label>${modalSelect("taskVehicle", vehicles, prefill.vehicle || "", { search: true, emptyLabel: "Seleziona commessa…" })}</div>
             <div class="field"><label>Stato</label>${modalSelect("taskStatus", taskStatuses, defaultStatus)}</div>
+            ${issueNoteFieldHtml("taskIssueNote")}
             <div class="field full"><label>Risorse assegnate <span class="req">*</span></label>${modalChecks("taskResourcesBox", people, "taskResources", prefill.resources?.length ? prefill.resources : defaultPersonList())}</div>
             <div class="field full"><label>Sistemi diagnostici <span class="req">*</span></label>${modalChecks("taskSystemsBox", systems, "taskSystems", [])}</div>
             <div class="field"><label>Data inizio</label><input id="taskStart" type="date" class="input" value="${escapeHtml(prefill.start || "")}"></div>
@@ -3956,6 +4117,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         </form>
       `;
       document.getElementById("taskInterventionType").addEventListener("change", () => updateTaskTitlePreview("taskInterventionType", "taskTitle", "taskTitlePreview"));
+      bindIssueNoteField("taskStatus", "taskIssueNote", "");
       showModal();
     }
 
@@ -4098,6 +4260,11 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         updates: collectTaskUpdates("taskUpdatesList"),
         attachments: []
       };
+      if (row.status === ISSUE_STATUS) {
+        const note = document.getElementById("taskIssueNote")?.value.trim();
+        if (!note) return showToast("Scrivi cosa resta da fare per la segnalazione", { type: "error" });
+        row.updates = [...row.updates, { id: clientId("upd"), update_date: todayDateKey(), text: ISSUE_PREFIX + note }];
+      }
       const dateErr = dateOrderError(row.start_date, row.end_date);
       if (dateErr) return showToast(dateErr, { type: "error" });
 
@@ -4139,6 +4306,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     async function updateTaskStatus(id, status, isUndo = false) {
       const oldTask = tasks.find(t => t.id === id);
       const previous = oldTask?.status;
+      // passare a "Segnalazione aperta" richiede la nota su cosa resta da fare
+      if (!isUndo && status === ISSUE_STATUS && !isIssueTask(oldTask)) return openIssueDialog(id);
       const { data, error } = await sb.from("railops_tasks").update({ status }).eq("id", id).select().single();
       if (error) { renderTasks(); return showToast("Errore aggiornamento stato: " + error.message); }
       await logChange({ entityType: "task", entityId: id, entityTitle: taskTitle(data || oldTask), action: "update", oldData: oldTask, newData: data || { ...oldTask, status } });
@@ -4273,9 +4442,26 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       return duration === null ? 0 : duration;
     }
 
+    // Pausa pranzo: se nello slot NON è indicata nessuna pausa, la fascia 13:00–14:00 non viene conteggiata.
+    // Se la pausa è indicata (orari o minuti), vale quella e la regola automatica non si applica.
+    const LUNCH_START = 13 * 60, LUNCH_END = 14 * 60;
+
+    function hasExplicitPause(slot) {
+      return calculateDuration(slot?.pause_start_time, slot?.pause_end_time) !== null || Number(slot?.break_duration_minutes) > 0;
+    }
+
+    function autoLunchMinutes(slot) {
+      if (!slot || hasExplicitPause(slot)) return 0;
+      const s = minutesFromTime(formatTimeValue(slot.start_time));
+      let e = minutesFromTime(formatTimeValue(slot.end_time));
+      if (s === null || e === null) return 0;
+      if (e <= s) e += 1440;
+      return [0, 1440].reduce((t, off) => t + Math.max(0, Math.min(e, LUNCH_END + off) - Math.max(s, LUNCH_START + off)), 0);
+    }
+
     function workSlotPauseMinutes(slot) {
       if (!slot) return 0;
-      return calculatePauseDuration(slot.pause_start_time, slot.pause_end_time, slot.break_duration_minutes);
+      return calculatePauseDuration(slot.pause_start_time, slot.pause_end_time, slot.break_duration_minutes) + autoLunchMinutes(slot);
     }
 
     function workSlotNetMinutes(slot) {
@@ -4352,7 +4538,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     function travelSlotPauseMinutes(slot) {
       if (!slot) return 0;
-      return calculatePauseDuration(slot.pause_start_time, slot.pause_end_time);
+      return calculatePauseDuration(slot.pause_start_time, slot.pause_end_time) + autoLunchMinutes(slot);
     }
 
     function travelSlotMinutes(slot) {
@@ -4704,7 +4890,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
             <div class="slot-block">
               <div class="slot-block-title"><span class="kpi-dot dot-done"></span>Lavoro</div>
               <div class="work-slots-list" data-field="work_slots">${(workSlots.length ? workSlots : [{}]).map(slot => workSlotRow(slot, "refreshTripDailyTotals")).join("")}</div>
-              <div class="work-slots-actions"><button type="button" class="btn secondary small" onclick="addTripWorkSlotRow(this)">${icon("plus")}Slot lavoro</button><span class="work-slots-help">Turni notturni validi (es. 21:00 → 00:00, segnati con 🌙)</span></div>
+              <div class="work-slots-actions"><button type="button" class="btn secondary small" onclick="addTripWorkSlotRow(this)">${icon("plus")}Slot lavoro</button><span class="work-slots-help">Senza pausa indicata, 13:00–14:00 non si conta (pausa pranzo). Turni notturni validi (es. 21:00 → 00:00, 🌙)</span></div>
             </div>
           </div>
           <div class="day-card-foot"><input class="input" data-field="notes" value="${escapeHtml(d.notes)}" placeholder="Note della giornata"></div>
@@ -4990,6 +5176,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
             <div class="field full mini-meta" id="editTaskTitlePreview" style="margin-top:-6px"></div>
             <div class="field"><label>Commessa / Veicolo</label>${modalSelect("editTaskVehicle", vehicles, task.vehicle, { search: true })}</div>
             <div class="field"><label>Stato</label>${modalSelect("editTaskStatus", taskStatuses, task.status)}</div>
+            ${issueNoteFieldHtml("editTaskIssueNote")}
             <div class="field full"><label>Risorse assegnate <span class="req">*</span></label>${modalChecks("editTaskResourcesBox", people, "editTaskResources", getTaskResources(task))}</div>
             <div class="field full"><label>Sistemi diagnostici <span class="req">*</span></label>${modalChecks("editTaskSystemsBox", systems, "editTaskSystems", Array.isArray(task.systems) ? task.systems : [])}</div>
             <div class="field"><label>Data inizio</label><input id="editTaskStart" type="date" class="input" value="${escapeHtml(task.start_date || "")}"></div>
@@ -5052,7 +5239,129 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       refreshTaskDailyTotals();
       document.getElementById("editTaskInterventionType").addEventListener("change", () => updateTaskTitlePreview("editTaskInterventionType", "editTaskTitle", "editTaskTitlePreview"));
       updateTaskTitlePreview("editTaskInterventionType", "editTaskTitle", "editTaskTitlePreview");
+      bindIssueNoteField("editTaskStatus", "editTaskIssueNote", task.status);
       showModal();
+    }
+
+    /* ---------- Segnalazioni aperte ---------- */
+    function issueNoteFieldHtml(id) {
+      return `<div class="field full issue-note-field hidden" id="${id}Field">
+        <label>Cosa resta da fare (segnalazione) <span class="req">*</span></label>
+        <textarea id="${id}" class="textarea" placeholder="Es. manca la verifica GNSS in campo, in attesa del pezzo di ricambio…"></textarea>
+        <div class="mini-meta" style="margin-top:4px">L'attività non risulterà più in ritardo: comparirà tra le Segnalazioni aperte della Dashboard finché non la porti a Completata.</div>
+      </div>`;
+    }
+
+    // Mostra il campo nota solo quando si passa a "Segnalazione aperta"
+    function bindIssueNoteField(selectId, noteId, originalStatus) {
+      const select = document.getElementById(selectId);
+      const field = document.getElementById(noteId + "Field");
+      if (!select || !field) return;
+      const sync = () => field.classList.toggle("hidden", !(select.value === ISSUE_STATUS && originalStatus !== ISSUE_STATUS));
+      select.addEventListener("change", () => { sync(); if (!field.classList.contains("hidden")) document.getElementById(noteId)?.focus(); });
+      sync();
+    }
+
+    function openIssueDialog(id, opts = {}) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return showToast("Attività non trovata");
+      const info = taskIssueInfo(task);
+      const updating = opts.update && isIssueTask(task);
+      document.getElementById("editModalTitle").textContent = updating ? "Aggiorna segnalazione" : "Segnalazione aperta";
+      document.getElementById("editModalBody").innerHTML = `
+        <form onsubmit="saveIssue(event, ${jsArg(id)}, ${updating ? "true" : "false"})" novalidate>
+          <div class="alert-item issue" style="margin-bottom:12px">
+            <div class="mini-title">${escapeHtml(task.title || "-")}</div>
+            <div class="mini-meta">${escapeHtml(task.vehicle || "-")} · ${escapeHtml(resourcesLabel(task))} · stato attuale: ${escapeHtml(task.status || "-")}</div>
+          </div>
+          ${updating ? "" : `<p class="mini-meta" style="margin:0 0 10px">L'attività è conclusa ma solo in parte: passa allo stato <b>Segnalazione aperta</b>, non risulterà più in ritardo e resterà nel riquadro “Segnalazioni aperte” della Dashboard finché non la segni come risolta.</p>`}
+          <div class="field full">
+            <label for="issueNote">Cosa resta da fare <span class="req">*</span></label>
+            <textarea id="issueNote" class="textarea" style="min-height:90px" placeholder="Es. manca la verifica GNSS in campo, in attesa del pezzo di ricambio…">${updating ? escapeHtml(info.note) : ""}</textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn secondary" onclick="closeEditModal(true); renderAll()">Annulla</button>
+            <button class="btn" type="submit"><span class="kpi-dot dot-issue" style="background:#fff"></span>${updating ? "Salva nota" : "Apri segnalazione"}</button>
+          </div>
+        </form>`;
+      showModal();
+      setTimeout(() => document.getElementById("issueNote")?.focus(), 50);
+    }
+
+    async function saveIssue(event, id, updating) {
+      event.preventDefault();
+      const form = event.target;
+      const oldTask = tasks.find(t => t.id === id);
+      if (!oldTask) return showToast("Attività non trovata");
+      const note = document.getElementById("issueNote").value.trim();
+      if (!note) return showToast("Scrivi cosa resta da fare", { type: "error" });
+      const updates = [...normalizeTaskUpdates(oldTask.updates), { id: clientId("upd"), update_date: todayDateKey(), text: ISSUE_PREFIX + note }];
+      const patch = { status: ISSUE_STATUS, updates };
+      setSaving(form, true);
+      const { data, error } = await sb.from("railops_tasks").update(patch).eq("id", id).select().single();
+      if (error) { setSaving(form, false); return showToast("Errore salvataggio segnalazione: " + error.message, { type: "error" }); }
+      await logChange({ entityType: "task", entityId: id, entityTitle: taskTitle(data || oldTask), action: "update", oldData: oldTask, newData: data || { ...oldTask, ...patch } });
+      closeEditModal(true);
+      const previous = oldTask.status;
+      showToast(updating ? "Nota della segnalazione aggiornata" : "Segnalazione aperta", { type: "success", action: !updating && previous ? { label: "Annulla", fn: () => updateTaskStatus(id, previous, true) } : null });
+      await loadAllData();
+    }
+
+    let issuesMode = "open";
+
+    function setIssuesMode(mode) {
+      issuesMode = mode;
+      renderIssues();
+    }
+
+    // Aggiornamenti "SEGNALAZIONE:" di un'attività (storico, dal più recente)
+    function taskIssueHistory(task) {
+      return normalizeTaskUpdates(task?.updates)
+        .filter(u => u.text.toUpperCase().startsWith(ISSUE_PREFIX.trim()))
+        .sort((a, b) => String(b.update_date || "").localeCompare(String(a.update_date || "")))
+        .map(u => ({ date: u.update_date, note: u.text.slice(u.text.indexOf(":") + 1).trim() }));
+    }
+
+    function renderIssues() {
+      const box = document.getElementById("issuesList");
+      if (!box) return;
+      document.querySelectorAll("#issuesModeSwitch button").forEach(b => b.classList.toggle("active", b.dataset.mode === issuesMode));
+      const q = document.getElementById("issuesSearch")?.value.toLowerCase() || "";
+      const sort = document.getElementById("issuesSort")?.value || "old";
+      const resolvedMode = issuesMode === "resolved";
+      const source = scopedTasks().filter(t => resolvedMode ? (!isIssueTask(t) && taskIssueHistory(t).length) : isIssueTask(t));
+      const list = source.map(task => ({ task, ...taskIssueInfo(task), history: taskIssueHistory(task) }))
+        .filter(x => !q || [x.task.title, x.task.vehicle, resourcesLabel(x.task), x.note, (x.task.systems || []).join(" "), x.history.map(h => h.note).join(" ")].join(" ").toLowerCase().includes(q))
+        .sort((a, b) => sort === "vehicle" ? String(a.task.vehicle || "").localeCompare(String(b.task.vehicle || ""), "it")
+          : sort === "new" ? String(b.since || "").localeCompare(String(a.since || ""))
+          : String(a.since || "9999").localeCompare(String(b.since || "9999")));
+      document.getElementById("issuesTitle").textContent = resolvedMode ? "Segnalazioni risolte" : "Segnalazioni aperte";
+      document.getElementById("issuesCount").textContent = `${list.length} ${resolvedMode ? (list.length === 1 ? "segnalazione risolta" : "segnalazioni risolte") : (list.length === 1 ? "segnalazione aperta" : "segnalazioni aperte")}${scopeName() ? ` · ${scopeName()}` : " · tutte le risorse"}`;
+      box.innerHTML = list.map(({ task, note, since, days, history }) => `
+        <div class="alert-item ${resolvedMode ? "resolved" : "issue"} clickable" onclick="openEditTask(${jsArg(task.id)})">
+          <div class="alert-tags">
+            ${resolvedMode ? `<span class="badge plain tone-done">Risolta</span><span class="badge plain">${escapeHtml(task.status || "")}</span>` : `<span class="badge plain tone-issue">Segnalazione</span>${days !== null ? `<span class="badge plain">${days === 0 ? "aperta oggi" : `aperta da ${days} giorn${days === 1 ? "o" : "i"}`}</span>` : ""}`}
+            ${priorityBadge(task.priority)}
+          </div>
+          <div class="mini-title">${escapeHtml(task.title || "-")}</div>
+          ${note ? `<div class="issue-note">${escapeHtml(note)}</div>` : ""}
+          <div class="mini-meta">${escapeHtml(task.vehicle || "-")} · ${escapeHtml((task.systems || []).join(", ") || "-")}<br>${escapeHtml(resourcesLabel(task))}${since ? ` · segnalata il ${formatDate(since)}` : ""}</div>
+          ${history.length > 1 ? `<details class="issue-history" onclick="event.stopPropagation()"><summary>Storico note (${history.length})</summary><ul>${history.map(h => `<li><b>${formatDate(h.date)}</b> · ${escapeHtml(h.note)}</li>`).join("")}</ul></details>` : ""}
+          <div class="alert-actions">
+            ${resolvedMode
+              ? `<button type="button" class="btn ghost small" onclick="event.stopPropagation(); openIssueDialog(${jsArg(task.id)})"><span class="kpi-dot dot-issue"></span>Riapri</button>`
+              : `<button type="button" class="btn secondary small" onclick="event.stopPropagation(); closeIssue(${jsArg(task.id)})">${icon("check")}Risolta</button>
+                 <button type="button" class="btn ghost small" onclick="event.stopPropagation(); openIssueDialog(${jsArg(task.id)}, { update: true })">${icon("edit")}Aggiorna nota</button>`}
+            <button type="button" class="btn ghost small" onclick="event.stopPropagation(); focusCalendarOn('task', ${jsArg(task.id)}, ${jsArg(task.start_date || task.due_date || task.end_date || "")})">${icon("calendar")}Calendario</button>
+          </div>
+        </div>`).join("") || `<div class="empty" style="grid-column:1/-1">${resolvedMode ? "Nessuna segnalazione risolta." : (q ? "Nessuna segnalazione corrisponde alla ricerca." : "Nessuna segnalazione aperta.")}</div>`;
+    }
+
+    async function closeIssue(id) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      const done = taskStatuses.includes("Completata") ? "Completata" : (taskStatuses.find(isDoneStatus) || "Completata");
+      await updateTaskStatus(id, done);
     }
 
     async function saveTaskEdit(event, id) {
@@ -5082,6 +5391,11 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         description: document.getElementById("editTaskDescription").value.trim(),
         updates: collectTaskUpdates("editTaskUpdatesList")
       };
+      if (updated.status === ISSUE_STATUS && !isIssueTask(oldTask)) {
+        const note = document.getElementById("editTaskIssueNote")?.value.trim();
+        if (!note) return showToast("Scrivi cosa resta da fare per la segnalazione", { type: "error" });
+        updated.updates = [...updated.updates, { id: clientId("upd"), update_date: todayDateKey(), text: ISSUE_PREFIX + note }];
+      }
 
       if (!splitTaskTitle(updated.title).name) return showToast("Inserisci il nome dell'attività", { type: "error" });
       if (!updated.resources.length) return showToast("Seleziona almeno una risorsa", { type: "error" });
@@ -5589,11 +5903,13 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       overdue: { label: "In ritardo", test: t => isTaskOverdue(t) },
       due7: { label: "In scadenza entro 7 giorni", test: t => isTaskDueWithin(t, 7) },
       blocked: { label: "Bloccate", test: t => statusTone(t.status) === "blocked" },
+      issues: { label: "Segnalazioni aperte", test: t => isIssueTask(t) },
       nodue: { label: "Aperte senza scadenza", test: t => isOpenTask(t) && !t.due_date },
       done: { label: "Completate", test: t => isDoneStatus(t.status) }
     };
 
     function openTasksQuick(key) {
+      if (key === "issues") { issuesMode = "open"; return showSection("segnalazioni"); }
       taskQuickFilter = key;
       showSection("attivita");
     }
@@ -5625,8 +5941,17 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const filtered = tasks.filter(t => {
         const systemList = Array.isArray(t.systems) ? t.systems : [];
         const haystack = [t.title,t.vehicle,systemList.join(" "),resourcesLabel(t),t.start_date,t.end_date,t.due_date,t.status,t.priority,t.mail_subject,t.description,taskUpdatesSearchText(t),normalizeAttachments(t.attachments).map(a => a.name).join(" ")].join(" ").toLowerCase();
+        // le segnalazioni aperte stanno nella loro sezione (si vedono qui solo filtrando per quello stato)
+        if (isIssueTask(t) && status !== t.status && taskQuickFilter !== "issues") return false;
         return (!quick || quick.test(t)) && (!q || haystack.includes(q)) && (!status || t.status === status) && (!system || systemList.includes(system)) && (!resource || getTaskResources(t).includes(resource)) && (!priority || t.priority === priority);
       });
+
+      const issuesNote = document.getElementById("taskIssuesNote");
+      if (issuesNote) {
+        const n = scopedTasks().filter(isIssueTask).length;
+        issuesNote.classList.toggle("hidden", !n || status === ISSUE_STATUS);
+        issuesNote.innerHTML = n ? `<div class="alert-item issue clickable" style="padding:8px 12px" onclick="showSection('segnalazioni')"><span class="kpi-dot dot-issue" style="margin-right:6px"></span><b>${n} segnalazion${n === 1 ? "e aperta" : "i aperte"}</b> non compaiono in questo elenco: sono nella sezione <u>Segnalazioni</u>.</div>` : "";
+      }
 
       const counter = document.getElementById("tasksCount");
       if (counter) {
@@ -6452,8 +6777,26 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       return ["Completata", "Conclusa", "Test completato"].includes(status);
     }
 
+    // "Segnalazione aperta": attività conclusa in parte. Non è in ritardo né aperta, ma resta da seguire nel riquadro dedicato.
+    const ISSUE_STATUS = "Segnalazione aperta";
+    const ISSUE_PREFIX = "SEGNALAZIONE: ";
+
+    function isIssueTask(task) {
+      return String(task?.status || "").trim().toLowerCase() === ISSUE_STATUS.toLowerCase();
+    }
+
     function isOpenTask(task) {
-      return !isDoneStatus(task?.status);
+      return !isDoneStatus(task?.status) && !isIssueTask(task);
+    }
+
+    // Nota della segnalazione = ultimo aggiornamento che inizia con "SEGNALAZIONE:" (o, in mancanza, l'ultimo aggiornamento)
+    function taskIssueInfo(task) {
+      const updates = normalizeTaskUpdates(task?.updates).sort((a, b) => String(b.update_date || "").localeCompare(String(a.update_date || "")));
+      const issue = updates.find(u => u.text.toUpperCase().startsWith(ISSUE_PREFIX.trim())) || null;
+      const note = issue ? issue.text.slice(issue.text.indexOf(":") + 1).trim() : (updates[0]?.text || task?.description || "");
+      const since = issue?.update_date || "";
+      const days = since ? Math.max(0, Math.round((parseDateKey(todayDateKey()) - parseDateKey(since)) / 86400000)) : null;
+      return { note, since, days };
     }
 
     /* ===================== VISTA: SOLO IO / TUTTE LE RISORSE / UNA RISORSA ===================== */
@@ -6461,7 +6804,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     // Il selettore in alto e i filtri "risorsa" delle sezioni sono la stessa cosa: cambiarne uno li cambia tutti.
     let viewScope = "";
     const SCOPE_FILTER_IDS = ["tripPersonFilter", "taskResourceFilter", "oncallResourceFilter", "unavailabilityResourceFilter", "calendarResourceFilter"];
-    const SCOPED_SECTIONS = ["dashboard", "calendario", "trasferte", "attivita", "reperibilita", "indisponibilita", "risorse", "backup"];
+    const SCOPED_SECTIONS = ["dashboard", "calendario", "trasferte", "attivita", "segnalazioni", "reperibilita", "indisponibilita", "risorse", "backup"];
 
     function scopeName() {
       return viewScope && people.includes(viewScope) ? viewScope : "";
@@ -6612,6 +6955,23 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       document.getElementById("statTasksOverdue").textContent = overdue.length;
       document.getElementById("statTasksDue7").textContent = due7.length;
       document.getElementById("statTasksBlocked").textContent = blocked.length;
+      const issues = tasks.filter(isIssueTask).map(task => ({ task, ...taskIssueInfo(task) })).sort((a, b) => String(a.since || "9999").localeCompare(String(b.since || "9999")));
+      document.getElementById("statTasksIssues").textContent = issues.length;
+      document.getElementById("dashboardIssues").innerHTML = issues.length
+        ? issues.slice(0, 6).map(({ task, note, days }) => `
+          <div class="alert-item issue clickable" onclick="openEditTask(${jsArg(task.id)})">
+            <div class="alert-head">
+              <div class="alert-tags"><span class="badge plain tone-issue">Segnalazione</span>${days !== null ? `<span class="badge plain">${days === 0 ? "aperta oggi" : `aperta da ${days} giorn${days === 1 ? "o" : "i"}`}</span>` : ""}</div>
+            </div>
+            <div class="mini-title">${escapeHtml(task.title || "-")}</div>
+            ${note ? `<div class="issue-note">${escapeHtml(note)}</div>` : ""}
+            <div class="mini-meta">${escapeHtml(task.vehicle || "-")} · ${escapeHtml(resourcesLabel(task))}</div>
+            <div class="alert-actions">
+              <button type="button" class="btn secondary small" onclick="event.stopPropagation(); closeIssue(${jsArg(task.id)})">${icon("check")}Risolta</button>
+              <button type="button" class="btn ghost small" onclick="event.stopPropagation(); openIssueDialog(${jsArg(task.id)}, { update: true })">${icon("edit")}Aggiorna nota</button>
+            </div>
+          </div>`).join("") + (issues.length > 6 ? `<button class="btn ghost small" onclick="openTasksQuick('issues')">Mostra tutte (${issues.length})</button>` : "")
+        : `<div class="alert-item good"><div class="mini-title">Nessuna segnalazione aperta</div><div class="mini-meta">Quando un'attività è conclusa solo in parte, mettila nello stato “Segnalazione aperta” (o usa “Segnala” nelle priorità).</div></div>`;
 
       // Oggi
       const t = todayItems();
@@ -6643,6 +7003,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
             <div class="alert-tags">${tags.map(tag => `<span class="badge plain ${tag === "In scadenza" ? "tone-progress" : "tone-blocked"}">${tag}</span>`).join("")}${priorityBadge(task.priority)}</div>
             <div class="mini-title">${escapeHtml(task.title || "-")}</div>
             <div class="mini-meta">${task.due_date ? `Scadenza ${formatDate(task.due_date)} · ` : ""}${escapeHtml(resourcesLabel(task))} · ${escapeHtml(task.vehicle || "-")} · ${escapeHtml(task.status || "-")}</div>
+            <div class="alert-actions"><button type="button" class="btn ghost small" title="Conclusa in parte: diventa una segnalazione aperta" onclick="event.stopPropagation(); openIssueDialog(${jsArg(task.id)})"><span class="kpi-dot dot-issue"></span>Segnala</button></div>
           </div>`).join("") + (alerts.length > 7 ? `<button class="btn ghost small" onclick="openTasksQuick('open')">Mostra tutte (${alerts.length})</button>` : "")
         : `<div class="alert-item good"><div class="mini-title">Nessuna criticità</div><div class="mini-meta">Non risultano attività in ritardo, bloccate o in scadenza nei prossimi 7 giorni.</div></div>`;
 
@@ -6685,6 +7046,13 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     function updateNavBadges() {
       const badge = document.getElementById("navOverdueBadge");
       if (!badge) return;
+      const issuesBadge = document.getElementById("navIssuesBadge");
+      if (issuesBadge) {
+        const ni = scopedTasks().filter(isIssueTask).length;
+        issuesBadge.textContent = ni;
+        issuesBadge.title = `${ni} segnalazioni aperte`;
+        issuesBadge.classList.toggle("hidden", !ni);
+      }
       const n = scopedTasks().filter(isTaskOverdue).length;
       badge.textContent = n;
       badge.title = `${n} attività in ritardo`;
@@ -7707,7 +8075,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     const TRIP_PDF_HEAD = ["Stato","Commessa","Luogo","Periodo","Persone","Sistemi","Viaggio","Lavoro"];
 
     function taskRowsForPdf(list) {
-      return list.map(t => [pdfBadge(t.status), t.priority, { html: `<b>${escapeHtml(t.title || "-")}</b>${t.description ? `<br><span style="color:#64748b">${escapeHtml(String(t.description).slice(0, 220))}${String(t.description).length > 220 ? "…" : ""}</span>` : ""}` }, t.vehicle, resourcesLabel(t), `${formatDate(t.start_date || t.due_date)} → ${formatDate(t.end_date || t.due_date || t.start_date)}`, formatDate(t.due_date), formatMinutes(totalTaskMinutes(t.daily_logs))]);
+      return list.map(t => [pdfBadge(t.status), t.priority, { html: `<b>${escapeHtml(t.title || "-")}</b>${t.description ? `<br><span style="color:var(--muted)">${escapeHtml(String(t.description).slice(0, 220))}${String(t.description).length > 220 ? "…" : ""}</span>` : ""}` }, t.vehicle, resourcesLabel(t), `${formatDate(t.start_date || t.due_date)} → ${formatDate(t.end_date || t.due_date || t.start_date)}`, formatDate(t.due_date), formatMinutes(totalTaskMinutes(t.daily_logs))]);
     }
     const TASK_PDF_HEAD = ["Stato","Priorità","Attività","Commessa","Risorse","Periodo","Scadenza","Ore"];
 
@@ -8018,6 +8386,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       dashboard: { title: "Dashboard", sub: "Situazione operativa di oggi e priorità" },
       trasferte: { title: "Trasferte", sub: "" },
       attivita: { title: "Attività", sub: "" },
+      segnalazioni: { title: "Segnalazioni", sub: "Attività concluse in parte, con qualcosa ancora da risolvere" },
       indisponibilita: { title: "Indisponibilità", sub: "" },
       reperibilita: { title: "Reperibilità", sub: "" },
       calendario: { title: "Calendario", sub: "" },
@@ -8040,6 +8409,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         dashboard: renderDashboard,
         trasferte: renderTrips,
         attivita: renderTasks,
+        segnalazioni: renderIssues,
         reperibilita: renderOncall,
         indisponibilita: renderUnavailability,
         calendario: renderCalendar,
@@ -8181,6 +8551,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       }).observe(document.body, { childList: true, subtree: true });
 
       document.querySelectorAll("[data-app-version]").forEach(el => el.textContent = APP_VERSION);
+      applyTheme();
       refreshRegistryControls();
     }
 
@@ -8353,7 +8724,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     }
 
     // Intervalli effettivi di uno slot in minuti dall'inizio del giorno (oltre 1440 = giorno dopo),
-    // tolte la pausa dello slot e la pausa pranzo 13–14.
+    // tolta la pausa dello slot; se non è indicata nessuna pausa, si toglie la pausa pranzo 13–14.
     function rapportinoSlotIntervals(slot) {
       const t = v => minutesFromTime(formatTimeValue(v));
       const s = t(slot?.start_time);
@@ -8362,15 +8733,20 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (e <= s) e += 1440;
       let list = [[s, e]];
       const ps = t(slot.pause_start_time), pe = t(slot.pause_end_time);
-      if (ps !== null && pe !== null) {
+      const breakMin = Number(slot.break_duration_minutes) > 0 ? Number(slot.break_duration_minutes) : 0;
+      if (ps !== null && pe !== null && calculateDuration(slot.pause_start_time, slot.pause_end_time)) {
+        // pausa indicata con gli orari: vale quella (niente pausa pranzo automatica)
         const a = ps + (ps < s ? 1440 : 0);
         const b = pe + (pe < s ? 1440 : 0);
         if (b > a) list = subtractInterval(list, [a, b]);
-      } else if (Number(slot.break_duration_minutes) > 0 && !(s < RAPP_LUNCH[1] && e > RAPP_LUNCH[0])) {
-        // pausa indicata solo in minuti (fuori dall'orario di pranzo): si accorcia la fine dello slot
-        list = [[s, Math.max(s, e - Number(slot.break_duration_minutes))]];
+      } else if (breakMin) {
+        // pausa indicata solo in minuti: se lo slot comprende le 13:00 la si mette lì, altrimenti si accorcia la fine
+        if (s < RAPP_LUNCH[0] && e > RAPP_LUNCH[0]) list = subtractInterval(list, [RAPP_LUNCH[0], RAPP_LUNCH[0] + breakMin]);
+        else list = [[s, Math.max(s, e - breakMin)]];
+      } else {
+        // nessuna pausa indicata: 13:00–14:00 è pausa pranzo e non si conta
+        [0, 1440].forEach(off => { list = subtractInterval(list, [RAPP_LUNCH[0] + off, RAPP_LUNCH[1] + off]); });
       }
-      [0, 1440].forEach(off => { list = subtractInterval(list, [RAPP_LUNCH[0] + off, RAPP_LUNCH[1] + off]); });
       return list.filter(([a, b]) => b > a);
     }
 
@@ -8953,7 +9329,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
                 <button type="button" class="btn small" onclick="this.nextElementSibling.click()">${icon("upload")}Carica più firme</button><input type="file" accept="image/png,image/jpeg,image/webp" multiple hidden onchange="handleSignatureUpload(this, null)">
                 <button type="button" class="btn secondary small" onclick="signatureIndex=null;renderSignaturePanel()">${icon("refresh")}Aggiorna</button>
               </div>
-              ${signatureIndexError ? `<div class="operator-card-note" style="background:#fff7e6;border-color:#f2d49b;color:#7a4a00">${icon("alert")}Non riesco a leggere le firme dal server: ${escapeHtml(signatureIndexError)}</div>` : ""}
+              ${signatureIndexError ? `<div class="operator-card-note" style="background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-ink)">${icon("alert")}Non riesco a leggere le firme dal server: ${escapeHtml(signatureIndexError)}</div>` : ""}
               <div class="registry-list">${rows || `<div class="empty">Nessuna persona in anagrafica.</div>`}</div>
             </div>
           </div>`;
@@ -9053,7 +9429,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         const c = data.cliente;
         clienteBox.innerHTML = c.certain
           ? `<label>Cliente</label><input id="rappCliente" class="input" value="${escapeHtml(c.value)}"><div class="mini-meta" style="margin-top:4px">${escapeHtml(c.reason)}</div>`
-          : `<div class="operator-card-note" style="background:#fff7e6;border-color:#f2d49b;color:#7a4a00;display:block">
+          : `<div class="operator-card-note" style="background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-ink);display:block">
               ${icon("alert")} <strong>Quale cliente devo indicare?</strong> ${escapeHtml(c.reason)}
               <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
                 ${[...c.candidates, "Tesmec Rail"].map(v => `<button type="button" class="btn secondary small" style="margin-left:0" onclick="document.getElementById('rappCliente').value=${jsArg(v)};document.getElementById('rappCliente').dispatchEvent(new Event('input'))">${escapeHtml(v)}</button>`).join("")}
@@ -9082,7 +9458,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       }).join("");
       document.getElementById("rappPreview").innerHTML = `
         <div class="mini-meta" style="margin-bottom:6px">Nome file: <b>${escapeHtml(data.fileName)}</b></div>
-        ${data.warnings.map(w => `<div class="operator-card-note" style="background:#fff7e6;border-color:#f2d49b;color:#7a4a00">${icon("alert")}${escapeHtml(w)}</div>`).join("")}
+        ${data.warnings.map(w => `<div class="operator-card-note" style="background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-ink)">${icon("alert")}${escapeHtml(w)}</div>`).join("")}
         <div class="field-label">Matricola mezzo (POS)</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${data.pos.map((m, i) => `<span class="pill"${i >= RAPP_MAX_POS ? ' style="opacity:.45"' : ""}><b>${i + 1}</b>&nbsp;→&nbsp;${escapeHtml(m)}</span>`).join("") || '<span class="mini-meta">—</span>'}</div>
         <div class="field-label">Pagina 1 · attività della settimana</div>
