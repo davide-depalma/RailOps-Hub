@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v57.5 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v58.3 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v57.5" />
+  <meta name="app-version" content="v58.3" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <script>
@@ -102,6 +102,8 @@
     :root[data-theme="dark"] .btn.secondary:hover,:root[data-theme="dark"] .icon-btn:hover{background:var(--soft-2)}
     :root[data-theme="dark"] .toast{box-shadow:0 10px 30px rgba(0,0,0,.5)}
     .theme-btn .ico{width:17px;height:17px}
+    .refresh-btn{position:relative}
+    .refresh-btn.has-update::after{content:"";position:absolute;top:3px;right:3px;width:9px;height:9px;border-radius:50%;background:var(--issue-dot);box-shadow:0 0 0 2px var(--panel)}
     *{box-sizing:border-box}
     html{height:100%;-webkit-text-size-adjust:100%}
     body{margin:0;min-height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.45;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
@@ -148,6 +150,171 @@
     .nav button.active svg{color:#93b4ff}
     .nav-badge{margin-left:auto;background:#dc2626;color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:1px 7px}
     .nav-badge.issue{background:var(--issue-dot)}
+    /* ===== Rimborsi spese ===== */
+    .cards.expense-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .expense-kpis .stat-value small{font-size:13px;color:var(--muted);font-weight:700}
+    .expense-list{display:flex;flex-direction:column;gap:8px}
+    .expense-row{display:flex;gap:14px;align-items:center;justify-content:space-between;border:1px solid var(--border);border-left:4px solid var(--todo-dot);background:var(--panel);border-radius:12px;padding:10px 14px;cursor:pointer}
+    .expense-row:hover{border-color:var(--border-strong)}
+    .expense-row.step-1{border-left-color:var(--trip-dot)} .expense-row.step-2{border-left-color:var(--issue-dot)} .expense-row.step-3{border-left-color:var(--prog-dot)} .expense-row.step-4{border-left-color:var(--done-dot)}
+    .er-main{min-width:0;flex:1}
+    .er-veh{font-weight:600;color:var(--muted)}
+    .er-steps{display:flex;align-items:center;gap:4px;margin-top:6px;flex-wrap:wrap}
+    .er-step{width:22px;height:6px;border-radius:999px;background:var(--soft-2);border:1px solid var(--border)}
+    .er-step.done{background:var(--done-dot);border-color:var(--done-dot)}
+    .er-step.current{background:var(--primary);border-color:var(--primary)}
+    .er-status{font-size:12px;font-weight:750;color:var(--text-2);margin-left:6px}
+    .er-warn{display:flex;gap:6px;align-items:flex-start;font-size:12px;color:var(--block-ink);margin-top:6px}
+    .er-warn .ico{width:14px;height:14px;flex:0 0 auto;margin-top:1px}
+    .er-amount{text-align:right;flex:0 0 auto}
+    .er-amount strong{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+    .er-amount span{font-size:11.5px;color:var(--muted)}
+    .er-empty{font-style:italic}
+    .trip-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+    .expense-trip-btn{font-variant-numeric:tabular-nums;border:1px solid var(--border)}
+    .expense-trip-btn.step-2{border-color:var(--issue-bd);color:var(--issue-ink);background:var(--issue-bg-2)}
+    .expense-trip-btn.step-4{border-color:var(--done-bd);color:var(--done-ink)}
+    .expense-dash-kpi{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+    .expense-dash-kpi span{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    .expense-dash-kpi strong{font-size:22px;font-variant-numeric:tabular-nums}
+    .expense-dash-kpi em{font-style:normal;font-size:12px;font-weight:800;color:var(--issue-ink);background:var(--issue-bg-2);border:1px solid var(--issue-bd-2);border-radius:999px;padding:1px 8px}
+    .claim-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px}
+    .claim-person{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .claim-person .select{width:auto;min-width:190px}
+    .private-chip{font-size:11.5px;font-weight:800;color:var(--muted);border:1px dashed var(--border-strong);border-radius:999px;padding:2px 8px}
+    .claim-steps{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;counter-reset:s}
+    .claim-steps li{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;font-size:11.5px;color:var(--muted);font-weight:700}
+    .claim-steps li:not(:last-child)::after{content:"";position:absolute;top:13px;left:calc(50% + 16px);right:calc(-50% + 16px);height:2px;background:var(--border)}
+    .claim-steps li.done:not(:last-child)::after{background:var(--done-dot)}
+    .claim-steps .dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--soft-2);border:2px solid var(--border);font-weight:850;color:var(--muted);z-index:1}
+    .claim-steps li.done .dot{background:var(--done-dot);border-color:var(--done-dot);color:#fff}
+    .claim-steps li.current .dot{background:var(--primary);border-color:var(--primary);color:#fff}
+    .claim-steps li.current .lbl{color:var(--text)}
+    .claim-steps .dt{font-size:10.5px;font-weight:600}
+    .claim-block{border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:12px;background:var(--soft)}
+    .claim-block-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .claim-block-head h3{margin:0;font-size:15px}
+    .claim-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    .claim-tools .select{width:auto;max-width:240px;padding:6px 8px;font-size:13px}
+    .receipt-list{display:flex;flex-direction:column;gap:3px;max-height:min(52vh,560px);overflow:auto;padding-right:2px}
+    .rc-day{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:8px 4px 3px;position:sticky;top:0;background:var(--soft);z-index:2;border-bottom:1px solid var(--border)}
+    .rc-day:not(:first-child){margin-top:6px}
+    .rc-day-date{font-weight:850;font-size:13px;text-transform:capitalize}
+    .rc-day-pause{font-size:11.5px;color:var(--muted);font-weight:600}
+    .rc-day-tot{margin-left:auto;font-size:12px;font-weight:800;color:var(--text-2);font-variant-numeric:tabular-nums}
+    .rc-compact{display:grid;grid-template-columns:30px 44px 132px minmax(0,1fr) 20px auto 104px;gap:8px;align-items:center;min-height:38px;padding:3px 8px;border:1px solid var(--border);background:var(--panel);border-radius:9px;cursor:pointer;font-size:13px}
+    .rc-compact:hover{border-color:var(--border-strong);background:var(--hover-bg)}
+    .rc-compact.incomplete{border-style:dashed}
+    .rcc-thumb{width:30px;height:30px;border-radius:6px;overflow:hidden;display:grid;place-items:center;background:var(--soft-2);color:var(--muted-2)}
+    .rcc-thumb img{width:100%;height:100%;object-fit:cover}
+    .rcc-thumb .ico{width:14px;height:14px}
+    .rcc-thumb .rc-doc{font-size:9px}
+    .rcc-time{font-variant-numeric:tabular-nums;font-weight:700;color:var(--text-2);font-size:12.5px}
+    .rcc-cat{font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .rc-compact.incomplete .rcc-cat{color:var(--warn-ink)}
+    .rcc-desc{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .rcc-vc{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:900}
+    .rcc-vc.ok{background:var(--done-bg);color:var(--done-ink)}
+    .rcc-vc.warn{background:var(--block-bg);color:var(--block-ink)}
+    .rcc-vc.none{background:var(--soft-2);color:var(--muted)}
+    .rcc-orig{font-size:12px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+    .rcc-eur{text-align:right;font-weight:850;white-space:nowrap;font-variant-numeric:tabular-nums}
+    .rcc-eur em{font-style:normal;font-size:10.5px;font-weight:800;color:var(--muted);margin-left:5px;border:1px solid var(--border);border-radius:5px;padding:0 4px}
+    .receipt-row{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:start;border:1px solid var(--primary-bd);background:var(--panel);border-radius:12px;padding:8px;box-shadow:0 0 0 3px rgba(31,79,216,.08);margin:2px 0}
+    .rc-side{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+    .rc-line.with-time{grid-template-columns:150px 96px 160px minmax(0,1fr)}
+    .rc-vitto{font-size:12px;font-weight:650;border-radius:8px;padding:4px 8px}
+    .rc-vitto.ok{background:var(--done-bg);color:var(--done-ink)}
+    .rc-vitto.warn{background:var(--block-bg);color:var(--block-ink)}
+    .rc-vitto.none{background:var(--soft-2);color:var(--muted)}
+    .rc-photo{display:flex;flex-direction:column;align-items:center;gap:2px}
+    .rc-thumb{width:62px;height:62px;border-radius:9px;border:1px dashed var(--border-strong);background:var(--soft);display:grid;place-items:center;cursor:pointer;overflow:hidden;padding:0;color:var(--muted)}
+    .rc-thumb.has{border-style:solid}
+    .rc-thumb img{width:100%;height:100%;object-fit:cover}
+    .rc-add{display:flex;flex-direction:column;align-items:center;font-size:10px;font-weight:700;gap:2px}
+    .rc-add .ico{width:18px;height:18px}
+    .rc-doc{font-size:11px;font-weight:700}
+    .rc-photo-change{border:0;background:none;color:var(--primary);font-size:11px;font-weight:700;cursor:pointer;padding:0}
+    .rc-main{display:flex;flex-direction:column;gap:6px;min-width:0}
+    .rc-line{display:grid;grid-template-columns:150px 170px minmax(0,1fr);gap:6px}
+    .rc-line:nth-child(2){grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 150px}
+    .rc-main .input,.rc-main .select{padding:7px 9px;font-size:14px}
+    .rc-amount{display:grid;grid-template-columns:minmax(0,1fr) 84px;gap:4px}
+    .rc-eur{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:5px;align-items:center}
+    .rc-eur.is-eur{display:none}
+    .rc-eq,.rc-eur-sign{font-weight:800;color:var(--muted)}
+    .rc-rate{font-size:11.5px;color:var(--muted)}
+    .rc-rate:empty{display:none}
+    .rc-del{margin-top:2px}
+    .claim-totals{display:flex;gap:16px;align-items:center;flex-wrap:wrap;border:1px solid var(--primary-bd);background:var(--primary-soft);color:var(--primary-ink);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+    .claim-total-main span{display:block;font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.05em}
+    .claim-total-main strong{font-size:26px;font-variant-numeric:tabular-nums}
+    .claim-total-side{display:flex;gap:16px;flex-wrap:wrap}
+    .claim-total-side span{display:block;font-size:11px;font-weight:700;opacity:.8}
+    .claim-total-side b{font-size:15px;font-variant-numeric:tabular-nums}
+    .claim-cats{display:flex;gap:5px;flex-wrap:wrap;flex-basis:100%}
+    .claim-cats .pill{font-size:12px}
+    .claim-cats .pill.muted{opacity:.75}
+    .claim-flow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .flow-step{border:1px solid var(--border);background:var(--panel);border-radius:12px;padding:10px}
+    .flow-title{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;margin-bottom:8px}
+    .flow-title span{width:22px;height:22px;border-radius:50%;background:var(--primary-soft);color:var(--primary-ink);display:grid;place-items:center;font-size:12px}
+    .flow-fields{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    .flow-fields .input{flex:1 1 120px;padding:7px 9px;font-size:14px}
+    .rate-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;font-weight:650;color:var(--muted);margin:-4px 0 8px}
+    .rate-info.live{color:var(--done-ink)}
+    .rate-info .ico{width:14px;height:14px}
+    .rate-info.locked{color:var(--warn-ink)}
+    .rate-info .btn{padding:3px 8px}
+    .live-dot{width:8px;height:8px;border-radius:50%;background:var(--done-dot);box-shadow:0 0 0 3px rgba(22,163,74,.18);animation:livepulse 2s ease-in-out infinite}
+    @keyframes livepulse{50%{box-shadow:0 0 0 6px rgba(22,163,74,0)}}
+    .claim-check{display:flex;gap:8px;align-items:flex-start;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:13px}
+    .claim-check .ico{width:16px;height:16px;flex:0 0 auto;margin-top:1px}
+    .claim-check.warn{background:var(--danger-bg-2);border:1px solid var(--danger-bd-2);color:var(--block-ink)}
+    .claim-check.info{background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn-ink)}
+    @media(max-width:760px){
+      .cards.expense-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .expense-row{flex-direction:column;align-items:stretch;gap:6px}
+      .er-amount{text-align:left}
+      .receipt-row{grid-template-columns:56px minmax(0,1fr);gap:8px}
+      .rc-side{grid-column:1 / -1;flex-direction:row;justify-content:flex-end}
+      .rc-compact{grid-template-columns:30px 40px minmax(0,1fr) 18px auto;gap:6px;padding:3px 6px}
+      .rcc-desc,.rcc-orig{display:none}
+      .rc-line.with-time{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+      .receipt-list{max-height:none}
+      .rc-day{gap:2px 10px;padding:6px 2px 3px}
+      .rc-day-pause{order:3;flex-basis:100%;font-size:11px}
+      .rate-hint{display:none}
+      .rc-thumb{width:54px;height:54px}
+      .rc-line,.rc-line:nth-child(2){grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+      .rc-line .rc-desc{grid-column:1 / -1}
+      .rc-line .rc-amount{grid-column:1 / -1}
+      .rc-main .input,.rc-main .select{font-size:13.5px;padding:7px 6px}
+      .claim-flow{grid-template-columns:minmax(0,1fr)}
+      .claim-steps .lbl{font-size:10px}
+      .trip-actions{justify-content:flex-start}
+    }
+    .issues-commesse{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+    .issue-commessa{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px 14px 12px;cursor:pointer;min-height:96px;transition:border-color .12s,box-shadow .12s}
+    .issue-commessa:hover{border-color:var(--border-strong);box-shadow:var(--shadow)}
+    .issue-commessa.has{border-color:var(--issue-bd);background:var(--issue-bg-2)}
+    .issue-commessa.zero{opacity:.72}
+    .issue-commessa.folder{border-style:solid;border-width:1px 1px 1px 4px;border-left-color:var(--primary)}
+    .issue-commessa.folder.has{border-left-color:var(--issue-dot)}
+    .issue-commessa-name .ico{width:17px;height:17px;margin-right:6px;vertical-align:-2px}
+    @media(max-width:760px){.issues-commesse{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.issue-commessa{min-height:84px;padding:12px}.issue-commessa-name{font-size:16px}}
+    @media(max-width:420px){.mobile-header .sync-label{display:none}}
+    .mobile-header strong{white-space:nowrap}
+    .issue-commessa-name{font-size:18px;font-weight:850;letter-spacing:-.01em;padding-right:34px;line-height:1.2;overflow-wrap:anywhere}
+    .issue-commessa-sub{font-size:12px;color:var(--muted);font-weight:650}
+    .issue-commessa.has .issue-commessa-sub{color:var(--issue-ink)}
+    .issue-commessa-mats{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+    .issue-commessa-mats .pill{font-size:11px;padding:1px 7px}
+    .issue-count{position:absolute;top:10px;right:10px;min-width:26px;height:26px;padding:0 7px;border-radius:999px;background:var(--issue-dot);color:#fff;font-weight:850;font-size:13px;display:grid;place-items:center;box-shadow:0 0 0 3px var(--panel)}
+    .issue-count.resolved{background:var(--done-dot)}
+    .issue-crumb{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+    .issue-crumb:empty{display:none}
+    .issue-crumb-name{font-size:16px;font-weight:850}
     .issues-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
     .issues-grid .alert-item{display:flex;flex-direction:column;gap:2px;margin:0}
     .issues-grid .alert-item.resolved{background:var(--soft);border-color:var(--border);border-left-color:var(--done-dot)}
@@ -519,6 +686,7 @@
     .cal-h.task.st-blocked{background:var(--block-bg);color:var(--block-ink);border-color:var(--block-bd)}
     .calendar-hours-btn{display:inline-flex;align-items:center;justify-content:center;gap:3px;height:20px;min-width:20px;padding:0 4px;margin:0;box-sizing:border-box;border-radius:999px;border:1px solid var(--border);background:var(--panel);color:var(--muted);font:inherit;font-size:11px;font-weight:800;cursor:pointer;line-height:1;position:relative;z-index:3}
     .calendar-hours-btn .ico{width:13px;height:13px}
+    .hours-all-btn.active{background:var(--primary-soft);color:var(--primary-ink);border-color:var(--primary-bd)}
     .calendar-hours-btn:hover{border-color:var(--border-strong);color:var(--text)}
     .calendar-hours-btn.on{background:var(--primary);border-color:var(--primary);color:#fff}
     .cal-h.trip{background:var(--trip-bg);color:var(--trip-ink);border-color:var(--trip-bd)}
@@ -793,6 +961,8 @@
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
     <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
     <symbol id="i-auto" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h13v4"/><path d="M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z"/><path d="M16 14h.01"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
     <symbol id="i-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
     <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
@@ -837,6 +1007,7 @@
     <div class="brand-logo">R</div>
     <strong>RailOps Hub</strong>
     <span class="sync-status" data-sync><span class="sync-dot"></span><span class="sync-label">Offline</span></span>
+    <button class="icon-btn refresh-btn" type="button" data-refresh-btn onclick="manualRefresh()" style="background:rgba(255,255,255,.1);border:0;color:#fff;flex:0 0 auto" aria-label="Aggiorna dati e app"><svg class="ico"><use href="#i-refresh"/></svg></button>
     <button class="icon-btn theme-btn" type="button" data-theme-btn onclick="cycleTheme()" style="background:rgba(255,255,255,.1);border:0;color:#fff;flex:0 0 auto" aria-label="Cambia tema"><svg class="ico"><use href="#i-auto"/></svg></button>
   </div>
 
@@ -855,8 +1026,9 @@
         <button data-section="dashboard" onclick="showSection('dashboard')"><svg class="ico"><use href="#i-home"/></svg>Dashboard</button>
         <button data-section="calendario" onclick="showSection('calendario')"><svg class="ico"><use href="#i-calendar"/></svg>Calendario</button>
         <button data-section="trasferte" onclick="showSection('trasferte')"><svg class="ico"><use href="#i-trip"/></svg>Trasferte</button>
+        <button data-section="rimborsi" onclick="showSection('rimborsi')"><svg class="ico"><use href="#i-wallet"/></svg>Rimborsi<span class="nav-badge issue hidden" id="navExpensesBadge"></span></button>
         <button data-section="attivita" onclick="showSection('attivita')"><svg class="ico"><use href="#i-task"/></svg>Attività<span class="nav-badge hidden" id="navOverdueBadge"></span></button>
-        <button data-section="segnalazioni" onclick="showSection('segnalazioni')"><svg class="ico"><use href="#i-alert"/></svg>Segnalazioni<span class="nav-badge issue hidden" id="navIssuesBadge"></span></button>
+        <button data-section="segnalazioni" onclick="openTasksQuick('issues')"><svg class="ico"><use href="#i-alert"/></svg>Segnalazioni<span class="nav-badge issue hidden" id="navIssuesBadge"></span></button>
         <button data-section="reperibilita" onclick="showSection('reperibilita')"><svg class="ico"><use href="#i-phone"/></svg>Reperibilità</button>
         <button data-section="indisponibilita" onclick="showSection('indisponibilita')"><svg class="ico"><use href="#i-userx"/></svg>Indisponibilità</button>
         <div class="nav-group-title">Analisi</div>
@@ -886,7 +1058,7 @@
         <div class="actions">
           <span class="sync-status" data-sync title="Stato sincronizzazione"><span class="sync-dot"></span><span class="sync-label">Offline</span></span>
           <button class="btn secondary icon theme-btn" type="button" data-theme-btn onclick="cycleTheme()" title="Tema" aria-label="Cambia tema"><svg class="ico"><use href="#i-auto"/></svg></button>
-          <button class="btn secondary icon" type="button" onclick="manualRefresh()" title="Aggiorna dati" aria-label="Aggiorna dati"><svg class="ico"><use href="#i-refresh"/></svg></button>
+          <button class="btn secondary icon refresh-btn" type="button" data-refresh-btn onclick="manualRefresh()" title="Aggiorna dati e app (se c'è una nuova versione la installa)" aria-label="Aggiorna dati e app"><svg class="ico"><use href="#i-refresh"/></svg></button>
           <button class="btn" type="button" onclick="openNewMenu(this)" aria-haspopup="menu"><svg class="ico"><use href="#i-plus"/></svg>Nuovo</button>
         </div>
       </div>
@@ -911,6 +1083,10 @@
             <div class="panel">
               <div class="panel-header"><h2>Priorità operative</h2><button class="btn secondary small" onclick="showSection('attivita')">Tutte le attività</button></div>
               <div class="panel-body"><div id="dashboardAlerts" class="alert-list"></div></div>
+            </div>
+            <div class="panel hidden" id="expensesPanel">
+              <div class="panel-header"><div><h2><svg class="ico" style="vertical-align:-3px;margin-right:6px"><use href="#i-wallet"/></svg>Rimborsi spese</h2><div class="panel-sub">Scontrini, note spese e rimborsi in attesa (privati)</div></div><button class="btn secondary small" onclick="showSection('rimborsi')">Apri</button></div>
+              <div class="panel-body"><div id="dashboardExpenses" class="mini-list"></div></div>
             </div>
             <div class="panel" id="issuesPanel">
               <div class="panel-header"><div><h2><span class="kpi-dot dot-issue" style="margin-right:6px"></span>Segnalazioni aperte</h2><div class="panel-sub">Attività concluse in parte: c'è ancora qualcosa da risolvere</div></div><button class="btn secondary small" onclick="openTasksQuick('issues')">Vedi tutte</button></div>
@@ -992,6 +1168,10 @@
         </div>
       </section>
 
+      <section id="rimborsi" class="section">
+        <div id="expensesBody"></div>
+      </section>
+
       <section id="segnalazioni" class="section">
         <div class="panel">
           <div class="panel-header">
@@ -1010,8 +1190,9 @@
                 <option value="vehicle">Per commessa / veicolo</option>
               </select>
             </div>
-            <div class="mini-meta" style="margin:-4px 0 12px">Qui finiscono le attività concluse solo in parte. Per aprirne una: stato «Segnalazione aperta» nell'attività, oppure «Segnala» nelle Priorità operative della Dashboard.</div>
-            <div id="issuesList" class="issues-grid"></div>
+            <div class="mini-meta" style="margin:-4px 0 12px">Qui finiscono le attività concluse solo in parte, divise per commessa. Per aprirne una: stato «Segnalazione aperta» nell'attività, oppure «Segnala» nelle Priorità operative della Dashboard.</div>
+            <div id="issuesCrumb" class="issue-crumb"></div>
+            <div id="issuesList" class="issues-commesse"></div>
           </div>
         </div>
       </section>
@@ -1097,6 +1278,7 @@
               <select id="calendarVehicleFilter" class="select" onchange="renderCalendar()"><option value="">Tutte le commesse</option></select>
               <select id="calendarSystemFilter" class="select" onchange="renderCalendar()"><option value="">Tutti i sistemi</option></select>
               <button class="btn ghost small hidden" id="calendarFiltersReset" onclick="clearCalendarFilters()">Azzera filtri</button>
+              <button class="btn ghost small hours-all-btn" id="calendarHoursAll" type="button" onclick="toggleCalendarAllHours()" aria-pressed="false"><svg class="ico"><use href="#i-clock"/></svg><span>Mostra ore</span></button>
               <button class="btn ghost small hidden" id="calendarSizeReset" onclick="resetCalendarSizes()" title="Riporta tutti i giorni alla grandezza standard">Dimensioni standard</button>
             </div>
             <div class="legend">
@@ -2808,9 +2990,17 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v57.5";
+    const APP_VERSION = "v58.3";
     const APP_RELEASE_DATE = "23/11/2026";
     const CHANGELOG = [
+      { v: "v58.3", date: "23/11/2026", items: ["Rimborsi: il cambio non è più in tempo reale ma quello ufficiale BCE del giorno dello scontrino, impostato in automatico (sabato e domenica: ultimo cambio disponibile, indicato sullo scontrino)", "Se cambi la data di uno scontrino il cambio si aggiorna da solo; gli scontrini già inseriti con il cambio di un altro giorno vengono corretti all'apertura della pratica", "Le pratiche consegnate alla segretaria mantengono i cambi salvati"] },
+      { v: "v58.2", date: "23/11/2026", items: ["Rimborsi · vitto: nuovo campo orario dello scontrino, confrontato con il registro giornaliero della trasferta: ✓ se cade nella pausa (o fuori dall'orario di lavoro), avviso se in quel momento risultavi al lavoro o in viaggio", "Scontrini più compatti: una riga per scontrino, raggruppati per giorno con totale e orari/pause del giorno; clic sulla riga per modificarla («Fatto» per richiuderla)", "La foto dello scontrino è facoltativa: tolto l'avviso «scontrini senza foto»", "Ora del vitto anche nel riepilogo PDF ed Excel"] },
+      { v: "v58.1", date: "23/11/2026", items: ["Rimborsi: il cambio delle valute estere in euro è in tempo reale (cambi di mercato aggiornati di continuo) e si aggiorna da solo ogni minuto con la pratica aperta, più il pulsante «Aggiorna ora»", "Elenco Rimborsi, Dashboard e pulsante € delle trasferte mostrano i totali con il cambio attuale (ricalcolati ogni 5 minuti)", "Quando la pratica viene consegnata alla segretaria il cambio si blocca, così il totale resta uguale alla nota spese", "Se il servizio in tempo reale non risponde si usa l'ultimo cambio ufficiale BCE"] },
+      { v: "v58.0", date: "23/11/2026", items: ["Nuova sezione «Rimborsi spese»: per ogni trasferta e persona gli scontrini (data, categoria, importo, valuta, pagata da me o con carta aziendale, foto) con totali per categoria e totale da rimborsare", "Valute estere (TRY, CZK, CHF, …) convertite con il cambio BCE del giorno dello scontrino; franco CFA e lev a cambio fisso; importo in € modificabile a mano", "Stato della pratica: consegnati alla segretaria → nota spese emessa (numero, data, importo) → controllata e firmata → rimborsata, con avviso se nota spese o rimborso non coincidono con gli scontrini", "Riepilogo per la segretaria in PDF (con le foto) ed Excel (CSV); pulsante «€» su ogni trasferta, riquadro in Dashboard e numero di note da firmare nel menu", "Spese private: ognuno vede solo le proprie; gli amministratori (Davide De Palma, Francesco Bisceglia) vedono tutte, seguendo la Vista", "Richiede una nuova tabella nel database: il comando SQL è nella sezione Rimborsi"] },
+      { v: "v57.9", date: "23/11/2026", items: ["Calendario: pulsante «Mostra ore / Nascondi ore» in alto per aprire o chiudere il totale delle ore in tutti i giorni insieme (anche cambiando mese o settimana)", "L'orologio su ogni giorno continua a funzionare: con le ore mostrate ovunque nasconde quel giorno, con le ore nascoste lo mostra; la scelta resta salvata sul dispositivo"] },
+      { v: "v57.8", date: "23/11/2026", items: ["Segnalazioni: nuova cartella «VARIE» che raccoglie FORMAZIONE e GENERICO, con il numero totale; dentro ci sono le due sottocartelle con i rispettivi numeri", "Commesse con il nome su più parole riconosciute per intero (es. COSTA D'AVORIO invece di COSTA); «RFI GENERICO» resta sotto RFI", "Lo stesso riconoscimento vale per il cliente del rapportino"] },
+      { v: "v57.7", date: "23/11/2026", items: ["Segnalazioni: la prima schermata è divisa per commessa (RFI, NRIC, ELZEL, FER, SBB, TCDD, … e Generico) con il numero di segnalazioni di ognuna; quando un'attività passa in segnalazione il numero compare sulla sua commessa", "Clic su una commessa per vedere le sue segnalazioni (con «Tutte le commesse» per tornare indietro); la ricerca cerca in tutte le commesse", "Le matricole coinvolte sono indicate su ogni commessa"] },
+      { v: "v57.6", date: "23/11/2026", items: ["Il pulsante con le frecce aggiorna i dati e, se su GitHub c'è una versione più nuova, installa subito l'aggiornamento (niente più Ctrl+Maiusc+R)", "Controllo automatico della nuova versione all'apertura, al ritorno sull'app e ogni 30 minuti: compare un avviso con «Aggiorna» e un pallino sulle frecce", "Frecce di aggiornamento anche nella barra in alto del telefono"] },
       { v: "v57.5", date: "23/11/2026", items: ["Modalità scura: le voci dei menu a tendina (es. selettore Vista) ora sono leggibili anche su Windows"] },
       { v: "v57.4", date: "23/11/2026", items: ["Nuova modalità scura per tutta l'app (schermate, finestre, calendario, moduli)", "Pulsante tema in alto (e nella barra del telefono): Automatico (segue il dispositivo) → Scuro → Chiaro; la scelta resta salvata sul dispositivo", "PDF e rapportino Excel restano sempre chiari per la stampa"] },
       { v: "v57.3", date: "23/11/2026", items: ["Ore: la pausa pranzo automatica 13:00–14:00 si applica solo se nello slot non è indicata nessuna pausa; se la pausa è indicata (es. 13:30–14:00) vale quella. Calendario, finestra del giorno, rapportino e registro giornaliero ora danno lo stesso totale", "Il «Netto» del registro giornaliero tiene conto della pausa pranzo automatica quando non c'è una pausa indicata"] },
@@ -2980,6 +3170,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           menuItem("Modifica", `openEditTrip(${arg})`, { icon: "edit" }),
           menuItem("Duplica", `duplicateTrip(${arg})`, { icon: "copy" }),
           menuItem("Report PDF", `printTripById(${arg})`, { icon: "file" }),
+          menuItem("Spese e rimborso", `openExpenseClaim(${arg})`, { icon: "wallet" }),
           menuItem("Storico modifiche", `openEntityLog('trip', ${arg})`, { icon: "history" }),
           "<hr>",
           menuItem("Elimina", `deleteTrip(${arg})`, { icon: "trash", danger: true })
@@ -3695,6 +3886,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (!oncallRes.error) oncallInterventions = oncallRes.data || [];
       if (!accessRes.error) accessLog = accessRes.data || [];
       if (!logRes.error) changeLog = logRes.data || [];
+      await fetchExpenseClaims();
       dataLoaded = true;
       if (!errors.length) saveOfflineSnapshot();
       showOfflineBanner(false);
@@ -3751,9 +3943,80 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     try { window.matchMedia?.("(prefers-color-scheme: dark)").addEventListener("change", () => { if (themePreference() === "auto") applyTheme(); }); } catch { /* browser vecchi */ }
 
+    /* ---------- Aggiornamento dell'app (versione pubblicata su GitHub Pages) ---------- */
+    function versionParts(v) {
+      return String(v || "").replace(/^v/i, "").split(".").map(n => parseInt(n, 10) || 0);
+    }
+
+    function isNewerVersion(remote, local) {
+      const a = versionParts(remote), b = versionParts(local);
+      for (let i = 0; i < Math.max(a.length, b.length); i++) {
+        if ((a[i] || 0) !== (b[i] || 0)) return (a[i] || 0) > (b[i] || 0);
+      }
+      return false;
+    }
+
+    // Legge la versione pubblicata scaricando solo l'inizio della pagina, senza cache
+    async function fetchPublishedVersion() {
+      if (!/^https?:$/.test(location.protocol) || !navigator.onLine) return null;
+      const url = new URL(location.pathname, location.origin);
+      url.searchParams.set("versione", Date.now());
+      const res = await fetch(url.href, { cache: "no-store", credentials: "same-origin" });
+      if (!res.ok) return null;
+      const re = /<meta name="app-version" content="([^"]+)"/;
+      if (!res.body?.getReader) return (await res.text()).match(re)?.[1] || null;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let text = "";
+      try {
+        while (text.length < 60000) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          text += decoder.decode(value, { stream: true });
+          const m = text.match(re);
+          if (m) return m[1];
+        }
+      } finally {
+        reader.cancel().catch(() => {});
+      }
+      return text.match(re)?.[1] || null;
+    }
+
+    // Scarica la nuova versione: aggiorna il service worker, svuota la cache dell'app e ricarica
+    async function updateAppNow(version = "") {
+      setLoading(true);
+      showToast(version ? `Aggiorno RailOps Hub alla ${version}…` : "Aggiorno RailOps Hub…", { duration: 8000 });
+      try {
+        const reg = await navigator.serviceWorker?.getRegistration?.();
+        await reg?.update?.().catch(() => {});
+        if (window.caches) {
+          const keys = await caches.keys();
+          await Promise.all(keys.filter(k => k.startsWith("railops-")).map(k => caches.delete(k)));
+        }
+      } catch { /* si ricarica comunque */ }
+      const url = new URL(location.href);
+      url.searchParams.set("agg", Date.now()); // evita la copia vecchia nella cache del browser
+      location.replace(url.href);
+    }
+
+    let updateNoticeShown = "";
+    async function checkForAppUpdate({ silent = true } = {}) {
+      let remote = null;
+      try { remote = await fetchPublishedVersion(); } catch { remote = null; }
+      document.querySelectorAll("[data-refresh-btn]").forEach(b => b.classList.toggle("has-update", !!remote && isNewerVersion(remote, APP_VERSION)));
+      if (!remote || !isNewerVersion(remote, APP_VERSION)) return { remote, newer: false };
+      if (silent && updateNoticeShown !== remote) {
+        updateNoticeShown = remote;
+        showToast(`È disponibile la ${remote} di RailOps Hub (stai usando la ${APP_VERSION})`, { duration: 120000, action: { label: "Aggiorna", fn: () => updateAppNow(remote) } });
+      }
+      return { remote, newer: true };
+    }
+
+    // Frecce in alto: aggiornano i dati e, se è stata pubblicata una nuova versione, anche l'app
     async function manualRefresh() {
-      await loadAllData();
-      showToast("Dati aggiornati", { type: "success" });
+      const [, check] = await Promise.all([loadAllData(), checkForAppUpdate({ silent: false })]);
+      if (check?.newer) return updateAppNow(check.remote);
+      showToast(check?.remote ? `Dati aggiornati · hai già l'ultima versione (${APP_VERSION})` : "Dati aggiornati", { type: "success" });
     }
 
     function startRealtime() {
@@ -3775,6 +4038,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     }
 
     function stopRealtime() {
+      stopExpenseRealtime();
       if (realtimeChannel) {
         sb.removeChannel(realtimeChannel);
         realtimeChannel = null;
@@ -5322,6 +5586,74 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         .map(u => ({ date: u.update_date, note: u.text.slice(u.text.indexOf(":") + 1).trim() }));
     }
 
+    // Segnalazioni divise per commessa: RFI_OCPD005_10171 → RFI; GENERICO / senza commessa → "Generico"
+    // Commessa = prima parte del codice veicolo (RFI_OCPD005_10171 → RFI, COSTA D'AVORIO_OCPD001_11723 → COSTA D'AVORIO).
+    // GENERICO e FORMAZIONE stanno insieme nella cartella "VARIE".
+    const ISSUE_GENERIC = "GENERICO";
+    const ISSUE_VARIE = "VARIE";
+    const VARIE_MEMBERS = ["FORMAZIONE", "GENERICO"];
+    let issuesCommessa = null; // null = elenco delle commesse · "VARIE" = sottocartelle · altrimenti la commessa aperta
+
+    function issueCommessaOf(task) {
+      return commessaFromVehicle(task?.vehicle) || ISSUE_GENERIC;
+    }
+
+    function issueTopFolder(code) {
+      return VARIE_MEMBERS.includes(code) ? ISSUE_VARIE : code;
+    }
+
+    function openIssuesCommessa(code) {
+      issuesCommessa = code;
+      const search = document.getElementById("issuesSearch");
+      if (search) search.value = "";
+      renderIssues();
+      document.getElementById("segnalazioni")?.scrollIntoView({ block: "start" });
+    }
+
+    // Riquadri delle cartelle (commesse) con il numero di segnalazioni
+    function renderIssueFolders(box, source, resolvedMode, level) {
+      const keyOf = level === "top" ? t => issueTopFolder(issueCommessaOf(t)) : t => issueCommessaOf(t);
+      const items = level === "top" ? source : source.filter(t => issueTopFolder(issueCommessaOf(t)) === ISSUE_VARIE);
+      const counts = new Map();
+      items.forEach(t => {
+        const code = keyOf(t);
+        const entry = counts.get(code) || { n: 0, vehicles: new Map(), oldest: "" };
+        entry.n++;
+        const mat = matricolaFromVehicle(t.vehicle);
+        entry.vehicles.set(mat, (entry.vehicles.get(mat) || 0) + 1);
+        const since = taskIssueInfo(t).since;
+        if (since && (!entry.oldest || since < entry.oldest)) entry.oldest = since;
+        counts.set(code, entry);
+      });
+      let codes;
+      if (level === "top") {
+        codes = [...new Set([...knownCommesse().map(issueTopFolder), ...counts.keys()])].filter(c => c !== ISSUE_VARIE).sort((a, b) => a.localeCompare(b, "it"));
+        codes.push(ISSUE_VARIE);
+      } else {
+        codes = [...new Set([...VARIE_MEMBERS, ...counts.keys()])];
+      }
+      const total = items.length;
+      const what = resolvedMode ? (total === 1 ? "segnalazione risolta" : "segnalazioni risolte") : (total === 1 ? "segnalazione aperta" : "segnalazioni aperte");
+      document.getElementById("issuesTitle").textContent = level === "top" ? (resolvedMode ? "Segnalazioni risolte per commessa" : "Segnalazioni per commessa") : `${ISSUE_VARIE}${resolvedMode ? " · risolte" : ""}`;
+      document.getElementById("issuesCount").textContent = `${total} ${what}${level === "top" ? ` in ${counts.size} ${counts.size === 1 ? "commessa" : "commesse"}` : ""}${scopeName() ? ` · ${scopeName()}` : " · tutte le risorse"}`;
+      box.className = "issues-commesse";
+      box.innerHTML = codes.map(code => {
+        const c = counts.get(code);
+        const n = c?.n || 0;
+        const isFolder = level === "top" && code === ISSUE_VARIE;
+        const mats = c && !isFolder ? [...c.vehicles.entries()].filter(([m]) => m !== "VARIE").sort((a, b) => b[1] - a[1]).slice(0, 4).map(([m, k]) => `<span class="pill">${escapeHtml(m)}${k > 1 ? ` ×${k}` : ""}</span>`).join("") : "";
+        const days = c?.oldest ? Math.round((parseDateKey(todayDateKey()) - parseDateKey(c.oldest)) / 86400000) : null;
+        const label = code.charAt(0) + code.slice(1).toLowerCase();
+        return `<button type="button" class="issue-commessa ${n ? "has" : "zero"} ${isFolder ? "folder" : ""}" onclick="openIssuesCommessa(${jsArg(code)})" aria-label="${escapeHtml(code)}: ${n} segnalazioni">
+          <span class="issue-commessa-name">${isFolder ? `<svg class="ico"><use href="#i-folder"/></svg>` : ""}${escapeHtml(code)}</span>
+          ${n ? `<span class="issue-count${resolvedMode ? " resolved" : ""}">${n}</span>` : ""}
+          <span class="issue-commessa-sub">${n ? `${n} ${resolvedMode ? (n === 1 ? "risolta" : "risolte") : (n === 1 ? "aperta" : "aperte")}${!resolvedMode && days ? ` · la più vecchia da ${days} gg` : ""}` : (resolvedMode ? "Nessuna risolta" : "Nessuna segnalazione")}</span>
+          ${isFolder ? `<span class="issue-commessa-mats">${VARIE_MEMBERS.map(m => `<span class="pill">${escapeHtml(m.charAt(0) + m.slice(1).toLowerCase())}</span>`).join("")}</span>` : ""}
+          ${mats ? `<span class="issue-commessa-mats">${mats}</span>` : ""}
+        </button>`;
+      }).join("");
+    }
+
     function renderIssues() {
       const box = document.getElementById("issuesList");
       if (!box) return;
@@ -5329,13 +5661,34 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const q = document.getElementById("issuesSearch")?.value.toLowerCase() || "";
       const sort = document.getElementById("issuesSort")?.value || "old";
       const resolvedMode = issuesMode === "resolved";
-      const source = scopedTasks().filter(t => resolvedMode ? (!isIssueTask(t) && taskIssueHistory(t).length) : isIssueTask(t));
+      const allSource = scopedTasks().filter(t => resolvedMode ? (!isIssueTask(t) && taskIssueHistory(t).length) : isIssueTask(t));
+      const crumb = document.getElementById("issuesCrumb");
+      // prima schermata: le commesse con il numero di segnalazioni (la ricerca cerca invece in tutte)
+      const back = `<button type="button" class="btn ghost small" onclick="openIssuesCommessa(null)">${icon("left")}Tutte le commesse</button>`;
+      if (!issuesCommessa && !q) {
+        if (crumb) crumb.innerHTML = "";
+        document.getElementById("issuesSort")?.classList.add("hidden");
+        return renderIssueFolders(box, allSource, resolvedMode, "top");
+      }
+      if (issuesCommessa === ISSUE_VARIE && !q) {
+        if (crumb) crumb.innerHTML = `${back}<span class="issue-crumb-name">${ISSUE_VARIE}</span>`;
+        document.getElementById("issuesSort")?.classList.add("hidden");
+        return renderIssueFolders(box, allSource, resolvedMode, "varie");
+      }
+      document.getElementById("issuesSort")?.classList.remove("hidden");
+      box.className = "issues-grid";
+      const inVarie = VARIE_MEMBERS.includes(issuesCommessa);
+      if (crumb) crumb.innerHTML = issuesCommessa
+        ? `${back}${inVarie ? `<button type="button" class="btn ghost small" onclick="openIssuesCommessa('${ISSUE_VARIE}')">${ISSUE_VARIE}</button><span class="mini-meta">›</span>` : ""}<span class="issue-crumb-name">${escapeHtml(issuesCommessa)}</span>`
+        : `<span class="mini-meta">Risultati della ricerca in tutte le commesse</span>`;
+      const source = !issuesCommessa ? allSource
+        : allSource.filter(t => issuesCommessa === ISSUE_VARIE ? issueTopFolder(issueCommessaOf(t)) === ISSUE_VARIE : issueCommessaOf(t) === issuesCommessa);
       const list = source.map(task => ({ task, ...taskIssueInfo(task), history: taskIssueHistory(task) }))
         .filter(x => !q || [x.task.title, x.task.vehicle, resourcesLabel(x.task), x.note, (x.task.systems || []).join(" "), x.history.map(h => h.note).join(" ")].join(" ").toLowerCase().includes(q))
         .sort((a, b) => sort === "vehicle" ? String(a.task.vehicle || "").localeCompare(String(b.task.vehicle || ""), "it")
           : sort === "new" ? String(b.since || "").localeCompare(String(a.since || ""))
           : String(a.since || "9999").localeCompare(String(b.since || "9999")));
-      document.getElementById("issuesTitle").textContent = resolvedMode ? "Segnalazioni risolte" : "Segnalazioni aperte";
+      document.getElementById("issuesTitle").textContent = `${resolvedMode ? "Segnalazioni risolte" : "Segnalazioni aperte"}${issuesCommessa ? ` · ${issuesCommessa}` : ""}`;
       document.getElementById("issuesCount").textContent = `${list.length} ${resolvedMode ? (list.length === 1 ? "segnalazione risolta" : "segnalazioni risolte") : (list.length === 1 ? "segnalazione aperta" : "segnalazioni aperte")}${scopeName() ? ` · ${scopeName()}` : " · tutte le risorse"}`;
       box.innerHTML = list.map(({ task, note, since, days, history }) => `
         <div class="alert-item ${resolvedMode ? "resolved" : "issue"} clickable" onclick="openEditTask(${jsArg(task.id)})">
@@ -5726,7 +6079,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           <td data-label="Periodo" style="white-space:nowrap">${formatDate(t.start_date)} → ${formatDate(t.end_date || t.start_date)}<div class="cell-sub">${days.length ? `${days.length} gg · viaggio ${formatMinutes(totalTripTravelMinutes(days))} · lavoro ${formatMinutes(totalTripNetMinutes(days))}` : "Registro giornaliero vuoto"}</div>${attachmentBadge(t.attachments)}</td>
           <td data-label="Persone">${escapeHtml(peopleList.join(", ") || "-")}</td>
           <td data-label="Sistemi"><span class="cell-sub" style="margin:0">${escapeHtml(systemList.join(", ") || "-")}</span></td>
-          <td class="actions-cell">${rowActionsHtml("trip", t.id, "openEditTrip")}</td>
+          <td class="actions-cell"><div class="trip-actions">${expenseTripButton(t)}${rowActionsHtml("trip", t.id, "openEditTrip")}</div></td>
         </tr>`;
       }).join("");
     }
@@ -5909,7 +6262,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     };
 
     function openTasksQuick(key) {
-      if (key === "issues") { issuesMode = "open"; return showSection("segnalazioni"); }
+      if (key === "issues") { issuesMode = "open"; issuesCommessa = null; return showSection("segnalazioni"); }
       taskQuickFilter = key;
       showSection("attivita");
     }
@@ -5950,7 +6303,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (issuesNote) {
         const n = scopedTasks().filter(isIssueTask).length;
         issuesNote.classList.toggle("hidden", !n || status === ISSUE_STATUS);
-        issuesNote.innerHTML = n ? `<div class="alert-item issue clickable" style="padding:8px 12px" onclick="showSection('segnalazioni')"><span class="kpi-dot dot-issue" style="margin-right:6px"></span><b>${n} segnalazion${n === 1 ? "e aperta" : "i aperte"}</b> non compaiono in questo elenco: sono nella sezione <u>Segnalazioni</u>.</div>` : "";
+        issuesNote.innerHTML = n ? `<div class="alert-item issue clickable" style="padding:8px 12px" onclick="openTasksQuick('issues')"><span class="kpi-dot dot-issue" style="margin-right:6px"></span><b>${n} segnalazion${n === 1 ? "e aperta" : "i aperte"}</b> non compaiono in questo elenco: sono nella sezione <u>Segnalazioni</u>.</div>` : "";
       }
 
       const counter = document.getElementById("tasksCount");
@@ -6804,7 +7157,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     // Il selettore in alto e i filtri "risorsa" delle sezioni sono la stessa cosa: cambiarne uno li cambia tutti.
     let viewScope = "";
     const SCOPE_FILTER_IDS = ["tripPersonFilter", "taskResourceFilter", "oncallResourceFilter", "unavailabilityResourceFilter", "calendarResourceFilter"];
-    const SCOPED_SECTIONS = ["dashboard", "calendario", "trasferte", "attivita", "segnalazioni", "reperibilita", "indisponibilita", "risorse", "backup"];
+    const SCOPED_SECTIONS = ["dashboard", "calendario", "trasferte", "rimborsi", "attivita", "segnalazioni", "reperibilita", "indisponibilita", "risorse", "backup"];
 
     function scopeName() {
       return viewScope && people.includes(viewScope) ? viewScope : "";
@@ -6957,6 +7310,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       document.getElementById("statTasksBlocked").textContent = blocked.length;
       const issues = tasks.filter(isIssueTask).map(task => ({ task, ...taskIssueInfo(task) })).sort((a, b) => String(a.since || "9999").localeCompare(String(b.since || "9999")));
       document.getElementById("statTasksIssues").textContent = issues.length;
+      renderDashboardExpenses();
       document.getElementById("dashboardIssues").innerHTML = issues.length
         ? issues.slice(0, 6).map(({ task, note, days }) => `
           <div class="alert-item issue clickable" onclick="openEditTask(${jsArg(task.id)})">
@@ -7046,6 +7400,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     function updateNavBadges() {
       const badge = document.getElementById("navOverdueBadge");
       if (!badge) return;
+      updateExpenseBadge();
       const issuesBadge = document.getElementById("navIssuesBadge");
       if (issuesBadge) {
         const ni = scopedTasks().filter(isIssueTask).length;
@@ -7321,6 +7676,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
       const mode = document.getElementById("calendarViewMode")?.value || "month";
       document.querySelectorAll("#calendarViewSwitch button").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+      updateCalendarHoursButton(mode);
       const anyFilter = ["calendarTypeFilter", "calendarVehicleFilter", "calendarSystemFilter"].some(id => document.getElementById(id)?.value);
       document.getElementById("calendarFiltersReset")?.classList.toggle("hidden", !anyFilter);
       monthLabel.textContent = calendarPeriodLabel(calendarCurrentDate);
@@ -7443,20 +7799,55 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     /* ---- riepilogo ore in ogni giorno del calendario (attività / trasferte / reperibilità) ---- */
     const CAL_HOURS_KEY = "railops_calendar_hours";
 
-    // Giorni con il riepilogo ore aperto (salvati su questo dispositivo)
-    function calendarOpenHourDays() {
+    // Ore del giorno: si aprono/chiudono tutte insieme (pulsante in alto) o giorno per giorno (orologio).
+    // Con "tutte" attivo, l'orologio di un giorno lo nasconde come eccezione; altrimenti lo mostra come eccezione.
+    const CAL_HOURS_ALL_KEY = "railops_calendar_hours_all";
+    const CAL_HOURS_CLOSED_KEY = "railops_calendar_hours_closed";
+
+    function readDaySet(key) {
       try {
-        const list = JSON.parse(storeGet(CAL_HOURS_KEY) || "[]");
+        const list = JSON.parse(storeGet(key) || "[]");
         return new Set(Array.isArray(list) ? list : []);
       } catch { return new Set(); }
     }
 
+    function calendarAllHoursOn() {
+      return storeGet(CAL_HOURS_ALL_KEY) === "1";
+    }
+
+    function calendarOpenHourDays() {
+      const all = calendarAllHoursOn();
+      const open = readDaySet(CAL_HOURS_KEY), closed = readDaySet(CAL_HOURS_CLOSED_KEY);
+      return { has: key => all ? !closed.has(key) : open.has(key) };
+    }
+
     function toggleCalendarDayHours(event, key) {
       event?.stopPropagation();
-      const open = calendarOpenHourDays();
-      if (open.has(key)) open.delete(key); else open.add(key);
-      storeSet(CAL_HOURS_KEY, JSON.stringify([...open].sort().slice(-400)));
+      const storeKey = calendarAllHoursOn() ? CAL_HOURS_CLOSED_KEY : CAL_HOURS_KEY;
+      const set = readDaySet(storeKey);
+      if (set.has(key)) set.delete(key); else set.add(key);
+      storeSet(storeKey, JSON.stringify([...set].sort().slice(-400)));
       renderCalendar();
+    }
+
+    // Pulsante in alto: mostra o nasconde le ore di tutti i giorni (azzera le scelte fatte sui singoli giorni)
+    function toggleCalendarAllHours() {
+      const on = !calendarAllHoursOn();
+      storeSet(CAL_HOURS_ALL_KEY, on ? "1" : "0");
+      storeSet(CAL_HOURS_KEY, "[]");
+      storeSet(CAL_HOURS_CLOSED_KEY, "[]");
+      renderCalendar();
+    }
+
+    function updateCalendarHoursButton(mode) {
+      const btn = document.getElementById("calendarHoursAll");
+      if (!btn) return;
+      const on = calendarAllHoursOn();
+      btn.classList.toggle("hidden", mode === "resources");
+      btn.classList.toggle("active", on);
+      btn.setAttribute("aria-pressed", String(on));
+      btn.querySelector("span").textContent = on ? "Nascondi ore" : "Mostra ore";
+      btn.title = on ? "Nascondi il totale delle ore in tutti i giorni" : "Mostra il totale delle ore in tutti i giorni (puoi sempre aprire o chiudere un singolo giorno con l'orologio)";
     }
 
     function taskSlotsOnDate(task, key) {
@@ -8025,7 +8416,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       return { html: `<span class="b">${escapeHtml(text || "-")}</span>` };
     }
 
-    function openPrintDocument(title, subtitle, bodyHtml) {
+    function openPrintDocument(title, subtitle, bodyHtml, opts = {}) {
       const w = window.open("", "_blank");
       if (!w) return showToast("Popup bloccato: consenti i popup per stampare il PDF", { type: "error" });
       w.document.write(`<!doctype html><html lang="it"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
@@ -8054,6 +8445,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           .none{color:#94a3b8;font-style:italic}
           .notes{white-space:pre-wrap;border:1px solid #e2e8f0;border-radius:6px;padding:8px;background:#f8fafc}
           footer{margin-top:18px;border-top:1px solid #e2e8f0;padding-top:6px;color:#94a3b8;font-size:9px;text-align:center}
+          .receipt-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+          .receipt-photos figure{margin:0;border:1px solid #e2e8f0;border-radius:6px;padding:4px;break-inside:avoid}
+          .receipt-photos img{width:100%;max-height:260px;object-fit:contain;display:block}
+          .receipt-photos figcaption{font-size:8.5px;color:#475569;margin-top:3px}
         </style></head><body>
         <header><div class="logo">R</div><div><h1>${escapeHtml(title)}</h1>${subtitle ? `<div class="sub">${escapeHtml(subtitle)}</div>` : ""}</div>
           <div class="meta">RailOps Hub ${escapeHtml(APP_VERSION)}<br>Generato il ${escapeHtml(new Date().toLocaleString("it-IT"))}<br>da ${escapeHtml(currentUser?.name || "-")}</div></header>
@@ -8062,7 +8457,16 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       </body></html>`);
       w.document.close();
       w.focus();
-      setTimeout(() => w.print(), 350);
+      if (opts.waitImages) {
+        // si stampa quando le foto sono caricate (al massimo dopo 10 secondi)
+        const imgs = [...w.document.images];
+        Promise.race([
+          Promise.all(imgs.map(img => img.complete ? null : new Promise(r => { img.onload = img.onerror = r; }))),
+          new Promise(r => setTimeout(r, 10000))
+        ]).then(() => setTimeout(() => w.print(), 250));
+      } else {
+        setTimeout(() => w.print(), 350);
+      }
     }
 
     function slotsLines(slots, netFn, pauseFn) {
@@ -8387,6 +8791,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       trasferte: { title: "Trasferte", sub: "" },
       attivita: { title: "Attività", sub: "" },
       segnalazioni: { title: "Segnalazioni", sub: "Attività concluse in parte, con qualcosa ancora da risolvere" },
+      rimborsi: { title: "Rimborsi spese", sub: "Scontrini delle trasferte, nota spese e rimborso" },
       indisponibilita: { title: "Indisponibilità", sub: "" },
       reperibilita: { title: "Reperibilità", sub: "" },
       calendario: { title: "Calendario", sub: "" },
@@ -8410,6 +8815,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         trasferte: renderTrips,
         attivita: renderTasks,
         segnalazioni: renderIssues,
+        rimborsi: renderExpenses,
         reperibilita: renderOncall,
         indisponibilita: renderUnavailability,
         calendario: renderCalendar,
@@ -8449,7 +8855,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       sub.textContent = SECTION_META[id].sub || "";
       sub.classList.toggle("hidden", !SECTION_META[id].sub);
       document.title = `${SECTION_META[id].title} · RailOps Hub`;
-      document.getElementById("scopePicker")?.classList.toggle("hidden", !SCOPED_SECTIONS.includes(id));
+      // nei Rimborsi la Vista conta solo per gli amministratori (gli altri vedono sempre e solo le proprie spese)
+      document.getElementById("scopePicker")?.classList.toggle("hidden", !SCOPED_SECTIONS.includes(id) || (id === "rimborsi" && !isAdminUser()));
 
       const hash = `#/${id}`;
       if (!opts.fromHistory && location.hash !== hash) {
@@ -8574,6 +8981,1052 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       }
     }
 
+    /* ===================== SPESE E RIMBORSI ===================== */
+    // Una "pratica" per trasferta e persona: scontrini → consegna alla segretaria → nota spese → firma → rimborso.
+    // Le spese sono private: ognuno vede solo le proprie; gli amministratori vedono quelle di tutti (seguendo la Vista).
+    const EXPENSE_TABLE = "railops_expense_claims";
+    const ADMIN_USERS = ["Davide De Palma", "Francesco Bisceglia"];
+    const EXPENSE_CATEGORIES = ["Vitto", "Alloggio", "Carburante", "Pedaggi", "Parcheggio", "Taxi / mezzi pubblici", "Treno / aereo", "Noleggio auto", "Altro"];
+    const EXPENSE_CURRENCIES = {
+      EUR: "€ Euro",
+      TRY: "TRY Lira turca",
+      XOF: "XOF Franco CFA (Costa d'Avorio)",
+      CZK: "CZK Corona ceca",
+      CHF: "CHF Franco svizzero",
+      BGN: "BGN Lev bulgaro (fino al 2025)",
+      USD: "USD Dollaro USA",
+      GBP: "GBP Sterlina"
+    };
+    // cambi fissi con l'euro: franco CFA (parità fissa) e lev bulgaro (conversione all'ingresso nell'euro, 1/1/2026)
+    const FIXED_RATES = { EUR: 1, XOF: 655.957, BGN: 1.95583 };
+    const CLAIM_STEPS = [
+      { key: "draft", label: "Scontrini da completare", short: "Da completare" },
+      { key: "delivered", label: "Consegnati alla segretaria", short: "Consegnati" },
+      { key: "note", label: "Nota spese emessa", short: "Nota emessa" },
+      { key: "signed", label: "Controllata e firmata", short: "Firmata" },
+      { key: "reimbursed", label: "Rimborsata", short: "Rimborsata" }
+    ];
+    const EXPENSE_SQL = `-- RailOps Hub · Spese e rimborsi (v58) — da eseguire una sola volta in Supabase › SQL Editor
+create table if not exists public.railops_expense_claims (
+  id uuid primary key default gen_random_uuid(),
+  trip_id text not null,
+  resource text not null,
+  default_currency text default 'EUR',
+  receipts jsonb not null default '[]'::jsonb,
+  status text default 'draft',
+  total_eur numeric default 0,
+  total_personal numeric default 0,
+  delivered_date date,
+  note_number text,
+  note_date date,
+  note_amount numeric,
+  signed_date date,
+  reimbursed_date date,
+  reimbursed_amount numeric,
+  notes text,
+  created_by_operator text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique (trip_id, resource)
+);
+alter table public.railops_expense_claims enable row level security;
+drop policy if exists "railops_expense_claims_all" on public.railops_expense_claims;
+create policy "railops_expense_claims_all" on public.railops_expense_claims
+  for all to anon, authenticated using (true) with check (true);
+do $$ begin
+  alter publication supabase_realtime add table public.railops_expense_claims;
+exception when others then null; end $$;`;
+
+    let expenseClaims = [];
+    let expenseTableMissing = false;
+    let expenseChannel = null;
+    let claimDraft = null;
+    let expenseFilter = "open";
+    const rateCache = new Map();
+
+    function isAdminUser(name = currentUser?.name) {
+      return ADMIN_USERS.includes(name);
+    }
+
+    function canSeeExpensesOf(person) {
+      return !!person && (isAdminUser() || person === currentUser?.name);
+    }
+
+    // Persone di cui si mostrano le spese: utente normale → solo sé stesso; amministratore → la Vista (null = tutti)
+    function expensePeopleInScope() {
+      if (!isAdminUser()) return currentUser?.name ? [currentUser.name] : [];
+      const s = scopeName();
+      return s ? [s] : null;
+    }
+
+    function round2(v) { return Math.round((Number(v) || 0) * 100) / 100; }
+    function fmtEur(v) { return (Number(v) || 0).toLocaleString("it-IT", { style: "currency", currency: "EUR" }); }
+    function fmtMoney(v, cur) {
+      try { return (Number(v) || 0).toLocaleString("it-IT", { style: "currency", currency: cur }); }
+      catch { return `${(Number(v) || 0).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${cur}`; }
+    }
+    function numOrEmpty(v) {
+      if (v === "" || v === null || v === undefined) return "";
+      const n = Number(String(v).replace(",", "."));
+      return Number.isFinite(n) ? n : "";
+    }
+
+    function normalizeReceipt(r = {}) {
+      const currency = EXPENSE_CURRENCIES[r.currency] ? r.currency : "EUR";
+      const amount = numOrEmpty(r.amount);
+      const rate = currency === "EUR" ? 1 : (numOrEmpty(r.rate) || FIXED_RATES[currency] || "");
+      let eur = numOrEmpty(r.amount_eur);
+      if (eur === "" && amount !== "" && rate) eur = round2(amount / rate);
+      return {
+        id: r.id || clientId("rcp"), date: r.date || "", time: r.time || "", category: r.category || "", description: r.description || "",
+        amount, currency, rate, amount_eur: eur, eur_manual: !!r.eur_manual, rate_date_for: r.rate_date_for || "", rate_source: r.rate_source || (FIXED_RATES[currency] && currency !== "EUR" ? "cambio fisso" : ""),
+        paid: r.paid === "aziendale" ? "aziendale" : "personale", photo: r.photo || null,
+        _file: r._file || null, _preview: r._preview || ""
+      };
+    }
+
+    function claimTotals(receipts) {
+      const byCat = {}, byCur = {};
+      let total = 0, personal = 0, company = 0, missingPhoto = 0, incomplete = 0, count = 0;
+      (receipts || []).forEach(raw => {
+        const r = raw && raw.id ? raw : normalizeReceipt(raw);
+        count++;
+        const eur = Number(r.amount_eur) || 0;
+        total += eur;
+        if (r.paid === "aziendale") company += eur; else personal += eur;
+        const cat = r.category || "Altro";
+        byCat[cat] = (byCat[cat] || 0) + eur;
+        if (r.currency && r.currency !== "EUR" && r.amount !== "") byCur[r.currency] = (byCur[r.currency] || 0) + Number(r.amount);
+        if (!r.photo && !r._file) missingPhoto++;
+        if (r.amount === "" || r.amount === null || !r.date || !r.category) incomplete++;
+      });
+      return { count, total: round2(total), personal: round2(personal), company: round2(company), byCat, byCur, missingPhoto, incomplete };
+    }
+
+    function claimStepIndex(c) {
+      if (!c) return 0;
+      if (c.reimbursed_date) return 4;
+      if (c.signed_date) return 3;
+      if (c.note_date || c.note_number || (c.note_amount !== "" && c.note_amount !== null && c.note_amount !== undefined)) return 2;
+      if (c.delivered_date) return 1;
+      return 0;
+    }
+
+    function hasValue(v) { return v !== "" && v !== null && v !== undefined; }
+
+    // Confronto tra scontrini, nota spese e rimborso ricevuto
+    function claimChecks(c) {
+      const t = claimTotals(c?.receipts);
+      const out = [];
+      if (hasValue(c?.note_amount) && Math.abs(Number(c.note_amount) - t.personal) > 0.009) {
+        out.push({ level: "warn", text: `La nota spese (${fmtEur(c.note_amount)}) non coincide con gli scontrini da rimborsare (${fmtEur(t.personal)}): differenza ${fmtEur(Number(c.note_amount) - t.personal)}.` });
+      }
+      if (hasValue(c?.reimbursed_amount)) {
+        const ref = hasValue(c?.note_amount) ? Number(c.note_amount) : t.personal;
+        if (Math.abs(Number(c.reimbursed_amount) - ref) > 0.009) {
+          out.push({ level: "warn", text: `Il rimborso ricevuto (${fmtEur(c.reimbursed_amount)}) non coincide con ${hasValue(c?.note_amount) ? "la nota spese" : "il totale degli scontrini"} (${fmtEur(ref)}): differenza ${fmtEur(Number(c.reimbursed_amount) - ref)}.` });
+        }
+      }
+      const trip = trips.find(x => String(x.id) === String(c?.trip_id));
+      const vitto = (c?.receipts || []).map(raw => vittoCheck(raw && raw.id ? raw : normalizeReceipt(raw), trip)).filter(Boolean);
+      const noTime = vitto.filter(v => v.text.startsWith("Manca l'orario")).length;
+      const clash = vitto.filter(v => v.level === "warn" && !v.text.startsWith("Manca")).length;
+      if (clash) out.push({ level: "warn", text: `${clash} scontrin${clash === 1 ? "o" : "i"} di vitto non combacia${clash === 1 ? "" : "no"} con la pausa del registro giornaliero (apri lo scontrino per il dettaglio).` });
+      if (noTime) out.push({ level: "info", text: `${noTime} scontrin${noTime === 1 ? "o" : "i"} di vitto senza orario.` });
+      if (t.incomplete) out.push({ level: "info", text: `${t.incomplete} scontrin${t.incomplete === 1 ? "o incompleto" : "i incompleti"} (manca data, categoria o importo).` });
+      return out;
+    }
+
+    function claimFor(tripId, person) {
+      return expenseClaims.find(c => String(c.trip_id) === String(tripId) && c.resource === person) || null;
+    }
+
+    async function fetchExpenseClaims() {
+      if (!currentUser?.name) { expenseClaims = []; return; }
+      try {
+        let query = sb.from(EXPENSE_TABLE).select("*");
+        if (!isAdminUser()) query = query.eq("resource", currentUser.name); // un utente scarica solo le proprie spese
+        const { data, error } = await query;
+        if (error) {
+          expenseTableMissing = /does not exist|schema cache|could not find|relation|42P01|PGRST20/i.test(`${error.message || ""} ${error.code || ""}`);
+          if (!expenseTableMissing) console.warn("Spese non caricate:", error.message);
+          return;
+        }
+        expenseTableMissing = false;
+        expenseClaims = (data || []).filter(c => canSeeExpensesOf(c.resource));
+        startExpenseRealtime();
+      } catch (error) {
+        console.warn("Spese non caricate:", error?.message || error);
+      }
+    }
+
+    function startExpenseRealtime() {
+      if (expenseChannel || expenseTableMissing || !navigator.onLine) return;
+      try {
+        expenseChannel = sb.channel("railops-expenses")
+          .on("postgres_changes", { event: "*", schema: "public", table: EXPENSE_TABLE }, () => scheduleRealtimeReload())
+          .subscribe();
+      } catch { expenseChannel = null; }
+    }
+
+    function stopExpenseRealtime() {
+      if (expenseChannel) { try { sb.removeChannel(expenseChannel); } catch { /* ok */ } expenseChannel = null; }
+    }
+
+    // Cambio BCE del giorno dello scontrino (1 € = X valuta). Le valute a cambio fisso non richiedono internet.
+    async function fetchEcbRate(date, cur) {
+      if (FIXED_RATES[cur]) return { rate: FIXED_RATES[cur], source: cur === "EUR" ? "" : "cambio fisso" };
+      const d = date && date <= todayDateKey() ? date : "latest";
+      const key = `${d}|${cur}`;
+      if (rateCache.has(key)) return rateCache.get(key);
+      const urls = [`https://api.frankfurter.dev/v1/${d}?base=EUR&symbols=${cur}`, `https://api.frankfurter.app/${d}?from=EUR&to=${cur}`];
+      for (const url of urls) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const j = await res.json();
+          const rate = Number(j?.rates?.[cur]);
+          if (rate) {
+            const same = !date || j.date === date || d === "latest";
+            const out = { rate, source: `BCE ${formatDate(j.date || date)}${same ? "" : " (ultimo disponibile)"}` };
+            rateCache.set(key, out);
+            return out;
+          }
+        } catch { /* si prova il prossimo */ }
+      }
+      return null;
+    }
+
+    /* ---------- Cambio del giorno dello scontrino (BCE), automatico ---------- */
+    // Ogni scontrino in valuta estera usa il cambio ufficiale BCE del suo giorno (sabato/domenica: ultimo cambio disponibile).
+    // Quando la pratica è consegnata alla segretaria i cambi restano quelli salvati, così il totale coincide con la nota spese.
+    function claimRatesLocked(c) {
+      return claimStepIndex(c) >= 1;
+    }
+
+    function claimHasForeign(c) {
+      return (c?.receipts || []).some(r => r.currency && r.currency !== "EUR" && !FIXED_RATES[r.currency]);
+    }
+
+    function isDayRate(r) {
+      return /^BCE/.test(r.rate_source || "") && r.rate_date_for === r.date;
+    }
+
+    function claimRateInfoHtml() {
+      const c = claimDraft;
+      if (!c || !claimHasForeign(c)) return "";
+      if (claimRatesLocked(c)) return `<div class="rate-info locked">🔒 Cambi bloccati: la pratica è già stata consegnata${c.delivered_date ? ` il ${formatDate(c.delivered_date)}` : ""}, così il totale resta uguale alla nota spese.</div>`;
+      return `<div class="rate-info live">${icon("check")}Cambio BCE del giorno di ogni scontrino, impostato in automatico (sabato e domenica: ultimo cambio disponibile)</div>`;
+    }
+
+    // Imposta il cambio del giorno sugli scontrini che non lo hanno ancora (o che hanno un cambio di un altro giorno)
+    async function applyDayRates({ all = false } = {}) {
+      if (!claimDraft || claimRatesLocked(claimDraft)) return;
+      const todo = claimDraft.receipts.filter(r => r.currency !== "EUR" && !FIXED_RATES[r.currency] && !r.eur_manual && (all || !isDayRate(r) || !Number(r.rate)));
+      if (!todo.length) return;
+      await Promise.all(todo.map(r => updateReceiptRate(r)));
+    }
+
+    function guessTripCurrency(trip) {
+      const text = `${trip?.place || ""} ${trip?.customer || ""} ${trip?.vehicle || ""}`.toLowerCase();
+      if (/tcdd|turch|ankara|istanbul|izmir|konya|eskişehir|eskisehir/.test(text)) return "TRY";
+      if (/costa d|abidjan|ivoir|yamoussoukro/.test(text)) return "XOF";
+      if (/sbb|svizz|zurig|zürich|zurich|berna|bern|basilea|basel|ginevra|losanna|lugano|switz/.test(text)) return "CHF";
+      if (/praga|prague|praha|ostrava|brno|plzen|ceca|czech/.test(text)) return "CZK";
+      return "EUR";
+    }
+
+    // Foto degli scontrini: ridotte (max 1800 px, JPEG) prima del caricamento per non riempire lo spazio
+    async function compressReceiptImage(file) {
+      if (!/^image\//.test(file.type || "") || /gif|svg/.test(file.type)) return file;
+      try {
+        const { width, height, url } = await imageSize(file);
+        const img = await new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = url; });
+        const scale = Math.min(1, 1800 / Math.max(width, height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(width * scale); canvas.height = Math.round(height * scale);
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.82));
+        if (!blob || blob.size >= file.size) return file;
+        return new File([blob], String(file.name || "scontrino").replace(/\.[a-z0-9]+$/i, "") + ".jpg", { type: "image/jpeg" });
+      } catch { return file; }
+    }
+
+    async function uploadReceiptPhoto(draft, file) {
+      const f = await compressReceiptImage(file);
+      if (f.size > MAX_ATTACHMENT_SIZE_MB * 1024 * 1024) throw new Error(`${file.name}: file troppo grande (max ${MAX_ATTACHMENT_SIZE_MB} MB)`);
+      const path = `spese/${signatureSlug(draft.resource)}/${safeFileName(String(draft.trip_id))}/${Date.now()}_${Math.random().toString(16).slice(2, 8)}_${safeFileName(f.name)}`;
+      const { error } = await sb.storage.from(ATTACHMENT_BUCKET).upload(path, f, { upsert: false, cacheControl: "3600", contentType: f.type || "application/octet-stream" });
+      if (error) throw error;
+      return { path, name: file.name, type: f.type || "", size: f.size };
+    }
+
+    function tripLabel(trip) {
+      return `${trip?.place || "-"} · ${trip?.vehicle || "-"}`;
+    }
+
+    /* ---------- Editor della pratica ---------- */
+    function openExpenseClaim(tripId, person = "") {
+      if (expenseTableMissing) return openExpenseSetup();
+      const trip = trips.find(t => String(t.id) === String(tripId));
+      if (!trip) return showToast("Trasferta non trovata", { type: "error" });
+      const people = Array.isArray(trip.people) ? trip.people : [];
+      if (!person) {
+        if (people.includes(currentUser?.name)) person = currentUser.name;
+        else if (isAdminUser()) person = (scopeName() && people.includes(scopeName())) ? scopeName() : people[0];
+      }
+      if (!person || !canSeeExpensesOf(person)) return showToast("Le spese sono private: puoi vedere solo le tue", { type: "error" });
+      const existing = claimFor(trip.id, person);
+      claimDraft = {
+        id: existing?.id || null,
+        trip_id: String(trip.id),
+        resource: person,
+        default_currency: existing?.default_currency || guessTripCurrency(trip),
+        receipts: (existing?.receipts || []).map(normalizeReceipt),
+        delivered_date: existing?.delivered_date || "",
+        note_number: existing?.note_number || "",
+        note_date: existing?.note_date || "",
+        note_amount: hasValue(existing?.note_amount) ? Number(existing.note_amount) : "",
+        signed_date: existing?.signed_date || "",
+        reimbursed_date: existing?.reimbursed_date || "",
+        reimbursed_amount: hasValue(existing?.reimbursed_amount) ? Number(existing.reimbursed_amount) : "",
+        notes: existing?.notes || "",
+        removedPhotos: [],
+        updated_at: existing?.updated_at || ""
+      };
+      claimOpenReceiptId = null;
+      renderClaimEditor();
+      showModal();
+      loadReceiptThumbs();
+      applyDayRates();
+    }
+
+    function claimTrip() {
+      return trips.find(t => String(t.id) === String(claimDraft?.trip_id));
+    }
+
+    function currencyOptions(selected) {
+      return Object.entries(EXPENSE_CURRENCIES).map(([code, label]) => `<option value="${code}" ${code === selected ? "selected" : ""}>${escapeHtml(code === "EUR" ? "EUR" : code)}</option>`).join("");
+    }
+
+    /* ---------- Vitto: orario dello scontrino e pausa del registro giornaliero ---------- */
+    function hhmmToMin(v) { return minutesFromTime(formatTimeValue(v)); }
+
+    // Fasce di lavoro/viaggio e pause del giorno, prese dal registro giornaliero della trasferta
+    function tripDaySchedule(trip, date) {
+      const day = normalizeTripDays(trip?.daily_logs).find(d => d.day_date === date);
+      const slots = day ? [...day.work_slots.map(s => ({ ...s, kind: "lavoro" })), ...day.travel_slots.map(s => ({ ...s, kind: "viaggio" }))] : [];
+      const out = [];
+      slots.forEach(slot => {
+        const s = hhmmToMin(slot.start_time);
+        let e = hhmmToMin(slot.end_time);
+        if (s === null || e === null) return;
+        if (e <= s) e += 1440;
+        const effective = rapportinoSlotIntervals(slot);           // lavoro effettivo (pause già tolte)
+        let pauses = [[s, e]];
+        effective.forEach(iv => { pauses = subtractInterval(pauses, iv); });
+        out.push({ kind: slot.kind, start: s, end: e, effective, pauses: pauses.filter(([x, y]) => y > x), auto: !hasExplicitPause(slot) });
+      });
+      return out;
+    }
+
+    function rangeText([a, b]) { return `${minutesToHHMM(a % 1440)}–${b >= 1440 && b % 1440 === 0 ? "24:00" : minutesToHHMM(b % 1440)}`; }
+
+    function dayPauseText(trip, date) {
+      const sched = tripDaySchedule(trip, date);
+      if (!sched.length) return "";
+      const pauses = sched.flatMap(x => x.pauses.map(p => rangeText(p) + (x.auto ? " (pranzo)" : "")));
+      const work = sched.map(x => `${x.kind} ${rangeText([x.start, x.end])}`);
+      return `${work.join(" · ")}${pauses.length ? ` · pausa ${pauses.join(", ")}` : " · nessuna pausa"}`;
+    }
+
+    // Lo scontrino di vitto deve cadere in una pausa (o fuori dall'orario di lavoro), non mentre si risultava al lavoro
+    function vittoCheck(r, trip) {
+      if (r.category !== "Vitto") return null;
+      if (!r.time) return { level: "warn", text: "Manca l'orario dello scontrino" };
+      if (!r.date) return { level: "warn", text: "Manca la data dello scontrino" };
+      const t = hhmmToMin(r.time);
+      const sched = tripDaySchedule(trip, r.date);
+      if (!sched.length) return { level: "none", text: `Nessun orario nel registro della trasferta per il ${formatDate(r.date)}: impossibile verificare la pausa` };
+      for (const x of sched) {
+        for (const tt of [t, t + 1440]) {
+          if (x.effective.some(([a, b]) => tt >= a && tt < b)) {
+            const p = x.pauses.length ? `, pausa ${x.pauses.map(rangeText).join(", ")}` : ", nessuna pausa";
+            return { level: "warn", text: `Alle ${r.time} risultavi ${x.kind === "lavoro" ? "al lavoro" : "in viaggio"} (${rangeText([x.start, x.end])}${p}): sistema la pausa nel registro o l'orario dello scontrino` };
+          }
+        }
+      }
+      for (const x of sched) {
+        const p = x.pauses.find(([a, b]) => (t >= a && t <= b) || (t + 1440 >= a && t + 1440 <= b));
+        if (p) return { level: "ok", text: `Dentro la pausa ${rangeText(p)}${x.auto ? " (pausa pranzo)" : ""}` };
+      }
+      return { level: "ok", text: "Fuori dall'orario di lavoro del giorno" };
+    }
+
+    let claimOpenReceiptId = null;
+
+    function receiptThumbHtml(r, small = false) {
+      const isImg = r._file ? /^image\//.test(r._file.type || "") : /^image\//.test(r.photo?.type || "");
+      if (r._preview) return `<img src="${r._preview}" alt="Scontrino">`;
+      if (r.photo) return isImg ? `<img data-photo-path="${escapeHtml(r.photo.path)}" alt="Scontrino">` : `<span class="rc-doc">${icon("file")}</span>`;
+      return small ? `<span class="rcc-nophoto" title="Nessuna foto">${icon("upload")}</span>` : `<span class="rc-add">${icon("upload")}<small>Foto</small></span>`;
+    }
+
+    // Riga compatta (una per scontrino): clic per modificarla
+    function receiptCompactHtml(r, trip) {
+      const vc = vittoCheck(r, trip);
+      const incomplete = r.amount === "" || !r.category;
+      return `<div class="rc-compact ${incomplete ? "incomplete" : ""}" data-id="${escapeHtml(r.id)}" role="button" tabindex="0" onclick="openReceipt(${jsArg(r.id)})" onkeydown="if(event.key==='Enter'){openReceipt(${jsArg(r.id)})}" title="Clic per modificare">
+        <span class="rcc-thumb">${receiptThumbHtml(r, true)}</span>
+        <span class="rcc-time">${r.category === "Vitto" ? escapeHtml(r.time || "--:--") : ""}</span>
+        <span class="rcc-cat">${escapeHtml(r.category || "Categoria?")}</span>
+        <span class="rcc-desc">${escapeHtml(r.description || "")}</span>
+        <span class="rcc-vc ${vc ? vc.level : ""}" ${vc ? `title="${escapeHtml(vc.text)}"` : ""}>${vc ? (vc.level === "ok" ? "✓" : vc.level === "warn" ? "!" : "?") : ""}</span>
+        <span class="rcc-orig">${r.currency !== "EUR" && r.amount !== "" ? escapeHtml(fmtMoney(r.amount, r.currency)) : ""}</span>
+        <span class="rcc-eur">${r.amount_eur !== "" ? fmtEur(r.amount_eur) : "— €"}${r.paid === "aziendale" ? `<em title="Carta aziendale: non va a rimborso">az.</em>` : ""}</span>
+      </div>`;
+    }
+
+    // Scontrino aperto in modifica
+    function receiptRowHtml(r, trip) {
+      const cats = EXPENSE_CATEGORIES.map(c => `<option ${c === r.category ? "selected" : ""}>${escapeHtml(c)}</option>`).join("");
+      const vitto = r.category === "Vitto";
+      const vc = vittoCheck(r, trip);
+      return `<div class="receipt-row open" data-id="${escapeHtml(r.id)}">
+        <div class="rc-photo">
+          <button type="button" class="rc-thumb ${r.photo || r._file ? "has" : ""}" title="${r.photo || r._file ? "Apri la foto" : "Scatta o carica la foto (facoltativa)"}" onclick="receiptPhotoClick(${jsArg(r.id)})">${receiptThumbHtml(r)}</button>
+          <input type="file" accept="image/*,application/pdf" hidden data-photo-input onchange="receiptPhotoChosen(${jsArg(r.id)}, this)">
+          ${r.photo || r._file ? `<button type="button" class="rc-photo-change" onclick="this.parentElement.querySelector('[data-photo-input]').click()">cambia</button>` : ""}
+        </div>
+        <div class="rc-main">
+          <div class="rc-line ${vitto ? "with-time" : ""}">
+            <input type="date" class="input" data-f="date" value="${escapeHtml(r.date)}" aria-label="Data scontrino">
+            ${vitto ? `<input type="time" class="input rc-time" data-f="time" value="${escapeHtml(r.time || "")}" aria-label="Orario dello scontrino" title="Orario stampato sullo scontrino">` : ""}
+            <select class="select" data-f="category" aria-label="Categoria"><option value="">Categoria…</option>${cats}</select>
+            <input class="input rc-desc" data-f="description" value="${escapeHtml(r.description)}" placeholder="Descrizione (es. cena, hotel, taxi)">
+          </div>
+          <div class="rc-line">
+            <div class="rc-amount"><input type="number" step="0.01" min="0" inputmode="decimal" class="input" data-f="amount" value="${r.amount === "" ? "" : r.amount}" placeholder="Importo" aria-label="Importo"><select class="select" data-f="currency" aria-label="Valuta">${currencyOptions(r.currency)}</select></div>
+            <div class="rc-eur ${r.currency === "EUR" ? "is-eur" : ""}"><span class="rc-eq">=</span><input type="number" step="0.01" min="0" inputmode="decimal" class="input" data-f="amount_eur" value="${r.amount_eur === "" ? "" : r.amount_eur}" placeholder="€" aria-label="Importo in euro"><span class="rc-eur-sign">€</span></div>
+            <select class="select rc-paid" data-f="paid" aria-label="Pagata con"><option value="personale" ${r.paid === "personale" ? "selected" : ""}>Pagata da me</option><option value="aziendale" ${r.paid === "aziendale" ? "selected" : ""}>Carta aziendale</option></select>
+          </div>
+          <div class="rc-rate" data-rate-label>${receiptRateText(r)}</div>
+          ${vitto ? `<div class="rc-vitto ${vc?.level || ""}" data-vc>${vc ? `${vc.level === "ok" ? "✓" : "⚠"} ${escapeHtml(vc.text)}` : ""}</div>` : ""}
+        </div>
+        <div class="rc-side">
+          <button type="button" class="btn small" onclick="closeReceipt()" title="Chiudi la modifica">${icon("check")}Fatto</button>
+          <button type="button" class="btn ghost icon rc-del" title="Elimina scontrino" aria-label="Elimina scontrino" onclick="removeReceipt(${jsArg(r.id)})">${icon("trash")}</button>
+        </div>
+      </div>`;
+    }
+
+    function receiptRateText(r) {
+      if (r.currency === "EUR") return r.paid === "aziendale" ? "Pagata con carta aziendale: non va a rimborso" : "";
+      const rate = Number(r.rate);
+      const parts = [];
+      if (rate) parts.push(`1 € = ${rate.toLocaleString("it-IT", { maximumFractionDigits: 4 })} ${r.currency}${r.rate_source ? ` · ${r.rate_source}` : ""}`);
+      else parts.push(`Cambio non disponibile: scrivi l'importo in € (es. dall'estratto conto)`);
+      if (r.eur_manual) parts.push("importo in € inserito a mano");
+      if (r.paid === "aziendale") parts.push("carta aziendale: non va a rimborso");
+      return escapeHtml(parts.join(" · "));
+    }
+
+    function claimStepsHtml(c) {
+      const idx = claimStepIndex(c);
+      const dates = ["", c.delivered_date, c.note_date, c.signed_date, c.reimbursed_date];
+      return `<ol class="claim-steps">${CLAIM_STEPS.map((s, i) => `<li class="${i < idx ? "done" : i === idx ? "current" : ""}"><span class="dot">${i < idx ? "✓" : i + 1}</span><span class="lbl">${escapeHtml(s.short)}</span>${dates[i] ? `<span class="dt">${formatDate(dates[i])}</span>` : ""}</li>`).join("")}</ol>`;
+    }
+
+    function renderClaimEditor() {
+      const c = claimDraft;
+      const trip = claimTrip();
+      const people = (trip?.people || []).filter(p => canSeeExpensesOf(p));
+      document.getElementById("editModalTitle").textContent = `Spese trasferta · ${trip?.place || "-"}`;
+      document.getElementById("editModalBody").innerHTML = `
+        <div class="claim-head">
+          <div>
+            <div class="mini-title">${escapeHtml(tripLabel(trip))}</div>
+            <div class="mini-meta">${formatDate(trip?.start_date)} → ${formatDate(trip?.end_date || trip?.start_date)} · ${escapeHtml(trip?.customer || commessaFromVehicle(trip?.vehicle) || "-")}</div>
+          </div>
+          <div class="claim-person">
+            ${people.length > 1 ? `<label class="mini-meta" for="claimPerson">Spese di</label><select id="claimPerson" class="select" onchange="switchClaimPerson(this.value)">${people.map(p => `<option ${p === c.resource ? "selected" : ""}>${escapeHtml(p)}</option>`).join("")}</select>` : `<span class="pill">${icon("users")}&nbsp;${escapeHtml(c.resource)}</span>`}
+            <span class="private-chip" title="Visibili solo a ${escapeHtml(c.resource)} e agli amministratori">🔒 Private</span>
+          </div>
+        </div>
+        <div id="claimSteps">${claimStepsHtml(c)}</div>
+
+        <div class="claim-block">
+          <div class="claim-block-head">
+            <h3>Scontrini</h3>
+            <div class="claim-tools">
+              <label class="mini-meta" for="claimCurrency">Valuta della trasferta</label>
+              <select id="claimCurrency" class="select" onchange="claimDraft.default_currency=this.value">${Object.entries(EXPENSE_CURRENCIES).map(([code, label]) => `<option value="${code}" ${code === c.default_currency ? "selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select>
+              <button type="button" class="btn secondary small" onclick="addReceipt()">${icon("plus")}Scontrino</button>
+              <button type="button" class="btn small" onclick="document.getElementById('claimBulkPhotos').click()">${icon("upload")}Da foto</button>
+              <input type="file" id="claimBulkPhotos" accept="image/*,application/pdf" multiple hidden onchange="addReceiptsFromPhotos(this)">
+            </div>
+          </div>
+          <div id="claimRateInfo">${claimRateInfoHtml()}</div>
+          <div id="claimReceipts" class="receipt-list"></div>
+          <div class="mini-meta" style="margin-top:6px">Gli scontrini sono raggruppati per giorno: clic su una riga per modificarla. La foto è facoltativa; con «Da foto» puoi caricarne più insieme (uno scontrino per foto). Per il vitto indica l'orario: deve cadere nella pausa del registro giornaliero (o fuori dall'orario di lavoro). Le valute estere vengono convertite in automatico con il cambio BCE del giorno dello scontrino (franco CFA e lev a cambio fisso): se cambi la data, il cambio si aggiorna da solo. Se ti rimborsano l'importo addebitato in carta, scrivilo direttamente in €.</div>
+        </div>
+
+        <div id="claimTotals" class="claim-totals"></div>
+
+        <div class="claim-block">
+          <div class="claim-block-head"><h3>Nota spese e rimborso</h3></div>
+          <div class="claim-flow">
+            <div class="flow-step"><div class="flow-title"><span>1</span>Consegnati alla segretaria</div>
+              <div class="flow-fields"><input type="date" class="input" data-c="delivered_date" value="${escapeHtml(c.delivered_date)}"><button type="button" class="btn ghost small" onclick="claimToday('delivered_date')">Oggi</button></div></div>
+            <div class="flow-step"><div class="flow-title"><span>2</span>Nota spese emessa</div>
+              <div class="flow-fields"><input class="input" data-c="note_number" value="${escapeHtml(c.note_number)}" placeholder="N. nota"><input type="date" class="input" data-c="note_date" value="${escapeHtml(c.note_date)}"><input type="number" step="0.01" inputmode="decimal" class="input" data-c="note_amount" value="${c.note_amount === "" ? "" : c.note_amount}" placeholder="Importo €"><button type="button" class="btn ghost small" title="Copia il totale degli scontrini da rimborsare" onclick="claimCopyTotal('note_amount')">= totale</button></div></div>
+            <div class="flow-step"><div class="flow-title"><span>3</span>Controllata e firmata</div>
+              <div class="flow-fields"><input type="date" class="input" data-c="signed_date" value="${escapeHtml(c.signed_date)}"><button type="button" class="btn ghost small" onclick="claimToday('signed_date')">Oggi</button></div></div>
+            <div class="flow-step"><div class="flow-title"><span>4</span>Rimborso ricevuto</div>
+              <div class="flow-fields"><input type="date" class="input" data-c="reimbursed_date" value="${escapeHtml(c.reimbursed_date)}"><input type="number" step="0.01" inputmode="decimal" class="input" data-c="reimbursed_amount" value="${c.reimbursed_amount === "" ? "" : c.reimbursed_amount}" placeholder="Importo €"><button type="button" class="btn ghost small" title="Copia l'importo della nota spese" onclick="claimCopyTotal('reimbursed_amount')">= nota</button></div></div>
+          </div>
+          <div id="claimChecks"></div>
+          <div class="field full" style="margin-top:10px"><label for="claimNotes">Note</label><textarea id="claimNotes" class="textarea" data-c="notes" style="min-height:60px" placeholder="Es. manca la ricevuta del taxi del 12/11">${escapeHtml(c.notes)}</textarea></div>
+        </div>
+
+        <div class="form-actions">
+          ${c.id ? `<button type="button" class="btn danger-soft" onclick="deleteExpenseClaim()">${icon("trash")}Elimina</button>` : ""}
+          <button type="button" class="btn secondary" onclick="printExpenseClaim()">${icon("file")}Riepilogo PDF</button>
+          <button type="button" class="btn secondary" onclick="exportExpenseClaimCSV()">${icon("download")}Excel (CSV)</button>
+          <span class="spacer" style="flex:1"></span>
+          <button type="button" class="btn secondary" onclick="closeEditModal(true)">Annulla</button>
+          <button type="button" class="btn" id="claimSaveBtn" onclick="saveExpenseClaim()">Salva</button>
+        </div>`;
+      renderReceiptRows();
+      updateClaimSummary();
+      const body = document.getElementById("editModalBody");
+      body.querySelector(".claim-flow").addEventListener("input", onClaimFieldInput);
+      document.getElementById("claimNotes").addEventListener("input", onClaimFieldInput);
+      const list = document.getElementById("claimReceipts");
+      list.addEventListener("input", onReceiptInput);
+      list.addEventListener("change", onReceiptInput);
+    }
+
+    // Elenco compatto raggruppato per giorno; un solo scontrino aperto in modifica alla volta
+    function renderReceiptRows() {
+      const list = document.getElementById("claimReceipts");
+      if (!list) return;
+      const trip = claimTrip();
+      const rows = [...claimDraft.receipts].sort((a, b) => String(a.date || "9999").localeCompare(String(b.date || "9999")) || String(a.time || "").localeCompare(String(b.time || "")));
+      const days = new Map();
+      rows.forEach(r => { const k = r.date || ""; if (!days.has(k)) days.set(k, []); days.get(k).push(r); });
+      const dayFmt = new Intl.DateTimeFormat("it-IT", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" });
+      list.innerHTML = [...days.entries()].map(([date, items]) => {
+        const pause = date ? dayPauseText(trip, date) : "";
+        return `<div class="rc-day" data-day="${escapeHtml(date)}">
+            <span class="rc-day-date">${date ? escapeHtml(dayFmt.format(parseDateKey(date))) : "Senza data"}</span>
+            ${pause ? `<span class="rc-day-pause" title="Dal registro giornaliero della trasferta">${escapeHtml(pause)}</span>` : ""}
+            <span class="rc-day-tot" data-day-tot>${dayTotalText(items)}</span>
+          </div>
+          ${items.map(r => r.id === claimOpenReceiptId ? receiptRowHtml(r, trip) : receiptCompactHtml(r, trip)).join("")}`;
+      }).join("") || `<div class="empty">Nessuno scontrino. Usa «Scontrino» o «Da foto» per iniziare.</div>`;
+      loadReceiptThumbs();
+    }
+
+    function dayTotalText(items) {
+      const tot = round2(items.reduce((s, r) => s + (r.paid === "aziendale" ? 0 : Number(r.amount_eur) || 0), 0));
+      return `${items.length} scontrin${items.length === 1 ? "o" : "i"} · ${fmtEur(tot)}`;
+    }
+
+    function refreshDayTotals() {
+      document.querySelectorAll("#claimReceipts .rc-day[data-day]").forEach(el => {
+        const items = claimDraft.receipts.filter(r => (r.date || "") === el.dataset.day);
+        const tot = el.querySelector("[data-day-tot]");
+        if (tot) tot.textContent = dayTotalText(items);
+      });
+    }
+
+    function refreshVittoCheck(r) {
+      const el = document.querySelector(`#claimReceipts .receipt-row[data-id="${CSS.escape(r.id)}"] [data-vc]`);
+      if (!el) return;
+      const vc = vittoCheck(r, claimTrip());
+      el.className = `rc-vitto ${vc?.level || ""}`;
+      el.textContent = vc ? `${vc.level === "ok" ? "✓" : "⚠"} ${vc.text}` : "";
+    }
+
+    function openReceipt(id) {
+      claimOpenReceiptId = id;
+      renderReceiptRows();
+      const row = document.querySelector(`#claimReceipts .receipt-row[data-id="${CSS.escape(id)}"]`);
+      row?.scrollIntoView({ block: "nearest" });
+      setTimeout(() => (row?.querySelector('[data-f="amount"]:placeholder-shown') || row?.querySelector('[data-f="category"]'))?.focus(), 30);
+    }
+
+    function closeReceipt() {
+      claimOpenReceiptId = null;
+      renderReceiptRows();
+    }
+
+    async function loadReceiptThumbs() {
+      const imgs = [...document.querySelectorAll("#claimReceipts img[data-photo-path]:not([src])")];
+      for (const img of imgs) {
+        const path = img.dataset.photoPath;
+        try {
+          const { data } = await sb.storage.from(ATTACHMENT_BUCKET).createSignedUrl(path, 60 * 60);
+          if (data?.signedUrl && data.signedUrl !== "about:blank") img.src = data.signedUrl;
+          else img.replaceWith(Object.assign(document.createElement("span"), { className: "rc-doc", textContent: "foto" }));
+        } catch { /* resta l'icona */ }
+      }
+    }
+
+    function updateClaimSummary() {
+      const c = claimDraft;
+      const t = claimTotals(c.receipts);
+      const cats = Object.entries(t.byCat).filter(([, v]) => v).sort((a, b) => b[1] - a[1]);
+      const curs = Object.entries(t.byCur);
+      const box = document.getElementById("claimTotals");
+      if (box) box.innerHTML = `
+        <div class="claim-total-main"><span>Da rimborsare</span><strong>${fmtEur(t.personal)}</strong></div>
+        <div class="claim-total-side">
+          <div><span>Scontrini</span><b>${t.count}</b></div>
+          <div><span>Totale spese</span><b>${fmtEur(t.total)}</b></div>
+          <div><span>Carta aziendale</span><b>${fmtEur(t.company)}</b></div>
+        </div>
+        ${cats.length ? `<div class="claim-cats">${cats.map(([k, v]) => `<span class="pill">${escapeHtml(k)} <b>${fmtEur(v)}</b></span>`).join("")}${curs.map(([k, v]) => `<span class="pill muted">${fmtMoney(v, k)}</span>`).join("")}</div>` : ""}`;
+      const steps = document.getElementById("claimSteps");
+      if (steps) steps.innerHTML = claimStepsHtml(c);
+      const checks = document.getElementById("claimChecks");
+      if (checks) checks.innerHTML = claimChecks(c).map(x => `<div class="claim-check ${x.level}">${icon(x.level === "warn" ? "alert" : "file")}<span>${escapeHtml(x.text)}</span></div>`).join("");
+    }
+
+    function onClaimFieldInput(event) {
+      const el = event.target.closest("[data-c]");
+      if (!el) return;
+      const f = el.dataset.c;
+      claimDraft[f] = ["note_amount", "reimbursed_amount"].includes(f) ? numOrEmpty(el.value) : el.value;
+      updateClaimSummary();
+    }
+
+    function claimToday(field) {
+      claimDraft[field] = todayDateKey();
+      const el = document.querySelector(`#editModalBody [data-c="${field}"]`);
+      if (el) el.value = claimDraft[field];
+      updateClaimSummary();
+    }
+
+    function claimCopyTotal(field) {
+      const value = field === "reimbursed_amount" && hasValue(claimDraft.note_amount) ? Number(claimDraft.note_amount) : claimTotals(claimDraft.receipts).personal;
+      claimDraft[field] = round2(value);
+      const el = document.querySelector(`#editModalBody [data-c="${field}"]`);
+      if (el) el.value = claimDraft[field];
+      if (field === "note_amount" && !claimDraft.note_date) claimToday("note_date");
+      if (field === "reimbursed_amount" && !claimDraft.reimbursed_date) claimToday("reimbursed_date");
+      updateClaimSummary();
+    }
+
+    function receiptById(id) { return claimDraft.receipts.find(r => r.id === id); }
+
+    function refreshReceiptRow(r, row, skipField) {
+      if (!row) row = document.querySelector(`#claimReceipts .receipt-row[data-id="${CSS.escape(r.id)}"]`);
+      if (!row) return;
+      const eurInput = row.querySelector('[data-f="amount_eur"]');
+      if (eurInput && skipField !== "amount_eur") eurInput.value = r.amount_eur === "" ? "" : r.amount_eur;
+      row.querySelector(".rc-eur")?.classList.toggle("is-eur", r.currency === "EUR");
+      const label = row.querySelector("[data-rate-label]");
+      if (label) label.textContent = receiptRateText(r).replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+    }
+
+    function recomputeReceiptEur(r) {
+      if (r.eur_manual) return;
+      if (r.currency === "EUR") { r.rate = 1; r.amount_eur = r.amount === "" ? "" : round2(r.amount); return; }
+      r.amount_eur = r.amount !== "" && Number(r.rate) ? round2(r.amount / Number(r.rate)) : (r.amount === "" ? "" : r.amount_eur);
+    }
+
+    async function updateReceiptRate(r) {
+      if (r.currency === "EUR") { r.rate = 1; r.rate_source = ""; recomputeReceiptEur(r); refreshReceiptRow(r); updateClaimSummary(); return; }
+
+      const label = document.querySelector(`#claimReceipts .receipt-row[data-id="${CSS.escape(r.id)}"] [data-rate-label]`);
+      if (label && !FIXED_RATES[r.currency]) label.textContent = "Cerco il cambio BCE…";
+      const res = await fetchEcbRate(r.date, r.currency);
+      if (res) { r.rate = res.rate; r.rate_source = res.source; r.rate_date_for = r.date; }
+      else if (!FIXED_RATES[r.currency]) { r.rate = ""; r.rate_source = ""; }
+      recomputeReceiptEur(r);
+      refreshReceiptRow(r);
+      refreshDayTotals();
+      const info = document.getElementById("claimRateInfo"); if (info) info.innerHTML = claimRateInfoHtml();
+      updateClaimSummary();
+    }
+
+    function onReceiptInput(event) {
+      const el = event.target.closest("[data-f]");
+      if (!el) return;
+      const row = el.closest(".receipt-row");
+      const r = receiptById(row?.dataset.id);
+      if (!r) return;
+      const f = el.dataset.f;
+      const value = el.value;
+      if (f === "amount") {
+        r.amount = numOrEmpty(value);
+        recomputeReceiptEur(r);
+        refreshReceiptRow(r, row, "amount");
+      } else if (f === "amount_eur") {
+        r.amount_eur = numOrEmpty(value);
+        r.eur_manual = r.currency !== "EUR" && r.amount_eur !== "";
+        if (r.currency === "EUR") { r.amount = r.amount_eur; const a = row.querySelector('[data-f="amount"]'); if (a) a.value = value; }
+        else if (r.eur_manual && r.amount !== "" && r.amount_eur) { r.rate = round2(r.amount / r.amount_eur * 10000) / 10000; r.rate_source = "da importo in €"; }
+        refreshReceiptRow(r, row, "amount_eur");
+      } else if (f === "currency") {
+        if (event.type !== "change") return;
+        r.currency = value;
+        r.eur_manual = false;
+        claimDraft.default_currency = value;
+        updateReceiptRate(r);
+      } else if (f === "date") {
+        r.date = value;
+        if (event.type === "change" && r.currency !== "EUR" && !FIXED_RATES[r.currency] && !r.eur_manual) updateReceiptRate(r);
+      } else if (f === "paid") {
+        r.paid = value;
+        refreshReceiptRow(r, row);
+      } else if (f === "category") {
+        r.category = value;
+        if (event.type === "change") { renderReceiptRows(); if (value === "Vitto") setTimeout(() => document.querySelector(`#claimReceipts .receipt-row[data-id="${CSS.escape(r.id)}"] [data-f="time"]`)?.focus(), 30); }
+      } else {
+        r[f] = value;
+      }
+      if (f === "date" && event.type === "change") renderReceiptRows();
+      if (["time", "date", "category"].includes(f)) refreshVittoCheck(r);
+      refreshDayTotals();
+      updateClaimSummary();
+    }
+
+    function newReceipt(extra = {}) {
+      const trip = claimTrip();
+      const today = todayDateKey();
+      const inTrip = trip && today >= (trip.start_date || today) && today <= (trip.end_date || trip.start_date || today);
+      const cur = claimDraft.default_currency || "EUR";
+      return normalizeReceipt({ date: inTrip ? today : (trip?.start_date || today), currency: cur, rate: FIXED_RATES[cur] || "", paid: "personale", ...extra });
+    }
+
+    function addReceipt() {
+      const r = newReceipt();
+      claimDraft.receipts.push(r);
+      claimOpenReceiptId = r.id;
+      renderReceiptRows();
+      updateClaimSummary();
+      if (r.currency !== "EUR" && !FIXED_RATES[r.currency]) updateReceiptRate(r);
+      setTimeout(() => document.querySelector(`#claimReceipts .receipt-row[data-id="${CSS.escape(r.id)}"] [data-f="amount"]`)?.focus(), 30);
+    }
+
+    function addReceiptsFromPhotos(input) {
+      const files = [...(input.files || [])];
+      input.value = "";
+      if (!files.length) return;
+      const added = files.map(file => newReceipt({ _file: file, _preview: /^image\//.test(file.type) ? URL.createObjectURL(file) : "" }));
+      claimDraft.receipts.push(...added);
+      claimOpenReceiptId = added[0]?.id || null;
+      renderReceiptRows();
+      updateClaimSummary();
+      added.filter(r => r.currency !== "EUR" && !FIXED_RATES[r.currency]).forEach(r => updateReceiptRate(r));
+      showToast(`${files.length} scontrin${files.length === 1 ? "o aggiunto" : "i aggiunti"}: completa importo e categoria`, { type: "success" });
+    }
+
+    async function removeReceipt(id) {
+      const r = receiptById(id);
+      if (!r) return;
+      const filled = r.amount !== "" || r.description || r.photo || r._file;
+      if (filled && !(await uiConfirm(`${r.description || r.category || "Scontrino"}${r.amount !== "" ? ` · ${fmtMoney(r.amount, r.currency)}` : ""}`, { title: "Eliminare lo scontrino?", confirmLabel: "Elimina", danger: true }))) return;
+      if (r.photo?.path) claimDraft.removedPhotos.push(r.photo.path);
+      if (r._preview) URL.revokeObjectURL(r._preview);
+      claimDraft.receipts = claimDraft.receipts.filter(x => x.id !== id);
+      renderReceiptRows();
+      updateClaimSummary();
+    }
+
+    function receiptPhotoClick(id) {
+      const r = receiptById(id);
+      if (!r) return;
+      if (r._preview) return window.open(r._preview, "_blank");
+      if (r._file) return showToast("La foto verrà caricata al salvataggio");
+      if (r.photo?.path) return openAttachment(r.photo.path);
+      document.querySelector(`#claimReceipts .receipt-row[data-id="${CSS.escape(id)}"] [data-photo-input]`)?.click();
+    }
+
+    function receiptPhotoChosen(id, input) {
+      const file = input.files?.[0];
+      input.value = "";
+      const r = receiptById(id);
+      if (!file || !r) return;
+      if (r.photo?.path) claimDraft.removedPhotos.push(r.photo.path);
+      if (r._preview) URL.revokeObjectURL(r._preview);
+      r.photo = null;
+      r._file = file;
+      r._preview = /^image\//.test(file.type) ? URL.createObjectURL(file) : "";
+      renderReceiptRows();
+      updateClaimSummary();
+    }
+
+    function switchClaimPerson(person) {
+      if (!canSeeExpensesOf(person)) return;
+      openExpenseClaim(claimDraft.trip_id, person);
+    }
+
+    async function saveExpenseClaim() {
+      const c = claimDraft;
+      if (!c) return;
+      const btn = document.getElementById("claimSaveBtn");
+      if (btn) btn.disabled = true;
+      setLoading(true);
+      try {
+        // 1) foto nuove
+        const pending = c.receipts.filter(r => r._file);
+        for (let i = 0; i < pending.length; i++) {
+          const r = pending[i];
+          if (pending.length > 1) showToast(`Carico le foto ${i + 1}/${pending.length}…`, { duration: 1500 });
+          r.photo = await uploadReceiptPhoto(c, r._file);
+          if (r._preview) URL.revokeObjectURL(r._preview);
+          r._file = null; r._preview = "";
+        }
+        // 2) dati
+        const t = claimTotals(c.receipts);
+        const receipts = c.receipts.map(({ _file, _preview, ...r }) => r);
+        const row = {
+          trip_id: String(c.trip_id), resource: c.resource, default_currency: c.default_currency || "EUR", receipts,
+          status: CLAIM_STEPS[claimStepIndex(c)].key, total_eur: t.total, total_personal: t.personal,
+          delivered_date: c.delivered_date || null, note_number: c.note_number || null, note_date: c.note_date || null,
+          note_amount: hasValue(c.note_amount) ? Number(c.note_amount) : null, signed_date: c.signed_date || null,
+          reimbursed_date: c.reimbursed_date || null, reimbursed_amount: hasValue(c.reimbursed_amount) ? Number(c.reimbursed_amount) : null,
+          notes: c.notes || null, updated_at: new Date().toISOString()
+        };
+        let res;
+        if (c.id) res = await sb.from(EXPENSE_TABLE).update(row).eq("id", c.id).select().single();
+        else {
+          res = await sb.from(EXPENSE_TABLE).insert({ ...row, created_by_operator: currentUser?.name || null }).select().single();
+          if (res.error && /duplicate|unique|23505/i.test(`${res.error.message} ${res.error.code || ""}`)) {
+            // creata nel frattempo da un altro dispositivo: si aggiorna quella
+            res = await sb.from(EXPENSE_TABLE).update(row).eq("trip_id", row.trip_id).eq("resource", row.resource).select().single();
+          }
+        }
+        if (res.error) throw res.error;
+        // 3) foto tolte
+        if (c.removedPhotos.length) await sb.storage.from(ATTACHMENT_BUCKET).remove(c.removedPhotos).catch?.(() => {});
+        const saved = res.data || { ...row, id: c.id };
+        expenseClaims = [...expenseClaims.filter(x => x.id !== saved.id && !(String(x.trip_id) === row.trip_id && x.resource === row.resource)), saved];
+        closeEditModal(true);
+        showToast(`Spese salvate · da rimborsare ${fmtEur(t.personal)}`, { type: "success" });
+        renderAll();
+      } catch (error) {
+        showToast("Errore salvataggio spese: " + (error?.message || error), { type: "error" });
+        if (btn) btn.disabled = false;
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function deleteExpenseClaim() {
+      const c = claimDraft;
+      if (!c?.id) return;
+      const t = claimTotals(c.receipts);
+      if (!(await uiConfirm(`${t.count} scontrini (${fmtEur(t.total)}) e le relative foto verranno eliminati definitivamente.`, { title: "Eliminare la pratica di rimborso?", confirmLabel: "Elimina", danger: true }))) return;
+      const { error } = await sb.from(EXPENSE_TABLE).delete().eq("id", c.id);
+      if (error) return showToast("Errore eliminazione: " + error.message, { type: "error" });
+      const paths = [...c.receipts.map(r => r.photo?.path).filter(Boolean), ...c.removedPhotos];
+      if (paths.length) await sb.storage.from(ATTACHMENT_BUCKET).remove(paths).catch?.(() => {});
+      expenseClaims = expenseClaims.filter(x => x.id !== c.id);
+      closeEditModal(true);
+      showToast("Pratica eliminata");
+      renderAll();
+    }
+
+    /* ---------- Riepilogo per la segretaria ---------- */
+    function claimReceiptRows(c) {
+      return [...c.receipts].map(normalizeReceipt).sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    }
+
+    async function printExpenseClaim() {
+      const c = claimDraft;
+      const trip = claimTrip();
+      const t = claimTotals(c.receipts);
+      const rows = claimReceiptRows(c);
+      // foto: link temporanei (validi 1 ora) per mostrarle nel PDF
+      const photoUrls = await Promise.all(c.receipts.map(async r => {
+        if (r._preview) return r._preview;
+        if (r.photo?.path && /^image\//.test(r.photo.type || "")) {
+          try { const { data } = await sb.storage.from(ATTACHMENT_BUCKET).createSignedUrl(r.photo.path, 3600); return data?.signedUrl || ""; } catch { return ""; }
+        }
+        return "";
+      }));
+      const urlOf = new Map(c.receipts.map((r, i) => [r.id, photoUrls[i]]));
+      const body = pdfKv([
+        ["Persona", c.resource], ["Trasferta", tripLabel(trip)], ["Periodo", `${formatDate(trip?.start_date)} → ${formatDate(trip?.end_date || trip?.start_date)}`], ["Cliente", trip?.customer || commessaFromVehicle(trip?.vehicle) || "-"],
+        ["Scontrini", t.count], ["Totale spese", fmtEur(t.total)], ["Carta aziendale", fmtEur(t.company)], ["Da rimborsare", fmtEur(t.personal)]
+      ])
+        + pdfSection("Scontrini", pdfTable(["#", "Data", "Ora", "Categoria", "Descrizione", "Importo", "Cambio", "Importo €", "Pagata con"],
+          rows.map((r, i) => [i + 1, formatDate(r.date), r.time || "", r.category || "-", r.description || "-", r.amount === "" ? "-" : fmtMoney(r.amount, r.currency), r.currency === "EUR" ? "-" : (r.rate ? `1 € = ${Number(r.rate).toLocaleString("it-IT", { maximumFractionDigits: 4 })} ${r.currency}` : "-"), r.amount_eur === "" ? "-" : fmtEur(r.amount_eur), r.paid === "aziendale" ? "Carta aziendale" : "Personale"]),
+          { empty: "Nessuno scontrino.", foot: rows.length ? ["\u00a0", "\u00a0", "\u00a0", "\u00a0", "Totale", "\u00a0", "\u00a0", fmtEur(t.total), `Da rimborsare ${fmtEur(t.personal)}`] : null }))
+        + pdfSection("Totali per categoria", pdfTable(["Categoria", "Importo €"], Object.entries(t.byCat).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, fmtEur(v)]), { empty: "-" }))
+        + (c.note_number || c.note_date || hasValue(c.note_amount) || c.delivered_date ? pdfSection("Nota spese", pdfKv([["Consegnati", formatDate(c.delivered_date)], ["N. nota", c.note_number || "-"], ["Data nota", formatDate(c.note_date)], ["Importo nota", hasValue(c.note_amount) ? fmtEur(c.note_amount) : "-"], ["Firmata", formatDate(c.signed_date)], ["Rimborsata", formatDate(c.reimbursed_date)], ["Importo rimborsato", hasValue(c.reimbursed_amount) ? fmtEur(c.reimbursed_amount) : "-"]])) : "")
+        + (c.notes ? pdfSection("Note", `<div class="notes">${escapeHtml(c.notes)}</div>`) : "")
+        + (rows.some(r => urlOf.get(r.id)) ? pdfSection("Foto degli scontrini", `<div class="receipt-photos">${rows.map((r, i) => urlOf.get(r.id) ? `<figure><img src="${escapeHtml(urlOf.get(r.id))}" alt=""><figcaption>#${i + 1} · ${formatDate(r.date)} · ${escapeHtml(r.category || "")} · ${r.amount === "" ? "" : escapeHtml(fmtMoney(r.amount, r.currency))}</figcaption></figure>` : "").join("")}</div>`) : "");
+      openPrintDocument(`Riepilogo spese · ${trip?.place || ""}`, `${c.resource} · ${formatDate(trip?.start_date)} → ${formatDate(trip?.end_date || trip?.start_date)}`, body, { waitImages: true });
+    }
+
+    function exportExpenseClaimCSV() {
+      const c = claimDraft;
+      const trip = claimTrip();
+      const t = claimTotals(c.receipts);
+      const rows = [["Persona", "Trasferta", "Data", "Ora", "Categoria", "Descrizione", "Importo", "Valuta", "Cambio (1 € =)", "Importo €", "Pagata con", "Foto"]];
+      claimReceiptRows(c).forEach(r => rows.push([c.resource, tripLabel(trip), formatDate(r.date), r.time || "", r.category, r.description, r.amount === "" ? "" : String(r.amount).replace(".", ","), r.currency, r.currency === "EUR" ? "" : String(r.rate || "").replace(".", ","), r.amount_eur === "" ? "" : String(r.amount_eur).replace(".", ","), r.paid === "aziendale" ? "Carta aziendale" : "Personale", r.photo || r._file ? "sì" : "no"]));
+      rows.push([], ["", "", "", "", "", "Totale spese", "", "", "", String(t.total).replace(".", ","), "", ""], ["", "", "", "", "", "Da rimborsare", "", "", "", String(t.personal).replace(".", ","), "", ""]);
+      const name = `spese_${safeFileName(trip?.place || "trasferta")}_${(trip?.start_date || "").replace(/-/g, "")}_${safeFileName(c.resource)}.csv`;
+      downloadText(name, csvRows(rows), "text/csv;charset=utf-8");
+      showToast("Riepilogo scaricato (si apre con Excel)", { type: "success" });
+    }
+
+    /* ---------- Sezione "Rimborsi" ---------- */
+    // Righe = trasferte già iniziate (o con spese) × persone visibili
+    function expenseRows() {
+      const scope = expensePeopleInScope();
+      const today = todayDateKey();
+      const rows = [];
+      trips.forEach(trip => {
+        (trip.people || []).forEach(person => {
+          if (!canSeeExpensesOf(person)) return;
+          if (scope && !scope.includes(person)) return;
+          const claim = claimFor(trip.id, person);
+          if (!claim && (trip.start_date || "9999") > today) return;
+          const step = claimStepIndex(claim);
+          rows.push({ trip, person, claim, step, totals: claimTotals(claim?.receipts) });
+        });
+      });
+      return rows.sort((a, b) => String(b.trip.start_date || "").localeCompare(String(a.trip.start_date || "")) || a.person.localeCompare(b.person));
+    }
+
+    function expenseKpis(rows) {
+      const open = rows.filter(r => r.step < 4 && r.claim);
+      return {
+        toRefund: round2(open.reduce((s, r) => s + r.totals.personal, 0)),
+        toSign: rows.filter(r => r.step === 2).length,
+        waiting: rows.filter(r => r.step === 3),
+        waitingAmount: round2(rows.filter(r => r.step === 3).reduce((s, r) => s + (hasValue(r.claim?.note_amount) ? Number(r.claim.note_amount) : r.totals.personal), 0)),
+        noReceipts: rows.filter(r => !r.totals.count && (r.trip.end_date || r.trip.start_date || "") <= todayDateKey()).length,
+        missingPhoto: rows.reduce((s, r) => s + (r.step < 4 ? r.totals.missingPhoto : 0), 0)
+      };
+    }
+
+    function openExpenseSetup() {
+      showSection("rimborsi");
+    }
+
+    function copyExpenseSql() {
+      const done = () => showToast("Comando SQL copiato: incollalo in Supabase › SQL Editor ed esegui", { type: "success", duration: 6000 });
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(EXPENSE_SQL).then(done).catch(() => fallbackCopy());
+      else fallbackCopy();
+      function fallbackCopy() { const ta = document.getElementById("expenseSqlText"); ta?.select(); try { document.execCommand("copy"); done(); } catch { showToast("Seleziona il testo e copialo a mano"); } }
+    }
+
+    function setExpenseFilter(value) {
+      expenseFilter = value;
+      renderExpenses();
+    }
+
+    function renderExpenses() {
+      const box = document.getElementById("expensesBody");
+      if (!box) return;
+      if (expenseTableMissing) {
+        box.innerHTML = `
+          <div class="panel"><div class="panel-body">
+            <h2 style="margin:0 0 6px">Attiva i rimborsi spese (una sola volta)</h2>
+            <p class="mini-meta" style="margin:0 0 12px">Per salvare scontrini e note spese serve una nuova tabella nel database. Chi gestisce Supabase deve aprire il progetto › <b>SQL Editor</b> › <b>New query</b>, incollare il comando qui sotto e premere <b>Run</b>. Poi torna qui e premi le frecce in alto.</p>
+            <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap"><button type="button" class="btn" onclick="copyExpenseSql()">${icon("copy")}Copia il comando SQL</button><button type="button" class="btn secondary" onclick="manualRefresh()">${icon("refresh")}Ho eseguito il comando, ricarica</button></div>
+            <textarea id="expenseSqlText" class="textarea" readonly style="min-height:260px;font-family:Consolas,ui-monospace,monospace;font-size:12px">${escapeHtml(EXPENSE_SQL)}</textarea>
+          </div></div>`;
+        return;
+      }
+      const allRows = expenseRows();
+      const k = expenseKpis(allRows);
+      const q = document.getElementById("expenseSearch")?.value.toLowerCase() || "";
+      let rows = allRows;
+      if (expenseFilter === "open") rows = rows.filter(r => r.step < 4);
+      else if (expenseFilter !== "all") rows = rows.filter(r => CLAIM_STEPS[r.step].key === expenseFilter);
+      if (q) rows = rows.filter(r => [r.trip.place, r.trip.vehicle, r.trip.customer, r.person, r.claim?.note_number, r.claim?.notes].join(" ").toLowerCase().includes(q));
+      const admin = isAdminUser();
+      const scope = expensePeopleInScope();
+      box.innerHTML = `
+        <div class="operator-card-note">${icon("users")}<span>${admin
+          ? (scope ? `Sei amministratore: stai vedendo le spese di <b>${escapeHtml(scope[0])}</b>. Per vederle tutte scegli «Tutte le risorse» nella Vista in alto.` : `Sei amministratore: stai vedendo le spese di <b>tutte le risorse</b>.`)
+          : `Le spese sono private: vedi solo le tue. Solo gli amministratori vedono quelle di tutti.`}</span></div>
+        <div class="cards expense-kpis">
+          <div class="card kpi"><div class="stat-label"><span class="kpi-dot dot-trip"></span>Da rimborsare</div><div class="stat-value">${fmtEur(k.toRefund)}</div></div>
+          <button class="card kpi" onclick="setExpenseFilter('note')"><div class="stat-label"><span class="kpi-dot dot-issue"></span>Note spese da firmare</div><div class="stat-value">${k.toSign}</div></button>
+          <button class="card kpi" onclick="setExpenseFilter('signed')"><div class="stat-label"><span class="kpi-dot dot-progress"></span>Firmate, in attesa di rimborso</div><div class="stat-value">${k.waiting.length}${k.waiting.length ? ` <small>${fmtEur(k.waitingAmount)}</small>` : ""}</div></button>
+          <button class="card kpi" onclick="setExpenseFilter('draft')"><div class="stat-label"><span class="kpi-dot dot-todo"></span>Trasferte senza scontrini</div><div class="stat-value">${k.noReceipts}</div></button>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div><h2>Pratiche di rimborso</h2><div class="panel-sub">${rows.length} di ${allRows.length} · una pratica per trasferta e persona</div></div></div>
+          <div class="panel-body">
+            <div class="toolbar">
+              <input id="expenseSearch" class="input" type="search" placeholder="Cerca luogo, commessa, persona, n. nota…" value="${escapeHtml(q)}" oninput="renderExpenses(); this.focus(); this.setSelectionRange(this.value.length, this.value.length)">
+              <select class="select" onchange="setExpenseFilter(this.value)" aria-label="Stato">
+                <option value="open" ${expenseFilter === "open" ? "selected" : ""}>Da chiudere (non rimborsate)</option>
+                ${CLAIM_STEPS.map(s => `<option value="${s.key}" ${expenseFilter === s.key ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("")}
+                <option value="all" ${expenseFilter === "all" ? "selected" : ""}>Tutte</option>
+              </select>
+            </div>
+            <div class="expense-list">${rows.map(expenseRowHtml).join("") || `<div class="empty">Nessuna pratica${expenseFilter === "open" ? " da chiudere" : ""}. Le pratiche compaiono per ogni trasferta iniziata in cui sei tra le persone coinvolte.</div>`}</div>
+          </div>
+        </div>`;
+    }
+
+    function expenseRowHtml(r) {
+      const checks = r.claim ? claimChecks(r.claim).filter(x => x.level === "warn") : [];
+      const multi = !expensePeopleInScope() || isAdminUser();
+      const days = r.step === 2 && r.claim?.note_date ? Math.round((parseDateKey(todayDateKey()) - parseDateKey(r.claim.note_date)) / 86400000) : null;
+      return `<div class="expense-row step-${r.step}" role="button" tabindex="0" onclick="openExpenseClaim(${jsArg(r.trip.id)}, ${jsArg(r.person)})">
+        <div class="er-main">
+          <div class="mini-title">${escapeHtml(r.trip.place || "-")} <span class="er-veh">· ${escapeHtml(r.trip.vehicle || "-")}</span></div>
+          <div class="mini-meta">${formatDate(r.trip.start_date)} → ${formatDate(r.trip.end_date || r.trip.start_date)}${multi ? ` · <b>${escapeHtml(r.person)}</b>` : ""}${r.claim?.note_number ? ` · nota n. ${escapeHtml(r.claim.note_number)}` : ""}</div>
+          <div class="er-steps">${CLAIM_STEPS.map((s, i) => `<span class="er-step ${i < r.step ? "done" : i === r.step ? "current" : ""}" title="${escapeHtml(s.label)}"></span>`).join("")}<span class="er-status">${escapeHtml(CLAIM_STEPS[r.step].label)}${days ? ` · da ${days} gg` : ""}</span></div>
+          ${checks.length ? `<div class="er-warn">${icon("alert")}${escapeHtml(checks[0].text)}</div>` : ""}
+        </div>
+        <div class="er-amount">
+          ${r.totals.count ? `<strong>${fmtEur(r.step === 4 && hasValue(r.claim?.reimbursed_amount) ? r.claim.reimbursed_amount : r.totals.personal)}</strong><span>${r.totals.count} scontrin${r.totals.count === 1 ? "o" : "i"}${r.totals.company ? ` · ${fmtEur(r.totals.company)} carta az.` : ""}</span>` : `<span class="er-empty">Nessuno scontrino</span>`}
+        </div>
+      </div>`;
+    }
+
+    // Trasferte: pulsante "Spese" nella riga
+    function expenseTripButton(trip) {
+      if (expenseTableMissing) return "";
+      const people = (trip.people || []).filter(p => canSeeExpensesOf(p));
+      if (!people.length) return "";
+      const scoped = scopeName() && people.includes(scopeName()) ? scopeName() : "";
+      const mine = people.includes(currentUser?.name) ? currentUser.name : (scoped || people[0]);
+      const claims = [claimFor(trip.id, mine)].filter(Boolean);
+      const step = claims.length ? claimStepIndex(claims[0]) : 0;
+      const t = claimTotals(claims.flatMap(c => c.receipts || []));
+      return `<button class="btn ghost small expense-trip-btn step-${claims.length ? step : "none"}" title="Spese e rimborso${claims.length ? ` · ${CLAIM_STEPS[step].label}` : ""}" onclick="event.stopPropagation(); openExpenseClaim(${jsArg(trip.id)}, ${jsArg(mine)})">€ ${t.count ? fmtEur(t.personal).replace(/\s?€/, "") : "Spese"}</button>`;
+    }
+
+    // Dashboard: riquadro rimborsi
+    function renderDashboardExpenses() {
+      const panel = document.getElementById("expensesPanel");
+      if (!panel) return;
+      if (expenseTableMissing || !currentUser) { panel.classList.add("hidden"); return; }
+      panel.classList.remove("hidden");
+      const rows = expenseRows();
+      const k = expenseKpis(rows);
+      const actions = rows.filter(r => r.step === 2 || (r.step < 2 && !r.totals.count && (r.trip.end_date || r.trip.start_date || "") <= todayDateKey()) || r.step === 3)
+        .sort((a, b) => (a.step === 2 ? 0 : a.step === 3 ? 2 : 1) - (b.step === 2 ? 0 : b.step === 3 ? 2 : 1)).slice(0, 4);
+      document.getElementById("dashboardExpenses").innerHTML = `
+        <div class="expense-dash-kpi"><span>Da rimborsare</span><strong>${fmtEur(k.toRefund)}</strong>${k.toSign ? `<em>${k.toSign} ${k.toSign === 1 ? "nota" : "note"} da firmare</em>` : ""}</div>
+        ${actions.map(r => `<div class="mini-item" onclick="openExpenseClaim(${jsArg(r.trip.id)}, ${jsArg(r.person)})"><div class="mini-title">${escapeHtml(r.trip.place || "-")}${isAdminUser() && !expensePeopleInScope() ? ` <span style="font-weight:600;color:var(--muted)">· ${escapeHtml(r.person)}</span>` : ""}</div><div class="mini-meta">${r.step === 2 ? "Nota spese da controllare e firmare" : r.step === 3 ? "Firmata, in attesa del rimborso" : "Mancano gli scontrini"} · ${r.totals.count ? fmtEur(r.totals.personal) : formatDate(r.trip.start_date)}</div></div>`).join("") || `<div class="mini-meta">Nessuna azione da fare sui rimborsi.</div>`}`;
+    }
+
+    function updateExpenseBadge() {
+      const badge = document.getElementById("navExpensesBadge");
+      if (!badge) return;
+      const n = expenseTableMissing || !currentUser ? 0 : expenseRows().filter(r => r.step === 2).length;
+      badge.textContent = n;
+      badge.title = `${n} note spese da firmare`;
+      badge.classList.toggle("hidden", !n);
+    }
+
     /* ===================== RAPPORTINO SETTIMANALE (Excel) ===================== */
     // Compila il modello "Consuntivo ore di intervento" (MD.INT.02) a partire da attività, trasferte e reperibilità.
     // Il modello originale è incorporato in fondo alla pagina: si modificano solo i valori delle celle, la grafica resta identica.
@@ -8616,8 +10069,9 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     // Commessa = prima parte del codice veicolo, senza numeri finali (es. ELZEL1_… → ELZEL). Mai la matricola.
     function commessaFromVehicle(vehicle) {
-      const first = String(vehicle || "").trim().split(/[_\s]+/)[0] || "";
-      const code = first.replace(/\d+$/, "").toUpperCase();
+      const first = (String(vehicle || "").trim().split("_")[0] || "").trim();
+      // "RFI GENERICO" → RFI · "ELZEL1" → ELZEL · "COSTA D'AVORIO" resta intero
+      const code = first.replace(/\s+GENERICO$/i, "").replace(/\s*\d+$/, "").toUpperCase().trim();
       if (!code || code === "GENERICO" || /^OCP/.test(code) || /^\d+$/.test(first)) return "";
       return code;
     }
@@ -8629,7 +10083,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     function clienteFromTrip(trip) {
       const known = knownCommesse();
       const customer = String(trip?.customer || "").trim().toUpperCase();
-      const fromCustomer = known.find(code => customer === code || customer.split(/[\s,;/()-]+/).includes(code));
+      const fromCustomer = known.find(code => customer === code || customer.split(/[\s,;/()-]+/).includes(code) || (code.includes(" ") && customer.includes(code)));
       if (fromCustomer) return fromCustomer;
       return commessaFromVehicle(trip?.vehicle);
     }
@@ -9679,6 +11133,12 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     });
 
     // Service worker: avvio veloce, apertura anche senza rete, avviso di nuova versione
+    // dopo un aggiornamento si toglie il parametro "agg" dall'indirizzo
+    try {
+      const u = new URL(location.href);
+      if (u.searchParams.has("agg") || u.searchParams.has("versione")) { u.searchParams.delete("agg"); u.searchParams.delete("versione"); history.replaceState(null, "", u.pathname + u.search + u.hash); }
+    } catch { /* ok */ }
+
     function registerServiceWorker() {
       if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
       const hadController = !!navigator.serviceWorker.controller;
@@ -9687,6 +11147,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           if (document.visibilityState === "visible") registration.update().catch(() => {});
         });
       }).catch(error => console.warn("Service worker non registrato", error));
+      // controllo della versione pubblicata: all'apertura, al ritorno sull'app e ogni 30 minuti
+      setTimeout(() => checkForAppUpdate(), 4000);
+      setInterval(() => checkForAppUpdate(), 30 * 60 * 1000);
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkForAppUpdate(); });
       navigator.serviceWorker.addEventListener("controllerchange", () => {
         if (!hadController) return; // prima installazione: niente avviso
         showToast("È disponibile una nuova versione di RailOps Hub", { duration: 120000, action: { label: "Aggiorna", fn: () => location.reload() } });
