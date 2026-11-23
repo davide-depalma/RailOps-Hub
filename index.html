@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v56.4 · 20/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v56.5 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v56.4" />
+  <meta name="app-version" content="v56.5" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -2678,9 +2678,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v56.4";
-    const APP_RELEASE_DATE = "20/11/2026";
+    const APP_VERSION = "v56.5";
+    const APP_RELEASE_DATE = "23/11/2026";
     const CHANGELOG = [
+      { v: "v56.5", date: "23/11/2026", items: ["Rapportino: corretto l'orario che in alcune celle compariva come numero (es. 0,58 invece di 14:00) — nel modello alcune celle DALLE/ALLE, soprattutto ORE VIAGGIO dalla riga 48 in giù, non avevano il formato orario; ora viene impostato sempre", "Rapportino: date e testi della pagina 1 mantengono i bordi della propria riga; la pagina 1 usa le righe 11–33 del modello"] },
       { v: "v56.4", date: "20/11/2026", items: ["Calendario: le barre degli elementi su più giorni sono di nuovo perfettamente allineate anche nei giorni con il pulsante delle ore (l'intestazione del giorno ha ora un'altezza fissa)"] },
       { v: "v56.3", date: "20/11/2026", items: ["Calendario, finestra del giorno: in alto il totale ore della giornata con il dettaglio per tipo; per ogni elemento le ore del giorno e le fasce orarie (es. 08:30–13:00 · 14:00–15:30), per le trasferte separate tra lavoro e viaggio", "Elementi ordinati per orario d'inizio; compaiono anche le reperibilità iniziate il giorno prima e proseguite dopo mezzanotte"] },
       { v: "v56.2", date: "20/11/2026", items: ["Calendario: le ore si aprono e chiudono giorno per giorno con il pulsante orologio in alto a destra di ogni giornata (al posto del numero di elementi); aperto mostra il totale del giorno", "Le ore delle attività sono colorate in base allo stato (da fare, in corso, completata, bloccata)", "Tolto il pulsante generale «Nascondi ore»"] },
@@ -8125,7 +8126,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     const JSZIP_URL = "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js";
     const RAPP_MAX_POS = 8;
     const RAPP_FIRST_ROW = 11;
-    const RAPP_MAX_ROWS = 24;
+    const RAPP_MAX_ROWS = 23; // righe 11–33 (la riga 34 del modello ha un'altra struttura)
     const RAPP_POS_CELLS = ["Q3", "Q4", "Q5", "Q6", "U3", "U4", "U5", "U6"];
     const RAPP_LUOGO_KEY = "railops_rapp_luogo";
     let rappData = null;
@@ -8514,38 +8515,47 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         if (value === null || value === undefined || value === "") return;
         xml = xmlSetCell(xml, ref, value, kind, styleIndex);
       };
-      // stile "riduci per adattare" per la colonna ATTIVITÀ: i testi lunghi restano interi nella cella
-      const shrinkStyle = await addShrinkToFitStyle(zip, xml.match(/<c r="G11"[^>]*\ss="(\d+)"/)?.[1]);
 
       // PAGINA 1 — intestazione
       set("T1", header.compilatoDa);
       set("E3", header.cliente);
       data.pos.slice(0, RAPP_MAX_POS).forEach((matricola, i) => set(RAPP_POS_CELLS[i], matricola));
       // PAGINA 1 — tabella POS / DATA / LUOGO / ATTIVITÀ / WO / TRASFERTA-REPERIBILITÀ
-      data.rows.slice(0, RAPP_MAX_ROWS).forEach((row, i) => {
-        const r = RAPP_FIRST_ROW + i;
+      const styleAt = ref => xml.match(new RegExp(`<c r="${ref}"[^>]*\\ss="(\\d+)"`))?.[1];
+      const page1 = data.rows.slice(0, RAPP_MAX_ROWS);
+      for (let i = 0; i < page1.length; i++) {
+        const row = page1[i], r = RAPP_FIRST_ROW + i;
         set(`A${r}`, row.pos, "num");
-        set(`C${r}`, excelDateSerial(row.date), "num");
+        // stile della cella della propria riga (bordi), con formato data garantito
+        set(`C${r}`, excelDateSerial(row.date), "num", await addStyleVariant(zip, styleAt(`C${r}`), {}, { numFmt: "date" }));
         set(`E${r}`, row.luogo);
-        set(`G${r}`, row.attivita, "str", shrinkStyle);
+        // "riduci per adattare" per la colonna ATTIVITÀ: i testi lunghi restano interi nella cella
+        set(`G${r}`, row.attivita, "str", await addShrinkToFitStyle(zip, styleAt(`G${r}`)));
         set(`T${r}`, row.tr);
-      });
+      }
 
       // PAGINA 2 — ore lavoro / ore viaggio
       const hourRows = (data.hours || []).slice(0, RAPP_HOURS_MAX_ROWS);
       const groups = rapportinoDateGroups(hourRows);
       const H0 = RAPP_HOURS_FIRST_ROW;
       const timeVal = min => Math.min(min, 1439) / 1440;
-      hourRows.forEach((row, i) => {
-        const r = H0 + i;
+      const styleOf = ref => xml.match(new RegExp(`<c r="${ref}"[^>]*\\ss="(\\d+)"`))?.[1];
+      // nel modello alcune celle DALLE/ALLE (es. ORE VIAGGIO dalla riga 48) non hanno il formato orario:
+      // si usa lo stile della cella (bordi compresi) forzando il formato h:mm, altrimenti Excel mostra 0,58 invece di 14:00
+      const setTime = async (ref, min) => set(ref, timeVal(min), "num", await addStyleVariant(zip, styleOf(ref), {}, { numFmt: "time" }));
+      for (let i = 0; i < hourRows.length; i++) {
+        const row = hourRows[i], r = H0 + i;
         set(`A${r}`, String(row.pos));
-        row.work.forEach(([a, b], k) => { set(`${"FHJ"[k]}${r}`, timeVal(a), "num"); set(`${"GIK"[k]}${r}`, timeVal(b), "num"); });
-        row.travel.forEach(([a, b], k) => { set(`${"OQ"[k]}${r}`, timeVal(a), "num"); set(`${"PR"[k]}${r}`, timeVal(b), "num"); });
-      });
-      // data e totale del giorno centrati verticalmente nelle celle unite
-      const dateStyle = await addStyleVariant(zip, xml.match(/<c r="C44"[^>]*\ss="(\d+)"/)?.[1], { vertical: "center" });
-      const totalStyle = await addStyleVariant(zip, xml.match(/<c r="U44"[^>]*\ss="(\d+)"/)?.[1], { vertical: "center" });
-      groups.forEach(g => set(`C${H0 + g.start}`, excelDateSerial(g.date), "num", dateStyle));
+        for (let k = 0; k < row.work.length; k++) { await setTime(`${"FHJ"[k]}${r}`, row.work[k][0]); await setTime(`${"GIK"[k]}${r}`, row.work[k][1]); }
+        for (let k = 0; k < row.travel.length; k++) { await setTime(`${"OQ"[k]}${r}`, row.travel[k][0]); await setTime(`${"PR"[k]}${r}`, row.travel[k][1]); }
+      }
+      // data e totale del giorno centrati verticalmente nelle celle unite (mantenendo i bordi della propria riga)
+      for (const g of groups) {
+        const ref = `C${H0 + g.start}`;
+        set(ref, excelDateSerial(g.date), "num", await addStyleVariant(zip, styleOf(ref), { vertical: "center" }, { numFmt: "date" }));
+      }
+      const totalStyles = new Map();
+      for (const g of groups) totalStyles.set(g.start, await addStyleVariant(zip, styleOf(`U${H0 + g.start}`), { vertical: "center" }));
       // formule riscritte senza "formule condivise", così le celle unite del totale restano coerenti
       const groupAt = new Map(groups.map(g => [g.start, g]));
       const insideGroup = new Set(groups.flatMap(g => Array.from({ length: g.end - g.start }, (_, k) => g.start + k + 1)));
@@ -8559,7 +8569,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         if (g) {
           const total = hourRows.slice(g.start, g.end + 1).reduce((t, x) => t + (x.workMinutes + x.travelMinutes) / 60, 0);
           const f = g.end > g.start ? `SUM(L${r}:L${H0 + g.end},S${r}:S${H0 + g.end})` : `SUM(L${r},S${r})`;
-          xml = xmlSetFormula(xml, `U${r}`, f, total, totalStyle);
+          xml = xmlSetFormula(xml, `U${r}`, f, total, totalStyles.get(i));
         } else if (insideGroup.has(i)) xml = xmlSetFormula(xml, `U${r}`, null);
         else xml = xmlSetFormula(xml, `U${r}`, `SUM(L${r},S${r})`);
       }
@@ -8599,15 +8609,41 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     }
 
     // Duplica lo stile di una cella aggiungendo attributi di allineamento. Restituisce l'indice del nuovo stile (null se non possibile).
-    async function addStyleVariant(zip, baseIndex, alignAttrs) {
+    // numFmt option: { numFmt: "time" | "date" } → se il formato della cella non è già un orario/una data, lo imposta (h:mm / gg/mm/aaaa).
+    async function addStyleVariant(zip, baseIndex, alignAttrs = {}, opts = {}) {
       if (baseIndex === undefined || baseIndex === null) return null;
+      const cacheKey = `${baseIndex}|${JSON.stringify(alignAttrs)}|${opts.numFmt || ""}`;
+      zip._styleVariants ||= new Map();
+      if (zip._styleVariants.has(cacheKey)) return zip._styleVariants.get(cacheKey);
       const path = "xl/styles.xml";
       let styles = await zip.file(path).async("string");
       const block = styles.match(/<cellXfs count="(\d+)">([\s\S]*?)<\/cellXfs>/);
       if (!block) return null;
       const xfs = block[2].match(/<xf\b[^>]*?(?:\/>|>[\s\S]*?<\/xf>)/g) || [];
-      const base = xfs[Number(baseIndex)];
+      let base = xfs[Number(baseIndex)];
       if (!base) return null;
+      let changed = Object.keys(alignAttrs).length > 0;
+      if (opts.numFmt) {
+        const id = Number(base.match(/numFmtId="(\d+)"/)?.[1] || 0);
+        const custom = styles.match(new RegExp(`<numFmt numFmtId="${id}" formatCode="([^"]*)"`))?.[1] || "";
+        const isTime = [18, 19, 20, 21, 45, 46, 47].includes(id) || (/h/i.test(custom) && /m/i.test(custom) && !/[dy]/i.test(custom.replace(/\[[^\]]*\]/g, "")));
+        const isDate = [14, 15, 16, 17, 22].includes(id) || (/d/i.test(custom) && /y/i.test(custom));
+        const ok = opts.numFmt === "time" ? isTime : isDate;
+        if (!ok) {
+          const target = opts.numFmt === "time" ? 20 : 14;
+          base = base.replace(/numFmtId="\d+"/, `numFmtId="${target}"`);
+          base = /applyNumberFormat=/.test(base) ? base.replace(/applyNumberFormat="[^"]*"/, 'applyNumberFormat="1"') : base.replace(/^<xf\b/, '<xf applyNumberFormat="1"');
+          changed = true;
+        }
+      }
+      if (!changed) { zip._styleVariants.set(cacheKey, Number(baseIndex)); return Number(baseIndex); }
+      if (!Object.keys(alignAttrs).length) {
+        const newIndex = xfs.length;
+        styles = styles.replace(block[0], `<cellXfs count="${newIndex + 1}">${block[2]}${base}</cellXfs>`);
+        zip.file(path, styles);
+        zip._styleVariants.set(cacheKey, newIndex);
+        return newIndex;
+      }
       const withAttrs = (attrs = "") => {
         let a = attrs;
         Object.entries(alignAttrs).forEach(([k, v]) => {
@@ -8624,6 +8660,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const newIndex = xfs.length;
       styles = styles.replace(block[0], `<cellXfs count="${newIndex + 1}">${block[2]}${clone}</cellXfs>`);
       zip.file(path, styles);
+      zip._styleVariants.set(cacheKey, newIndex);
       return newIndex;
     }
 
