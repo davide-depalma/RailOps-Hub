@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v58.3 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v58.5 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v58.3" />
+  <meta name="app-version" content="v58.5" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <script>
@@ -223,7 +223,13 @@
     .receipt-row{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:start;border:1px solid var(--primary-bd);background:var(--panel);border-radius:12px;padding:8px;box-shadow:0 0 0 3px rgba(31,79,216,.08);margin:2px 0}
     .rc-side{display:flex;flex-direction:column;gap:6px;align-items:stretch}
     .rc-line.with-time{grid-template-columns:150px 96px 160px minmax(0,1fr)}
-    .rc-vitto{font-size:12px;font-weight:650;border-radius:8px;padding:4px 8px}
+    .rc-vitto{font-size:12px;font-weight:650;border-radius:8px;padding:4px 8px;flex:1;min-width:200px}
+    .rc-vitto-row{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+    .meal-seg{display:inline-flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;flex:0 0 auto}
+    .meal-seg button{border:0;background:var(--panel);color:var(--muted);font:inherit;font-size:12px;font-weight:750;padding:5px 9px;cursor:pointer}
+    .meal-seg button + button{border-left:1px solid var(--border)}
+    .meal-seg button.active{background:var(--primary-soft);color:var(--primary-ink)}
+    .rcc-cat small{font-weight:600;color:var(--muted)}
     .rc-vitto.ok{background:var(--done-bg);color:var(--done-ink)}
     .rc-vitto.warn{background:var(--block-bg);color:var(--block-ink)}
     .rc-vitto.none{background:var(--soft-2);color:var(--muted)}
@@ -2990,9 +2996,11 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v58.3";
+    const APP_VERSION = "v58.5";
     const APP_RELEASE_DATE = "23/11/2026";
     const CHANGELOG = [
+      { v: "v58.5", date: "23/11/2026", items: ["Rimborsi · vitto: «Bar / caffè» rinominato «☕ Fuori pasto» (anche nel riepilogo PDF ed Excel: «Vitto (fuori pasto)»)"] },
+      { v: "v58.4", date: "23/11/2026", items: ["Rimborsi · vitto: scelta «🍽 Pasto» o «☕ Bar / caffè». Il pasto deve cadere nella pausa (o fuori orario); caffè, dolce, acqua e spuntini vanno bene anche durante il lavoro o il viaggio, senza avvisi", "Nel riepilogo PDF ed Excel compaiono come «Vitto (bar/caffè)», nel totale della categoria Vitto"] },
       { v: "v58.3", date: "23/11/2026", items: ["Rimborsi: il cambio non è più in tempo reale ma quello ufficiale BCE del giorno dello scontrino, impostato in automatico (sabato e domenica: ultimo cambio disponibile, indicato sullo scontrino)", "Se cambi la data di uno scontrino il cambio si aggiorna da solo; gli scontrini già inseriti con il cambio di un altro giorno vengono corretti all'apertura della pratica", "Le pratiche consegnate alla segretaria mantengono i cambi salvati"] },
       { v: "v58.2", date: "23/11/2026", items: ["Rimborsi · vitto: nuovo campo orario dello scontrino, confrontato con il registro giornaliero della trasferta: ✓ se cade nella pausa (o fuori dall'orario di lavoro), avviso se in quel momento risultavi al lavoro o in viaggio", "Scontrini più compatti: una riga per scontrino, raggruppati per giorno con totale e orari/pause del giorno; clic sulla riga per modificarla («Fatto» per richiuderla)", "La foto dello scontrino è facoltativa: tolto l'avviso «scontrini senza foto»", "Ora del vitto anche nel riepilogo PDF ed Excel"] },
       { v: "v58.1", date: "23/11/2026", items: ["Rimborsi: il cambio delle valute estere in euro è in tempo reale (cambi di mercato aggiornati di continuo) e si aggiorna da solo ogni minuto con la pratica aperta, più il pulsante «Aggiorna ora»", "Elenco Rimborsi, Dashboard e pulsante € delle trasferte mostrano i totali con il cambio attuale (ricalcolati ogni 5 minuti)", "Quando la pratica viene consegnata alla segretaria il cambio si blocca, così il totale resta uguale alla nota spese", "Se il servizio in tempo reale non risponde si usa l'ultimo cambio ufficiale BCE"] },
@@ -9078,7 +9086,7 @@ exception when others then null; end $$;`;
       let eur = numOrEmpty(r.amount_eur);
       if (eur === "" && amount !== "" && rate) eur = round2(amount / rate);
       return {
-        id: r.id || clientId("rcp"), date: r.date || "", time: r.time || "", category: r.category || "", description: r.description || "",
+        id: r.id || clientId("rcp"), date: r.date || "", time: r.time || "", meal: r.meal === "bar" ? "bar" : "pasto", category: r.category || "", description: r.description || "",
         amount, currency, rate, amount_eur: eur, eur_manual: !!r.eur_manual, rate_date_for: r.rate_date_for || "", rate_source: r.rate_source || (FIXED_RATES[currency] && currency !== "EUR" ? "cambio fisso" : ""),
         paid: r.paid === "aziendale" ? "aziendale" : "personale", photo: r.photo || null,
         _file: r._file || null, _preview: r._preview || ""
@@ -9129,7 +9137,7 @@ exception when others then null; end $$;`;
       }
       const trip = trips.find(x => String(x.id) === String(c?.trip_id));
       const vitto = (c?.receipts || []).map(raw => vittoCheck(raw && raw.id ? raw : normalizeReceipt(raw), trip)).filter(Boolean);
-      const noTime = vitto.filter(v => v.text.startsWith("Manca l'orario")).length;
+      const noTime = vitto.filter(v => v.text.startsWith("Manca l'orario")).length; // (i «bar» non richiedono la pausa)
       const clash = vitto.filter(v => v.level === "warn" && !v.text.startsWith("Manca")).length;
       if (clash) out.push({ level: "warn", text: `${clash} scontrin${clash === 1 ? "o" : "i"} di vitto non combacia${clash === 1 ? "" : "no"} con la pausa del registro giornaliero (apri lo scontrino per il dettaglio).` });
       if (noTime) out.push({ level: "info", text: `${noTime} scontrin${noTime === 1 ? "o" : "i"} di vitto senza orario.` });
@@ -9344,6 +9352,8 @@ exception when others then null; end $$;`;
     // Lo scontrino di vitto deve cadere in una pausa (o fuori dall'orario di lavoro), non mentre si risultava al lavoro
     function vittoCheck(r, trip) {
       if (r.category !== "Vitto") return null;
+      // caffè, dolce, acqua, spuntino: consentiti anche durante il lavoro o il viaggio, non devono cadere nella pausa
+      if (r.meal === "bar") return { level: "ok", bar: true, text: "Fuori pasto: va bene anche durante il lavoro o il viaggio, non serve la pausa" };
       if (!r.time) return { level: "warn", text: "Manca l'orario dello scontrino" };
       if (!r.date) return { level: "warn", text: "Manca la data dello scontrino" };
       const t = hhmmToMin(r.time);
@@ -9353,7 +9363,7 @@ exception when others then null; end $$;`;
         for (const tt of [t, t + 1440]) {
           if (x.effective.some(([a, b]) => tt >= a && tt < b)) {
             const p = x.pauses.length ? `, pausa ${x.pauses.map(rangeText).join(", ")}` : ", nessuna pausa";
-            return { level: "warn", text: `Alle ${r.time} risultavi ${x.kind === "lavoro" ? "al lavoro" : "in viaggio"} (${rangeText([x.start, x.end])}${p}): sistema la pausa nel registro o l'orario dello scontrino` };
+            return { level: "warn", text: `Alle ${r.time} risultavi ${x.kind === "lavoro" ? "al lavoro" : "in viaggio"} (${rangeText([x.start, x.end])}${p}): sistema la pausa nel registro o l'orario dello scontrino. Se è un caffè o uno spuntino scegli «Fuori pasto»` };
           }
         }
       }
@@ -9380,9 +9390,9 @@ exception when others then null; end $$;`;
       return `<div class="rc-compact ${incomplete ? "incomplete" : ""}" data-id="${escapeHtml(r.id)}" role="button" tabindex="0" onclick="openReceipt(${jsArg(r.id)})" onkeydown="if(event.key==='Enter'){openReceipt(${jsArg(r.id)})}" title="Clic per modificare">
         <span class="rcc-thumb">${receiptThumbHtml(r, true)}</span>
         <span class="rcc-time">${r.category === "Vitto" ? escapeHtml(r.time || "--:--") : ""}</span>
-        <span class="rcc-cat">${escapeHtml(r.category || "Categoria?")}</span>
+        <span class="rcc-cat">${escapeHtml(r.category || "Categoria?")}${r.category === "Vitto" && r.meal === "bar" ? ` <small>· fuori pasto</small>` : ""}</span>
         <span class="rcc-desc">${escapeHtml(r.description || "")}</span>
-        <span class="rcc-vc ${vc ? vc.level : ""}" ${vc ? `title="${escapeHtml(vc.text)}"` : ""}>${vc ? (vc.level === "ok" ? "✓" : vc.level === "warn" ? "!" : "?") : ""}</span>
+        <span class="rcc-vc ${vc ? vc.level : ""}" ${vc ? `title="${escapeHtml(vc.text)}"` : ""}>${vc ? (vc.bar ? "☕" : vc.level === "ok" ? "✓" : vc.level === "warn" ? "!" : "?") : ""}</span>
         <span class="rcc-orig">${r.currency !== "EUR" && r.amount !== "" ? escapeHtml(fmtMoney(r.amount, r.currency)) : ""}</span>
         <span class="rcc-eur">${r.amount_eur !== "" ? fmtEur(r.amount_eur) : "— €"}${r.paid === "aziendale" ? `<em title="Carta aziendale: non va a rimborso">az.</em>` : ""}</span>
       </div>`;
@@ -9412,7 +9422,13 @@ exception when others then null; end $$;`;
             <select class="select rc-paid" data-f="paid" aria-label="Pagata con"><option value="personale" ${r.paid === "personale" ? "selected" : ""}>Pagata da me</option><option value="aziendale" ${r.paid === "aziendale" ? "selected" : ""}>Carta aziendale</option></select>
           </div>
           <div class="rc-rate" data-rate-label>${receiptRateText(r)}</div>
-          ${vitto ? `<div class="rc-vitto ${vc?.level || ""}" data-vc>${vc ? `${vc.level === "ok" ? "✓" : "⚠"} ${escapeHtml(vc.text)}` : ""}</div>` : ""}
+          ${vitto ? `<div class="rc-vitto-row">
+            <span class="meal-seg" role="group" aria-label="Tipo di consumazione">
+              <button type="button" class="${r.meal !== "bar" ? "active" : ""}" onclick="setReceiptMeal(${jsArg(r.id)}, 'pasto')" title="Pranzo o cena: deve cadere nella pausa (o fuori orario)">🍽 Pasto</button>
+              <button type="button" class="${r.meal === "bar" ? "active" : ""}" onclick="setReceiptMeal(${jsArg(r.id)}, 'bar')" title="Caffè, dolce, acqua, spuntino: va bene anche durante il lavoro o il viaggio">☕ Fuori pasto</button>
+            </span>
+            <div class="rc-vitto ${vc?.level || ""}" data-vc>${vc ? `${vc.bar ? "☕" : vc.level === "ok" ? "✓" : "⚠"} ${escapeHtml(vc.text)}` : ""}</div>
+          </div>` : ""}
         </div>
         <div class="rc-side">
           <button type="button" class="btn small" onclick="closeReceipt()" title="Chiudi la modifica">${icon("check")}Fatto</button>
@@ -9547,7 +9563,15 @@ exception when others then null; end $$;`;
       if (!el) return;
       const vc = vittoCheck(r, claimTrip());
       el.className = `rc-vitto ${vc?.level || ""}`;
-      el.textContent = vc ? `${vc.level === "ok" ? "✓" : "⚠"} ${vc.text}` : "";
+      el.textContent = vc ? `${vc.bar ? "☕" : vc.level === "ok" ? "✓" : "⚠"} ${vc.text}` : "";
+    }
+
+    function setReceiptMeal(id, meal) {
+      const r = receiptById(id);
+      if (!r) return;
+      r.meal = meal === "bar" ? "bar" : "pasto";
+      renderReceiptRows();
+      updateClaimSummary();
     }
 
     function openReceipt(id) {
@@ -9857,7 +9881,7 @@ exception when others then null; end $$;`;
         ["Scontrini", t.count], ["Totale spese", fmtEur(t.total)], ["Carta aziendale", fmtEur(t.company)], ["Da rimborsare", fmtEur(t.personal)]
       ])
         + pdfSection("Scontrini", pdfTable(["#", "Data", "Ora", "Categoria", "Descrizione", "Importo", "Cambio", "Importo €", "Pagata con"],
-          rows.map((r, i) => [i + 1, formatDate(r.date), r.time || "", r.category || "-", r.description || "-", r.amount === "" ? "-" : fmtMoney(r.amount, r.currency), r.currency === "EUR" ? "-" : (r.rate ? `1 € = ${Number(r.rate).toLocaleString("it-IT", { maximumFractionDigits: 4 })} ${r.currency}` : "-"), r.amount_eur === "" ? "-" : fmtEur(r.amount_eur), r.paid === "aziendale" ? "Carta aziendale" : "Personale"]),
+          rows.map((r, i) => [i + 1, formatDate(r.date), r.time || "", r.category === "Vitto" && r.meal === "bar" ? "Vitto (fuori pasto)" : (r.category || "-"), r.description || "-", r.amount === "" ? "-" : fmtMoney(r.amount, r.currency), r.currency === "EUR" ? "-" : (r.rate ? `1 € = ${Number(r.rate).toLocaleString("it-IT", { maximumFractionDigits: 4 })} ${r.currency}` : "-"), r.amount_eur === "" ? "-" : fmtEur(r.amount_eur), r.paid === "aziendale" ? "Carta aziendale" : "Personale"]),
           { empty: "Nessuno scontrino.", foot: rows.length ? ["\u00a0", "\u00a0", "\u00a0", "\u00a0", "Totale", "\u00a0", "\u00a0", fmtEur(t.total), `Da rimborsare ${fmtEur(t.personal)}`] : null }))
         + pdfSection("Totali per categoria", pdfTable(["Categoria", "Importo €"], Object.entries(t.byCat).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, fmtEur(v)]), { empty: "-" }))
         + (c.note_number || c.note_date || hasValue(c.note_amount) || c.delivered_date ? pdfSection("Nota spese", pdfKv([["Consegnati", formatDate(c.delivered_date)], ["N. nota", c.note_number || "-"], ["Data nota", formatDate(c.note_date)], ["Importo nota", hasValue(c.note_amount) ? fmtEur(c.note_amount) : "-"], ["Firmata", formatDate(c.signed_date)], ["Rimborsata", formatDate(c.reimbursed_date)], ["Importo rimborsato", hasValue(c.reimbursed_amount) ? fmtEur(c.reimbursed_amount) : "-"]])) : "")
@@ -9871,7 +9895,7 @@ exception when others then null; end $$;`;
       const trip = claimTrip();
       const t = claimTotals(c.receipts);
       const rows = [["Persona", "Trasferta", "Data", "Ora", "Categoria", "Descrizione", "Importo", "Valuta", "Cambio (1 € =)", "Importo €", "Pagata con", "Foto"]];
-      claimReceiptRows(c).forEach(r => rows.push([c.resource, tripLabel(trip), formatDate(r.date), r.time || "", r.category, r.description, r.amount === "" ? "" : String(r.amount).replace(".", ","), r.currency, r.currency === "EUR" ? "" : String(r.rate || "").replace(".", ","), r.amount_eur === "" ? "" : String(r.amount_eur).replace(".", ","), r.paid === "aziendale" ? "Carta aziendale" : "Personale", r.photo || r._file ? "sì" : "no"]));
+      claimReceiptRows(c).forEach(r => rows.push([c.resource, tripLabel(trip), formatDate(r.date), r.time || "", r.category === "Vitto" && r.meal === "bar" ? "Vitto (fuori pasto)" : r.category, r.description, r.amount === "" ? "" : String(r.amount).replace(".", ","), r.currency, r.currency === "EUR" ? "" : String(r.rate || "").replace(".", ","), r.amount_eur === "" ? "" : String(r.amount_eur).replace(".", ","), r.paid === "aziendale" ? "Carta aziendale" : "Personale", r.photo || r._file ? "sì" : "no"]));
       rows.push([], ["", "", "", "", "", "Totale spese", "", "", "", String(t.total).replace(".", ","), "", ""], ["", "", "", "", "", "Da rimborsare", "", "", "", String(t.personal).replace(".", ","), "", ""]);
       const name = `spese_${safeFileName(trip?.place || "trasferta")}_${(trip?.start_date || "").replace(/-/g, "")}_${safeFileName(c.resource)}.csv`;
       downloadText(name, csvRows(rows), "text/csv;charset=utf-8");
