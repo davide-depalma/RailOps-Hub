@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v58.7 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v59.1 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v58.7" />
+  <meta name="app-version" content="v59.1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <script>
@@ -1127,6 +1127,7 @@
       </section>
 
       <section id="trasferte" class="section">
+        <div id="tripFieldsBanner"></div>
         <div class="panel">
           <div class="panel-header">
             <div><h2>Elenco trasferte</h2><div class="panel-sub" id="tripsCount"></div></div>
@@ -2969,6 +2970,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let unavailabilityReasons = ["Ferie","Malattia","Permesso","Formazione","Altro"];
     let oncallTypes = ["Chiamata da remoto","Supporto telefonico","Intervento in campo","Analisi log","Altro"];
     let taskInterventionTypes = ["Intervento da remoto","Intervento in sede","Intervento misto"];
+    let tripMaintenanceTypes = ["Manutenzione ordinaria","Manutenzione correttiva"];
 
     const registryDefinitions = [
       { category:"vehicles", title:"Commesse / Veicoli", singular:"commessa/veicolo", listKey:"vehicles", hint:"Usati in trasferte, attività, calendario, filtri e report." },
@@ -2979,7 +2981,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       { category:"priorities", title:"Priorità attività", singular:"priorità", listKey:"taskPriorities", hint:"Usate nella creazione e modifica attività." },
       { category:"unavailability_reasons", title:"Motivi indisponibilità", singular:"motivo", listKey:"unavailabilityReasons", hint:"Usati nella sezione Indisponibilità." },
       { category:"oncall_types", title:"Tipi intervento reperibilità", singular:"tipo intervento", listKey:"oncallTypes", hint:"Usati nella sezione Reperibilità e nel calendario." },
-      { category:"task_intervention_types", title:"Tipi di intervento attività", singular:"tipo di intervento", listKey:"taskInterventionTypes", hint:"Scelto quando si crea un'attività: compare prima del nome (es. «Intervento da remoto - Verifica odometria») anche nel rapportino." }
+      { category:"task_intervention_types", title:"Tipi di intervento attività", singular:"tipo di intervento", listKey:"taskInterventionTypes", hint:"Scelto quando si crea un'attività: compare prima del nome (es. «Intervento da remoto - Verifica odometria») anche nel rapportino." },
+      { category:"trip_maintenance_types", title:"Tipi di manutenzione trasferte", singular:"tipo di manutenzione", listKey:"tripMaintenanceTypes", hint:"Scelto quando si crea una trasferta: compare nell'etichetta (es. «Trasferta manutenzione ordinaria - Controllo annuale»)." }
     ];
     const ATTACHMENT_BUCKET = "railops-attachments";
     const MAX_ATTACHMENT_SIZE_MB = 25;
@@ -2998,9 +3001,11 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v58.7";
+    const APP_VERSION = "v59.1";
     const APP_RELEASE_DATE = "23/11/2026";
     const CHANGELOG = [
+      { v: "v59.1", date: "23/11/2026", items: ["Trasferte: la prima riga dell'etichetta è solo «Trasferta - motivo» (es. «Trasferta - Controllo annuale»); il tipo di manutenzione resta nella scheda, nell'elenco Trasferte e nel dettaglio del calendario"] },
+      { v: "v59.0", date: "23/11/2026", items: ["Trasferte: nuovi campi «Tipo di manutenzione» (ordinaria / correttiva, modificabili in Anagrafiche) e «Motivo della trasferta» (con suggerimenti); l'etichetta diventa «Trasferta manutenzione ordinaria - Controllo annuale» nel calendario, nell'elenco e in Dashboard", "Rapportino settimanale: per le trasferte la colonna ATTIVITÀ riporta «Trasferta - motivo»", "Le ore (registro giornaliero delle trasferte e registro tempo delle attività) si possono inserire già alla creazione, oltre che dopo", "Richiede due nuove colonne nella tabella trasferte: il comando SQL è nella sezione Trasferte"] },
       { v: "v58.7", date: "23/11/2026", items: ["Rimborsi: il colore delle pratiche segue lo stato — rosa da firmare (anche con nota spese non ancora emessa), giallo firmata in attesa di rimborso, verde rimborsata, grigio senza scontrini; stesso colore sul pulsante € delle trasferte", "Riquadro «Note spese da firmare»: niente più numero ripetuto («2 · nessuna ancora emessa» oppure «di cui 1 non ancora emessa»)"] },
       { v: "v58.6", date: "23/11/2026", items: ["Rimborsi: «Note spese da firmare» conta anche le pratiche con scontrini la cui nota spese non è ancora stata emessa (campo «Nota spese emessa» vuoto), con l'indicazione di quante non sono ancora emesse; lo stesso numero compare nel menu e in Dashboard"] },
       { v: "v58.5", date: "23/11/2026", items: ["Rimborsi · vitto: «Bar / caffè» rinominato «☕ Fuori pasto» (anche nel riepilogo PDF ed Excel: «Vitto (fuori pasto)»)"] },
@@ -3040,7 +3045,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     ];
     const DEFAULT_REGISTRY = {
       vehicles: [...vehicles], people: [...people], systems: [...systems], task_statuses: [...taskStatuses],
-      trip_statuses: [...tripStatuses], priorities: [...taskPriorities], unavailability_reasons: [...unavailabilityReasons], oncall_types: [...oncallTypes], task_intervention_types: [...taskInterventionTypes]
+      trip_statuses: [...tripStatuses], priorities: [...taskPriorities], unavailability_reasons: [...unavailabilityReasons], oncall_types: [...oncallTypes], task_intervention_types: [...taskInterventionTypes], trip_maintenance_types: [...tripMaintenanceTypes]
     };
     let registryRows = [];
     let registryDbCategories = new Set();
@@ -3501,6 +3506,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (category === "unavailability_reasons") return unavailabilityReasons;
       if (category === "oncall_types") return oncallTypes;
       if (category === "task_intervention_types") return taskInterventionTypes;
+      if (category === "trip_maintenance_types") return tripMaintenanceTypes;
       return [];
     }
 
@@ -3516,6 +3522,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (category === "unavailability_reasons") unavailabilityReasons = clean;
       if (category === "oncall_types") oncallTypes = clean;
       if (category === "task_intervention_types") taskInterventionTypes = clean;
+      if (category === "trip_maintenance_types") tripMaintenanceTypes = clean;
     }
 
     function applyRegistryRows(rows) {
@@ -4145,6 +4152,84 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       return `${trip?.vehicle || "Trasferta"}${trip?.place ? " - " + trip.place : ""}`;
     }
 
+    // Prima riga dell'etichetta: "Trasferta - Controllo annuale" (vuoto se il motivo non è indicato)
+    function tripHeadline(trip) {
+      const reason = String(trip?.trip_reason || "").trim();
+      return reason ? `Trasferta - ${reason}` : "";
+    }
+
+    /* ---------- Tipo di manutenzione e motivo della trasferta (colonne del database) ---------- */
+    const TRIP_FIELDS_SQL = `-- RailOps Hub v59 · tipo di manutenzione e motivo della trasferta — da eseguire una sola volta in Supabase › SQL Editor
+alter table public.railops_trips add column if not exists maintenance_type text;
+alter table public.railops_trips add column if not exists trip_reason text;`;
+
+    // Le colonne mancano se le trasferte caricate non le hanno (select * restituisce tutte le colonne esistenti)
+    function tripFieldsMissing() {
+      return trips.length > 0 && !("maintenance_type" in trips[0] && "trip_reason" in trips[0]);
+    }
+
+    function isMissingColumnError(error) {
+      return /maintenance_type|trip_reason/.test(error?.message || "") && /column|schema cache|PGRST204|42703/i.test(`${error?.message || ""} ${error?.code || ""}`);
+    }
+
+    function copyTripFieldsSql() {
+      const done = () => showToast("Comando SQL copiato: incollalo in Supabase › SQL Editor ed esegui", { type: "success", duration: 6000 });
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(TRIP_FIELDS_SQL).then(done).catch(() => showToast(TRIP_FIELDS_SQL, { duration: 20000 }));
+      else showToast(TRIP_FIELDS_SQL, { duration: 20000 });
+    }
+
+    function tripFieldsBannerHtml() {
+      if (!tripFieldsMissing()) return "";
+      return `<div class="operator-card-note" style="background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-ink);display:block">
+        ${icon("alert")} <strong>Tipo di manutenzione e motivo non ancora attivi.</strong> Serve aggiungere due colonne alla tabella delle trasferte: in Supabase › SQL Editor esegui questo comando una volta, poi premi le frecce in alto.
+        <pre style="white-space:pre-wrap;font-size:12px;margin:8px 0;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px">${escapeHtml(TRIP_FIELDS_SQL)}</pre>
+        <button type="button" class="btn small" onclick="copyTripFieldsSql()">${icon("copy")}Copia il comando SQL</button>
+      </div>`;
+    }
+
+    function tripReasonSuggestions() {
+      const used = trips.map(t => String(t.trip_reason || "").trim()).filter(Boolean);
+      return [...new Set([...used, "Controllo annuale", "Bug fix software", "Installazione", "Aggiornamento software", "Verifica e taratura", "Formazione cliente"])];
+    }
+
+    function tripReasonFieldsHtml(prefix, trip = {}, required = true) {
+      const req = required ? ' <span class="req">*</span>' : "";
+      return `
+        <div class="field"><label>Tipo di manutenzione${req}</label>${modalSelect(prefix + "MaintType", tripMaintenanceTypes, trip.maintenance_type || "", { emptyLabel: "Seleziona…" })}</div>
+        <div class="field"><label>Motivo della trasferta${req}</label><input id="${prefix}Reason" class="input" list="${prefix}ReasonList" value="${escapeHtml(trip.trip_reason || "")}" placeholder="Es. Controllo annuale, Bug fix software…" oninput="updateTripHeadlinePreview('${prefix}')"><datalist id="${prefix}ReasonList">${tripReasonSuggestions().map(r => `<option value="${escapeHtml(r)}"></option>`).join("")}</datalist></div>
+        <div class="field full mini-meta" id="${prefix}HeadlinePreview" style="margin-top:-6px"></div>`;
+    }
+
+    function updateTripHeadlinePreview(prefix) {
+      const el = document.getElementById(prefix + "HeadlinePreview");
+      if (!el) return;
+      const h = tripHeadline({ maintenance_type: document.getElementById(prefix + "MaintType")?.value, trip_reason: document.getElementById(prefix + "Reason")?.value });
+      el.innerHTML = h ? `Comparirà come: <b>${escapeHtml(h)}</b> (anche nel rapportino)` : "";
+    }
+
+    function bindTripHeadlinePreview(prefix) {
+      document.getElementById(prefix + "MaintType")?.addEventListener("change", () => updateTripHeadlinePreview(prefix));
+      updateTripHeadlinePreview(prefix);
+    }
+
+    // Voce del rapportino settimanale: "Trasferta - motivo"
+    function tripReportActivity(trip) {
+      const reason = String(trip?.trip_reason || "").trim();
+      return reason ? `Trasferta - ${reason}` : "Trasferta";
+    }
+
+    // Salvataggio con le colonne nuove; se non esistono ancora si salva il resto e si avvisa
+    async function saveTripRow(kind, row, id = null) {
+      const run = r => kind === "insert" ? sb.from("railops_trips").insert(r).select().single() : sb.from("railops_trips").update(r).eq("id", id).select().single();
+      let res = await run(row);
+      if (res.error && isMissingColumnError(res.error)) {
+        const { maintenance_type, trip_reason, ...rest } = row;
+        res = await run(rest);
+        if (!res.error) showToast("Trasferta salvata, ma tipo di manutenzione e motivo no: esegui il comando SQL indicato nella sezione Trasferte", { type: "error", duration: 10000 });
+      }
+      return res;
+    }
+
     function unavailabilityTitle(item) {
       return `${item?.resource || "Risorsa"}${item?.reason ? " - " + item.reason : ""}`;
     }
@@ -4335,6 +4420,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           <div class="form-grid">
             <div class="field"><label>Commessa / Veicolo <span class="req">*</span></label>${modalSelect("tripVehicle", vehicles, prefill.vehicle || "", { search: true, emptyLabel: "Seleziona commessa…" })}</div>
             <div class="field"><label>Stato</label>${modalSelect("tripStatus", tripStatuses, tripStatuses.includes("Pianificata") ? "Pianificata" : tripStatuses[0])}</div>
+            ${tripReasonFieldsHtml("trip", {}, true)}
             <div class="field"><label>Luogo <span class="req">*</span></label><input id="tripPlace" class="input" placeholder="Es. Roma, Sofia, Ankara…" required></div>
             <div class="field"><label>Cliente / referente</label><input id="tripCustomer" class="input" placeholder="Es. RFI, NRIC…"></div>
             <div class="field"><label>Data partenza <span class="req">*</span></label><input id="tripStart" type="date" class="input" value="${escapeHtml(prefill.start || "")}" required></div>
@@ -4343,15 +4429,27 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
             <div class="field full"><label>Sistemi diagnostici <span class="req">*</span></label>${modalChecks("tripSystemsBox", systems, "tripSystems", [])}</div>
             <div class="field full"><label>Oggetto mail</label><input id="tripMailSubject" class="input" placeholder="Oggetto della mail di riferimento"></div>
             <div class="field full"><label>Note</label><textarea id="tripNotes" class="textarea" placeholder="Attività previste, problematiche, logistica, hotel, riferimenti…"></textarea></div>
+
+            <div class="form-section-title">Registro giornaliero <span class="mini-meta" style="text-transform:none;letter-spacing:0;font-weight:600">· facoltativo, si può compilare anche dopo</span></div>
+            <div class="field full">
+              <div id="editTripDaysBody" class="days-list"></div>
+              <div class="daily-actions">
+                <button type="button" class="btn secondary small" onclick="addEmptyTripDay()">${icon("plus")}Aggiungi giornata</button>
+                <button type="button" class="btn ghost small" onclick="generateTripDaysFromPeriod()">${icon("calendar")}Crea giornate dal periodo</button>
+                <span class="daily-summary" id="editTripDaysSummary"></span>
+              </div>
+            </div>
+
             <div class="field full"><label>Allegati</label>${attachmentInputHtml("tripAttachments", "Report, foto, PDF, Excel, log o documenti tecnici.")}</div>
           </div>
-          <div class="mini-meta" style="margin-top:12px">Il registro giornaliero (viaggio e lavoro) si compila dopo il salvataggio, aprendo la trasferta.</div>
           <div class="form-actions">
             <button type="button" class="btn secondary" onclick="closeEditModal()">Annulla</button>
             <button class="btn" type="submit">Salva trasferta</button>
           </div>
         </form>
       `;
+      bindTripHeadlinePreview("trip");
+      refreshTripDailyTotals();
       showModal();
     }
 
@@ -4376,6 +4474,15 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
             <div class="field"><label>Priorità</label>${modalSelect("taskPriority", taskPriorities, defaultPriority)}</div>
             <div class="field full"><label>Oggetto mail</label><input id="taskMailSubject" class="input" placeholder="Oggetto della mail di riferimento"></div>
             <div class="field full"><label>Descrizione generale / note tecniche</label><textarea id="taskDescription" class="textarea" placeholder="Obiettivo, vincoli e informazioni generali…">${escapeHtml(prefill.description || "")}</textarea></div>
+
+            <div class="form-section-title">Registro tempo <span class="mini-meta" style="text-transform:none;letter-spacing:0;font-weight:600">· facoltativo, si può compilare anche dopo</span></div>
+            <div class="field full">
+              <div id="editTaskLogsBody" class="days-list"></div>
+              <div class="daily-actions">
+                <button type="button" class="btn secondary small" onclick="addTaskLogRow({ start_date: document.getElementById('taskStart')?.value || todayDateKey(), end_date: document.getElementById('taskStart')?.value || todayDateKey() }); modalDirty = true;">${icon("plus")}Aggiungi tempo</button>
+                <span class="daily-summary" id="editTaskLogsSummary"></span>
+              </div>
+            </div>
             <div class="field full">
               <label>Cronologia aggiornamenti</label>
               <div class="task-updates-box">
@@ -4394,6 +4501,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       `;
       document.getElementById("taskInterventionType").addEventListener("change", () => updateTaskTitlePreview("taskInterventionType", "taskTitle", "taskTitlePreview"));
       bindIssueNoteField("taskStatus", "taskIssueNote", "");
+      refreshTaskDailyTotals();
       showModal();
     }
 
@@ -4469,20 +4577,26 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         systems: checkedValues("tripSystems"),
         mail_subject: document.getElementById("tripMailSubject").value.trim(),
         notes: document.getElementById("tripNotes").value.trim(),
+        maintenance_type: document.getElementById("tripMaintType").value || null,
+        trip_reason: document.getElementById("tripReason").value.trim() || null,
+        daily_logs: collectTripDaysFromModal(),
         attachments: []
       };
       if (!row.vehicle) return showToast("Seleziona la commessa / veicolo", { type: "error" });
+      if (!row.maintenance_type) return showToast("Scegli il tipo di manutenzione (ordinaria o correttiva)", { type: "error" });
+      if (!row.trip_reason) return showToast("Scrivi il motivo della trasferta (es. Controllo annuale)", { type: "error" });
       if (!row.place) return showToast("Inserisci il luogo", { type: "error" });
       if (!row.start_date) return showToast("Inserisci la data di partenza", { type: "error" });
       const dateErr = dateOrderError(row.start_date, row.end_date);
       if (dateErr) return showToast(dateErr, { type: "error" });
       if (!row.systems.length) return showToast("Seleziona almeno un sistema diagnostico", { type: "error" });
+      if (row.daily_logs.length && !(await confirmWarnings(tripDaysWarnings(row.daily_logs, row.start_date, row.end_date || row.start_date)))) return;
 
       const conflicts = getAssignmentConflicts({ resources: row.people, start: row.start_date, end: row.end_date || row.start_date, entityType: "trip" });
       if (!(await confirmConflicts(conflicts))) return;
 
       setSaving(form, true);
-      let { data, error } = await sb.from("railops_trips").insert(row).select().single();
+      let { data, error } = await saveTripRow("insert", row);
       if (error) { setSaving(form, false); return showToast("Errore salvataggio trasferta: " + error.message); }
 
       try {
@@ -4536,6 +4650,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         updates: collectTaskUpdates("taskUpdatesList"),
         attachments: []
       };
+      const createLogs = collectTaskLogsFromModal();
+      if (createLogs.length) { row.daily_logs = createLogs; row.time_spent_minutes = totalTaskMinutes(createLogs); }
       if (row.status === ISSUE_STATUS) {
         const note = document.getElementById("taskIssueNote")?.value.trim();
         if (!note) return showToast("Scrivi cosa resta da fare per la segnalazione", { type: "error" });
@@ -4543,6 +4659,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       }
       const dateErr = dateOrderError(row.start_date, row.end_date);
       if (dateErr) return showToast(dateErr, { type: "error" });
+      if (createLogs.length && !(await confirmWarnings(taskLogsWarnings(createLogs)))) return;
 
       const conflicts = getAssignmentConflicts({ resources: row.resources, start: row.start_date || row.due_date, end: row.end_date || row.due_date || row.start_date, entityType: "task" });
       if (!(await confirmConflicts(conflicts))) return;
@@ -5216,15 +5333,15 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     function addEmptyTripDay() {
       const cards = [...document.querySelectorAll("#editTripDaysBody .trip-day-row")];
       const lastDate = cards.map(c => c.querySelector('[data-field="day_date"]')?.value).filter(Boolean).sort().pop();
-      const next = lastDate ? addDateDaysKey(lastDate, 1) : (document.getElementById("editTripStart")?.value || "");
+      const next = lastDate ? addDateDaysKey(lastDate, 1) : (document.getElementById("editTripStart")?.value || document.getElementById("tripStart")?.value || "");
       addTripDayRow({ day_date: next });
       modalDirty = true;
     }
 
     // Crea una giornata per ogni data del periodo trasferta che non è ancora presente.
     function generateTripDaysFromPeriod() {
-      const start = document.getElementById("editTripStart")?.value;
-      const end = document.getElementById("editTripEnd")?.value || start;
+      const start = document.getElementById("editTripStart")?.value || document.getElementById("tripStart")?.value;
+      const end = document.getElementById("editTripEnd")?.value || document.getElementById("tripEnd")?.value || start;
       if (!start) return showToast("Imposta prima la data di partenza", { type: "error" });
       const body = document.getElementById("editTripDaysBody");
       const cards = [...body.querySelectorAll(".trip-day-row")];
@@ -5321,6 +5438,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
           <div class="form-grid">
             <div class="field"><label>Commessa / Veicolo</label>${modalSelect("editTripVehicle", vehicles, trip.vehicle, { search: true })}</div>
             <div class="field"><label>Stato</label>${modalSelect("editTripStatus", tripStatuses, trip.status)}</div>
+            ${tripReasonFieldsHtml("editTrip", trip, false)}
             <div class="field"><label>Luogo <span class="req">*</span></label><input id="editTripPlace" class="input" value="${escapeHtml(trip.place || "")}" required></div>
             <div class="field"><label>Cliente / referente</label><input id="editTripCustomer" class="input" value="${escapeHtml(trip.customer || "")}"></div>
             <div class="field"><label>Data partenza <span class="req">*</span></label><input id="editTripStart" type="date" class="input" value="${escapeHtml(trip.start_date || "")}" required></div>
@@ -5378,6 +5496,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (!tripDays.length) addTripDayRow({ day_date: trip.start_date || "" });
       else tripDays.forEach(day => addTripDayRow(day));
       refreshTripDailyTotals();
+      bindTripHeadlinePreview("editTrip");
       showModal();
     }
 
@@ -5405,7 +5524,9 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         people: checkedValues("editTripPeople"),
         systems: checkedValues("editTripSystems"),
         mail_subject: document.getElementById("editTripMailSubject").value.trim(),
-        notes: document.getElementById("editTripNotes").value.trim()
+        notes: document.getElementById("editTripNotes").value.trim(),
+        maintenance_type: document.getElementById("editTripMaintType").value || null,
+        trip_reason: document.getElementById("editTripReason").value.trim() || null
       };
 
       if (!updated.place) return showToast("Inserisci il luogo", { type: "error" });
@@ -5430,7 +5551,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       }
       updated.attachments = nextAttachments;
 
-      const { data, error } = await sb.from("railops_trips").update(updated).eq("id", id).select().single();
+      const { data, error } = await saveTripRow("update", updated, id);
       if (error) { setSaving(form, false); return showToast("Errore salvataggio: " + error.message); }
       await logChange({ entityType: "trip", entityId: id, entityTitle: tripTitle(data || oldTrip), action: "update", oldData: oldTrip, newData: data || { ...oldTrip, ...updated } });
 
@@ -6059,6 +6180,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     }
 
     function renderTrips() {
+      const banner = document.getElementById("tripFieldsBanner");
+      if (banner) banner.innerHTML = tripFieldsBannerHtml();
       const q = document.getElementById("tripSearch")?.value.toLowerCase() || "";
       const status = document.getElementById("tripStatusFilter")?.value || "";
       const person = document.getElementById("tripPersonFilter")?.value || "";
@@ -6087,7 +6210,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         return `<tr class="row-link" onclick="rowClick(event, 'openEditTrip', ${jsArg(t.id)})">
           <td data-label="Stato">${statusSelectHtml("trip", t, tripStatuses)}</td>
           <td data-label="Commessa / Veicolo"><span class="cell-title">${escapeHtml(t.vehicle || "-")}</span><div class="cell-sub">${escapeHtml(t.customer || "-")}</div>${t.mail_subject ? `<div class="task-update-latest"><b>Mail:</b> ${escapeHtml(t.mail_subject)}</div>` : ""}</td>
-          <td data-label="Luogo">${escapeHtml(t.place || "-")}</td>
+          <td data-label="Luogo"><span class="cell-title">${escapeHtml(t.place || "-")}</span>${tripHeadline(t) ? `<div class="cell-sub trip-headline">${escapeHtml(tripHeadline(t))}</div>` : ""}${t.maintenance_type ? `<div class="cell-sub">${escapeHtml(t.maintenance_type)}</div>` : ""}</td>
           <td data-label="Periodo" style="white-space:nowrap">${formatDate(t.start_date)} → ${formatDate(t.end_date || t.start_date)}<div class="cell-sub">${days.length ? `${days.length} gg · viaggio ${formatMinutes(totalTripTravelMinutes(days))} · lavoro ${formatMinutes(totalTripNetMinutes(days))}` : "Registro giornaliero vuoto"}</div>${attachmentBadge(t.attachments)}</td>
           <td data-label="Persone">${escapeHtml(peopleList.join(", ") || "-")}</td>
           <td data-label="Sistemi"><span class="cell-sub" style="margin:0">${escapeHtml(systemList.join(", ") || "-")}</span></td>
@@ -6524,7 +6647,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         list: () => tasks, table: "railops_tasks",
         match: (item, value) => splitTaskTitle(item.title).type === value,
         patch: (item, oldValue, newValue) => ({ title: composeTaskTitle(newValue, splitTaskTitle(item.title).name) })
-      }]
+      }],
+      trip_maintenance_types: [{ list: () => trips, table: "railops_trips", field: "maintenance_type" }]
     };
 
     function registryValueUsage(category, value) {
@@ -6904,8 +7028,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const tripEvents = trips.map(t => ({
         type: "trip",
         id: t.id,
-        title: t.place ? `${t.place} · ${t.vehicle || "-"}` : (t.vehicle || "Trasferta"),
-        subtitle: `${t.vehicle || "-"} · ${(t.people || []).join(", ") || "nessuna persona"} · ${t.status || "-"}`,
+        title: tripHeadline(t) || (t.place ? `${t.place} · ${t.vehicle || "-"}` : (t.vehicle || "Trasferta")),
+        subtitle: `${tripHeadline(t) && t.place ? t.place + " · " : ""}${t.vehicle || "-"} · ${(t.people || []).join(", ") || "nessuna persona"} · ${t.status || "-"}`,
         start: t.start_date,
         end: t.end_date || t.start_date,
         raw: t
@@ -7376,7 +7500,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       document.getElementById("weeklyTrips").innerHTML = weekTrips.sort((a, b) => String(a.start_date).localeCompare(String(b.start_date))).slice(0, 8).map(trip => `
         <div class="mini-item" onclick="openEditTrip(${jsArg(trip.id)})">
           <div class="mini-title">${escapeHtml(trip.place || "-")} <span style="font-weight:600;color:var(--muted)">· ${escapeHtml(trip.vehicle || "-")}</span></div>
-          <div class="mini-meta">${formatDate(trip.start_date)} → ${formatDate(trip.end_date || trip.start_date)} · ${statusBadge(trip.status)}<br>${escapeHtml((trip.people || []).join(", ") || "Nessuna persona assegnata")}</div>
+          <div class="mini-meta">${tripHeadline(trip) ? `<b>${escapeHtml(tripHeadline(trip))}</b><br>` : ""}${formatDate(trip.start_date)} → ${formatDate(trip.end_date || trip.start_date)} · ${statusBadge(trip.status)}<br>${escapeHtml((trip.people || []).join(", ") || "Nessuna persona assegnata")}</div>
         </div>
       `).join("") || `<div class="empty">Nessuna trasferta nella settimana corrente.</div>`;
 
@@ -7585,11 +7709,11 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     function calendarChipInfo(event) {
       const r = event.raw || {};
       if (event.type === "trip") return {
-        title: r.place || r.vehicle || "Trasferta",
-        mat: r.vehicle || "-",
+        title: tripHeadline(r) || r.place || r.vehicle || "Trasferta",
+        mat: tripHeadline(r) ? `${r.place || "-"} · ${r.vehicle || "-"}` : (r.vehicle || "-"),
         status: r.status || "-", statusTone: statusTone(r.status),
         people: (r.people || []).join(", ") || "nessuna persona",
-        extra: [r.customer && `Cliente: ${r.customer}`, (r.systems || []).length && `Sistemi: ${(r.systems || []).join(", ")}`, r.mail_subject && `Mail: ${r.mail_subject}`, `Periodo: ${formatDate(r.start_date)} → ${formatDate(r.end_date || r.start_date)}`].filter(Boolean)
+        extra: [r.maintenance_type && `Tipo: ${r.maintenance_type}`, r.customer && `Cliente: ${r.customer}`, (r.systems || []).length && `Sistemi: ${(r.systems || []).join(", ")}`, r.mail_subject && `Mail: ${r.mail_subject}`, `Periodo: ${formatDate(r.start_date)} → ${formatDate(r.end_date || r.start_date)}`].filter(Boolean)
       };
       if (event.type === "task") return {
         title: r.title || "Attività",
@@ -10330,7 +10454,7 @@ exception when others then null; end $$;`;
         const tripSame = entries.find(x => x.kind === "trip" && x.date === e.date && x.matricola === e.matricola);
         const key = `${e.date}|${n}|${e.kind}`;
         if (e.kind === "trip") {
-          if (!rows.has(key)) rows.set(key, { date: e.date, pos: n, kind: "trip", luogo: e.place || luogoBase, attivita: "Trasferta", tr: "Trasferta", sources: [e.item] });
+          if (!rows.has(key)) rows.set(key, { date: e.date, pos: n, kind: "trip", luogo: e.place || luogoBase, attivita: tripReportActivity(e.item), tr: "Trasferta", sources: [e.item] });
         } else if (e.kind === "oncall") {
           if (!rows.has(key)) rows.set(key, { date: e.date, pos: n, kind: "oncall", luogo: tripSame?.place || luogoBase, attivita: "Reperibilità", tr: "Reperibilità", sources: [] });
           rows.get(key).sources.push(e.item);
