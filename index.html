@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v56.5 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v57.0 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v56.5" />
+  <meta name="app-version" content="v57.0" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -108,6 +108,13 @@
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
     .topbar h1{margin:0;font-size:24px;letter-spacing:-.025em;line-height:1.15}
     .topbar .page-sub{margin:3px 0 0;color:var(--muted);font-size:13px}
+    .scope-picker{display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:3px 4px 3px 10px;border:1px solid var(--border);background:#fff;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);max-width:100%;cursor:pointer}
+    .scope-picker .ico{width:15px;height:15px;flex:0 0 auto}
+    .scope-picker .scope-label{text-transform:uppercase;font-size:10.5px;letter-spacing:.06em;font-weight:850}
+    .scope-picker select{border:0;background:transparent;font:inherit;font-weight:800;color:var(--text);padding:3px 4px;min-width:0;max-width:260px;cursor:pointer;outline:none;text-overflow:ellipsis}
+    .scope-picker:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(31,79,216,.12)}
+    .scope-picker.not-me{background:#fff7e6;border-color:#f2d49b;color:#7a4a00}
+    .scope-picker.hidden{display:none}
     .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     .sync-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:600;padding:0 4px}
     .sync-dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}
@@ -793,6 +800,7 @@
         <div>
           <h1 id="pageTitle">Dashboard</h1>
           <p class="page-sub" id="pageSubtitle"></p>
+          <label class="scope-picker" id="scopePicker"><svg class="ico"><use href="#i-users"/></svg><span class="scope-label">Vista</span><select id="viewScopeSelect" onchange="setViewScope(this.value)" aria-label="Di chi vedere i dati"></select></label>
         </div>
         <div class="actions">
           <span class="sync-status" data-sync title="Stato sincronizzazione"><span class="sync-dot"></span><span class="sync-label">Offline</span></span>
@@ -855,7 +863,7 @@
             <div class="toolbar">
               <input id="tripSearch" class="input" type="search" placeholder="Cerca luogo, veicolo, cliente, note…" oninput="renderTrips()">
               <select id="tripStatusFilter" class="select" onchange="renderTrips()"><option value="">Tutti gli stati</option></select>
-              <select id="tripPersonFilter" class="select" onchange="renderTrips()"><option value="">Tutte le persone</option></select>
+              <select id="tripPersonFilter" class="select" onchange="setViewScope(this.value)"><option value="">Tutte le persone</option></select>
               <select id="tripSystemFilter" class="select" onchange="renderTrips()"><option value="">Tutti i sistemi</option></select>
               <button class="btn ghost" onclick="clearTripFilters()">Azzera filtri</button>
             </div>
@@ -885,7 +893,7 @@
               </select>
               <select id="taskStatusFilter" class="select" onchange="renderTasks()"><option value="">Tutti gli stati</option></select>
               <select id="taskSystemFilter" class="select" onchange="renderTasks()"><option value="">Tutti i sistemi</option></select>
-              <select id="taskResourceFilter" class="select" onchange="renderTasks()"><option value="">Tutte le risorse</option></select>
+              <select id="taskResourceFilter" class="select" onchange="setViewScope(this.value)"><option value="">Tutte le risorse</option></select>
               <select id="taskPriorityFilter" class="select" onchange="renderTasks()"><option value="">Tutte le priorità</option></select>
               <button class="btn ghost" onclick="clearTaskFilters()">Azzera filtri</button>
             </div>
@@ -903,7 +911,7 @@
           <div class="panel-body">
             <div class="toolbar">
               <input id="oncallSearch" class="input" type="search" placeholder="Cerca risorsa, veicolo, tipo, note…" oninput="renderOncall()">
-              <select id="oncallResourceFilter" class="select" onchange="renderOncall()"><option value="">Tutte le risorse</option></select>
+              <select id="oncallResourceFilter" class="select" onchange="setViewScope(this.value)"><option value="">Tutte le risorse</option></select>
               <select id="oncallTypeFilter" class="select" onchange="renderOncall()"><option value="">Tutti i tipi</option></select>
               <select id="oncallVehicleFilter" class="select" onchange="renderOncall()"><option value="">Tutte le commesse</option></select>
               <button class="btn ghost" onclick="clearOncallFilters()">Azzera filtri</button>
@@ -927,7 +935,7 @@
           <div class="panel-body">
             <div class="toolbar">
               <input id="unavailabilitySearch" class="input" type="search" placeholder="Cerca risorsa, motivo, note…" oninput="renderUnavailability()">
-              <select id="unavailabilityResourceFilter" class="select" onchange="renderUnavailability()"><option value="">Tutte le risorse</option></select>
+              <select id="unavailabilityResourceFilter" class="select" onchange="setViewScope(this.value)"><option value="">Tutte le risorse</option></select>
               <select id="unavailabilityReasonFilter" class="select" onchange="renderUnavailability()"><option value="">Tutti i motivi</option></select>
               <button class="btn ghost" onclick="clearUnavailabilityFilters()">Azzera filtri</button>
             </div>
@@ -971,7 +979,7 @@
                 <option value="unavailable">Solo indisponibilità</option>
                 <option value="oncall">Solo reperibilità</option>
               </select>
-              <select id="calendarResourceFilter" class="select" onchange="renderCalendar()"><option value="">Tutte le risorse</option></select>
+              <select id="calendarResourceFilter" class="select" onchange="setViewScope(this.value)"><option value="">Tutte le risorse</option></select>
               <select id="calendarVehicleFilter" class="select" onchange="renderCalendar()"><option value="">Tutte le commesse</option></select>
               <select id="calendarSystemFilter" class="select" onchange="renderCalendar()"><option value="">Tutti i sistemi</option></select>
               <button class="btn ghost small hidden" id="calendarFiltersReset" onclick="clearCalendarFilters()">Azzera filtri</button>
@@ -1057,6 +1065,7 @@
         <div class="backup-note">
           <strong>Consiglio:</strong> il <strong>backup JSON</strong> è l’unico formato che permette di ripristinare i dati. PDF e CSV servono per archiviare, condividere o lavorare in Excel.
         </div>
+        <div class="operator-card-note" id="backupScopeNote"></div>
 
         <div class="backup-group-title">Rapportini</div>
         <div class="backup-grid">
@@ -2678,9 +2687,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v56.5";
+    const APP_VERSION = "v57.0";
     const APP_RELEASE_DATE = "23/11/2026";
     const CHANGELOG = [
+      { v: "v57.0", date: "23/11/2026", items: ["Nuova «Vista» in alto: all'apertura l'app mostra solo i dati dell'operatore che ha fatto l'accesso (Dashboard, Calendario, Attività, Trasferte, Reperibilità, Indisponibilità, Risorse, Report)", "Dal selettore si passa a «Tutte le risorse» o a una singola risorsa; il filtro risorsa di ogni sezione è lo stesso selettore, quindi cambiarlo in un punto lo cambia ovunque", "Quando non stai guardando i tuoi dati il selettore diventa arancione", "Report CSV/PDF e report testuale seguono la vista; backup JSON, backup completo e log restano sempre completi", "Nuove attività, trasferte, indisponibilità e reperibilità propongono già la persona della vista"] },
       { v: "v56.5", date: "23/11/2026", items: ["Rapportino: corretto l'orario che in alcune celle compariva come numero (es. 0,58 invece di 14:00) — nel modello alcune celle DALLE/ALLE, soprattutto ORE VIAGGIO dalla riga 48 in giù, non avevano il formato orario; ora viene impostato sempre", "Rapportino: date e testi della pagina 1 mantengono i bordi della propria riga; la pagina 1 usa le righe 11–33 del modello"] },
       { v: "v56.4", date: "20/11/2026", items: ["Calendario: le barre degli elementi su più giorni sono di nuovo perfettamente allineate anche nei giorni con il pulsante delle ore (l'intestazione del giorno ha ora un'altezza fissa)"] },
       { v: "v56.3", date: "20/11/2026", items: ["Calendario, finestra del giorno: in alto il totale ore della giornata con il dettaglio per tipo; per ogni elemento le ore del giorno e le fasce orarie (es. 08:30–13:00 · 14:00–15:30), per le trasferte separate tra lavoro e viaggio", "Elementi ordinati per orario d'inizio; compaiono anche le reperibilità iniziate il giorno prima e proseguite dopo mezzanotte"] },
@@ -3216,6 +3226,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       fillSelect("oncallResourceFilter", people, "Tutte le risorse");
       fillSelect("oncallTypeFilter", oncallTypes, "Tutti i tipi");
       fillSelect("oncallVehicleFilter", vehicles, "Tutte le commesse");
+      syncScopeControls();
     }
 
     // Se una categoria non ha ancora righe nel database, l'app mostra i valori predefiniti.
@@ -3461,6 +3472,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
       currentUser = operatorObject(operatorName);
       storeSet(OPERATOR_STORAGE_KEY, operatorName);
+      resetViewScopeToUser();
 
       updateAuthUI();
       applySavedSidebarState();
@@ -3891,7 +3903,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
             <div class="field"><label>Cliente / referente</label><input id="tripCustomer" class="input" placeholder="Es. RFI, NRIC…"></div>
             <div class="field"><label>Data partenza <span class="req">*</span></label><input id="tripStart" type="date" class="input" value="${escapeHtml(prefill.start || "")}" required></div>
             <div class="field"><label>Data rientro</label><input id="tripEnd" type="date" class="input" value="${escapeHtml(prefill.end || "")}"></div>
-            <div class="field full"><label>Persone coinvolte</label>${modalChecks("tripPeopleBox", people, "tripPeople", prefill.people || [])}</div>
+            <div class="field full"><label>Persone coinvolte</label>${modalChecks("tripPeopleBox", people, "tripPeople", prefill.people?.length ? prefill.people : defaultPersonList())}</div>
             <div class="field full"><label>Sistemi diagnostici <span class="req">*</span></label>${modalChecks("tripSystemsBox", systems, "tripSystems", [])}</div>
             <div class="field full"><label>Oggetto mail</label><input id="tripMailSubject" class="input" placeholder="Oggetto della mail di riferimento"></div>
             <div class="field full"><label>Note</label><textarea id="tripNotes" class="textarea" placeholder="Attività previste, problematiche, logistica, hotel, riferimenti…"></textarea></div>
@@ -3919,7 +3931,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
             <div class="field full mini-meta" id="taskTitlePreview" style="margin-top:-6px"></div>
             <div class="field"><label>Commessa / Veicolo <span class="req">*</span></label>${modalSelect("taskVehicle", vehicles, prefill.vehicle || "", { search: true, emptyLabel: "Seleziona commessa…" })}</div>
             <div class="field"><label>Stato</label>${modalSelect("taskStatus", taskStatuses, defaultStatus)}</div>
-            <div class="field full"><label>Risorse assegnate <span class="req">*</span></label>${modalChecks("taskResourcesBox", people, "taskResources", prefill.resources || [])}</div>
+            <div class="field full"><label>Risorse assegnate <span class="req">*</span></label>${modalChecks("taskResourcesBox", people, "taskResources", prefill.resources?.length ? prefill.resources : defaultPersonList())}</div>
             <div class="field full"><label>Sistemi diagnostici <span class="req">*</span></label>${modalChecks("taskSystemsBox", systems, "taskSystems", [])}</div>
             <div class="field"><label>Data inizio</label><input id="taskStart" type="date" class="input" value="${escapeHtml(prefill.start || "")}"></div>
             <div class="field"><label>Data fine</label><input id="taskEnd" type="date" class="input" value="${escapeHtml(prefill.end || "")}"></div>
@@ -3953,7 +3965,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       document.getElementById("editModalBody").innerHTML = `
         <form id="unavailabilityForm" onsubmit="addUnavailability(event)" novalidate>
           <div class="form-grid">
-            <div class="field"><label>Risorsa <span class="req">*</span></label>${modalSelect("unavailabilityResource", people, prefill.resource || people[0] || "")}</div>
+            <div class="field"><label>Risorsa <span class="req">*</span></label>${modalSelect("unavailabilityResource", people, prefill.resource || defaultPersonList()[0] || people[0] || "")}</div>
             <div class="field"><label>Motivo <span class="req">*</span></label>${modalSelect("unavailabilityReason", unavailabilityReasons, defaultReason)}</div>
             <div class="field"><label>Data inizio <span class="req">*</span></label><input id="unavailabilityStart" type="date" class="input" value="${escapeHtml(prefill.start || "")}" required></div>
             <div class="field"><label>Data fine</label><input id="unavailabilityEnd" type="date" class="input" value="${escapeHtml(prefill.end || "")}"></div>
@@ -3975,7 +3987,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         <form id="oncallForm" onsubmit="addOncallIntervention(event)" novalidate>
           <div class="form-grid">
             <div class="field"><label>Data intervento <span class="req">*</span></label><input id="oncallDate" type="date" class="input" value="${escapeHtml(prefill.date || todayDateKey())}" required></div>
-            <div class="field"><label>Risorsa <span class="req">*</span></label>${modalSelect("oncallResource", people, prefill.resource || currentUser?.name || people[0] || "")}</div>
+            <div class="field"><label>Risorsa <span class="req">*</span></label>${modalSelect("oncallResource", people, prefill.resource || defaultPersonList()[0] || people[0] || "")}</div>
             <div class="field"><label>Ora inizio</label><input id="oncallStartTime" type="time" class="input"></div>
             <div class="field"><label>Ora fine</label><input id="oncallEndTime" type="time" class="input"></div>
             <div class="field"><label>Tipo intervento <span class="req">*</span></label>${modalSelect("oncallType", oncallTypes, oncallTypes[0] || "")}</div>
@@ -5135,7 +5147,6 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     function clearOncallFilters() {
       document.getElementById("oncallSearch").value = "";
-      document.getElementById("oncallResourceFilter").value = "";
       document.getElementById("oncallTypeFilter").value = "";
       document.getElementById("oncallVehicleFilter").value = "";
       renderOncall();
@@ -5605,7 +5616,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (quickSelect) {
         [...quickSelect.options].forEach(opt => {
           const def = TASK_QUICK_FILTERS[opt.value];
-          if (def) opt.textContent = `${def.label} (${tasks.filter(def.test).length})`;
+          if (def) opt.textContent = `${def.label} (${scopedTasks().filter(def.test).length})`;
         });
         quickSelect.value = quick ? taskQuickFilter : "";
         quickSelect.classList.toggle("filter-active", !!quick);
@@ -5791,7 +5802,6 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     function clearUnavailabilityFilters() {
       document.getElementById("unavailabilitySearch").value = "";
-      document.getElementById("unavailabilityResourceFilter").value = "";
       document.getElementById("unavailabilityReasonFilter").value = "";
       renderUnavailability();
     }
@@ -5960,6 +5970,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         if (category === "people" && storeGet(OPERATOR_STORAGE_KEY) === oldValue) {
           storeSet(OPERATOR_STORAGE_KEY, newValue);
           currentUser = operatorObject(newValue);
+          if (viewScope === oldValue) viewScope = newValue;
+          syncScopeControls();
           updateAuthUI();
         }
         closeEditModal(true);
@@ -5993,7 +6005,8 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     }
 
     function generateReport() {
-      let text = "REPORT RAILOPS HUB\n";
+      const trips = scopedTrips(), tasks = scopedTasks(), unavailability = scopedUnavailability(), oncallInterventions = scopedOncall();
+      let text = "REPORT RAILOPS HUB" + (scopeName() ? ` · ${scopeName()}` : "") + "\n";
       text += "Generato il: " + new Date().toLocaleString("it-IT") + "\n\n";
       text += "=== TRASFERTE ===\n";
       if (!trips.length) text += "Nessuna trasferta inserita.\n";
@@ -6127,7 +6140,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     }
 
     function clearCalendarFilters() {
-      ["calendarTypeFilter", "calendarResourceFilter", "calendarVehicleFilter", "calendarSystemFilter"].forEach(id => {
+      ["calendarTypeFilter", "calendarVehicleFilter", "calendarSystemFilter"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = "";
       });
@@ -6175,8 +6188,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const resource = document.getElementById("resourceDetailSelect")?.value || "";
       calendarCurrentDate = new Date(resourceCalendarCurrentDate);
       setCalendarViewValue("resources");
-      const filter = document.getElementById("calendarResourceFilter");
-      if (filter) filter.value = resource;
+      if (resource) { viewScope = resource; syncScopeControls(); }
       showSection("calendario");
     }
 
@@ -6444,6 +6456,74 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       return !isDoneStatus(task?.status);
     }
 
+    /* ===================== VISTA: SOLO IO / TUTTE LE RISORSE / UNA RISORSA ===================== */
+    // All'apertura dell'app la vista è sempre sull'operatore che ha fatto l'accesso.
+    // Il selettore in alto e i filtri "risorsa" delle sezioni sono la stessa cosa: cambiarne uno li cambia tutti.
+    let viewScope = "";
+    const SCOPE_FILTER_IDS = ["tripPersonFilter", "taskResourceFilter", "oncallResourceFilter", "unavailabilityResourceFilter", "calendarResourceFilter"];
+    const SCOPED_SECTIONS = ["dashboard", "calendario", "trasferte", "attivita", "reperibilita", "indisponibilita", "risorse", "backup"];
+
+    function scopeName() {
+      return viewScope && people.includes(viewScope) ? viewScope : "";
+    }
+
+    function resetViewScopeToUser() {
+      viewScope = currentUser?.name && people.includes(currentUser.name) ? currentUser.name : "";
+      syncScopeControls();
+    }
+
+    function setViewScope(value) {
+      viewScope = value || "";
+      syncScopeControls();
+      renderAll();
+    }
+
+    function inScopeTask(t) { const s = scopeName(); return !s || getTaskResources(t).includes(s); }
+    function inScopeTrip(t) { const s = scopeName(); return !s || (t.people || []).includes(s); }
+    function inScopeOncall(o) { const s = scopeName(); return !s || o.resource === s; }
+    function inScopeUnavailability(u) { const s = scopeName(); return !s || u.resource === s; }
+    function scopedTasks() { return tasks.filter(inScopeTask); }
+    function scopedTrips() { return trips.filter(inScopeTrip); }
+    function scopedOncall() { return oncallInterventions.filter(inScopeOncall); }
+    function scopedUnavailability() { return unavailability.filter(inScopeUnavailability); }
+    function scopeFileTag() { return scopeName() ? "_" + scopeName().replace(/[^\w]+/g, "_") : ""; }
+
+    // Persona proposta nei nuovi elementi: quella della vista, altrimenti l'operatore
+    function defaultPersonList() {
+      const p = scopeName() || (currentUser?.name && people.includes(currentUser.name) ? currentUser.name : "");
+      return p ? [p] : [];
+    }
+
+    function renderBackupScopeNote() {
+      const el = document.getElementById("backupScopeNote");
+      if (!el) return;
+      const s = scopeName();
+      el.innerHTML = s
+        ? `I report CSV/PDF e il report testuale contengono solo i dati di <strong>${escapeHtml(s)}</strong> (vista scelta in alto). Per avere tutte le risorse scegli <em>Tutte le risorse</em>. Backup JSON, “Backup completo” e log comprendono sempre tutto.`
+        : `I report contengono i dati di <strong>tutte le risorse</strong>. Per i dati di una sola persona cambia la vista in alto.`;
+    }
+
+    function syncScopeControls() {
+      const s = scopeName();
+      SCOPE_FILTER_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.value = s; });
+      const detail = document.getElementById("resourceDetailSelect");
+      if (detail && s) detail.value = s;
+      const backupRes = document.getElementById("backupResourceSelect");
+      if (backupRes && s) backupRes.value = s;
+      const select = document.getElementById("viewScopeSelect");
+      if (select) {
+        const me = currentUser?.name && people.includes(currentUser.name) ? currentUser.name : "";
+        const others = people.filter(p => p !== me);
+        select.innerHTML = (me ? `<option value="${escapeHtml(me)}">Solo io · ${escapeHtml(me)}</option>` : "")
+          + `<option value="">Tutte le risorse</option>`
+          + (others.length ? `<optgroup label="Altre risorse">${others.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}</optgroup>` : "");
+        select.value = s;
+        const picker = document.getElementById("scopePicker");
+        picker?.classList.toggle("not-me", s !== me);
+        picker?.setAttribute("title", s === me ? "Stai vedendo solo i tuoi dati" : (s ? `Stai vedendo i dati di ${s}` : "Stai vedendo i dati di tutte le risorse"));
+      }
+    }
+
     function todayDateKey() {
       return toDateKey(new Date());
     }
@@ -6476,14 +6556,15 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     function systemCounts() {
       const counts = {};
+      const trips = scopedTrips(), tasks = scopedTasks();
       trips.forEach(t => (t.systems || []).forEach(s => counts[s] = (counts[s] || 0) + 1));
       tasks.forEach(t => (t.systems || []).forEach(s => counts[s] = (counts[s] || 0) + 1));
       return Object.entries(counts).sort((a,b) => b[1] - a[1]);
     }
 
-    function resourceWorkStats() {
+    function resourceWorkStats(scoped = false) {
       const today = todayDateKey();
-      const names = [...people];
+      const names = scoped && scopeName() ? [scopeName()] : [...people];
       return names.map(resource => {
         const assignedTasks = tasks.filter(t => getTaskResources(t).includes(resource));
         const openTasks = assignedTasks.filter(isOpenTask);
@@ -6511,14 +6592,15 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const today = todayDateKey();
       return {
         today,
-        onTrip: trips.filter(t => rangesOverlap(today, today, t.start_date, t.end_date || t.start_date)),
-        unavailable: unavailability.filter(u => rangesOverlap(today, today, u.start_date, u.end_date || u.start_date)),
-        tasksToday: tasks.filter(t => isOpenTask(t) && rangesOverlap(today, today, taskRange(t).start, taskRange(t).end)),
-        oncall: oncallInterventions.filter(o => o.intervention_date === today)
+        onTrip: scopedTrips().filter(t => rangesOverlap(today, today, t.start_date, t.end_date || t.start_date)),
+        unavailable: scopedUnavailability().filter(u => rangesOverlap(today, today, u.start_date, u.end_date || u.start_date)),
+        tasksToday: scopedTasks().filter(t => isOpenTask(t) && rangesOverlap(today, today, taskRange(t).start, taskRange(t).end)),
+        oncall: scopedOncall().filter(o => o.intervention_date === today)
       };
     }
 
     function renderDashboard() {
+      const trips = scopedTrips(), tasks = scopedTasks();
       const overdue = tasks.filter(isTaskOverdue);
       const due7 = tasks.filter(t => isTaskDueWithin(t, 7));
       const blocked = tasks.filter(t => statusTone(t.status) === "blocked" && isOpenTask(t));
@@ -6571,7 +6653,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         </div>
       `).join("") || `<div class="empty">Nessuna trasferta nella settimana corrente.</div>`;
 
-      const stats = resourceWorkStats();
+      const stats = resourceWorkStats(true);
       document.getElementById("busyResources").innerHTML = stats.slice(0, 8).map(s => `
         <div class="mini-item load-row" onclick="selectResourceAndOpen(${jsArg(s.resource)})">
           <div>
@@ -6603,7 +6685,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     function updateNavBadges() {
       const badge = document.getElementById("navOverdueBadge");
       if (!badge) return;
-      const n = tasks.filter(isTaskOverdue).length;
+      const n = scopedTasks().filter(isTaskOverdue).length;
       badge.textContent = n;
       badge.title = `${n} attività in ritardo`;
       badge.classList.toggle("hidden", !n);
@@ -6871,7 +6953,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
       const mode = document.getElementById("calendarViewMode")?.value || "month";
       document.querySelectorAll("#calendarViewSwitch button").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
-      const anyFilter = ["calendarTypeFilter", "calendarResourceFilter", "calendarVehicleFilter", "calendarSystemFilter"].some(id => document.getElementById(id)?.value);
+      const anyFilter = ["calendarTypeFilter", "calendarVehicleFilter", "calendarSystemFilter"].some(id => document.getElementById(id)?.value);
       document.getElementById("calendarFiltersReset")?.classList.toggle("hidden", !anyFilter);
       monthLabel.textContent = calendarPeriodLabel(calendarCurrentDate);
       renderCalendarFocusNotice();
@@ -7427,13 +7509,13 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     }
 
     function clearTripFilters() {
-      ["tripSearch", "tripStatusFilter", "tripPersonFilter", "tripSystemFilter"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+      ["tripSearch", "tripStatusFilter", "tripSystemFilter"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
       renderTrips();
     }
 
     function clearTaskFilters() {
       taskQuickFilter = "";
-      ["taskSearch", "taskStatusFilter", "taskSystemFilter", "taskResourceFilter", "taskPriorityFilter"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
+      ["taskSearch", "taskStatusFilter", "taskSystemFilter", "taskPriorityFilter"].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
       renderTasks();
     }
 
@@ -7484,37 +7566,37 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     function exportTasksCSV() {
       const rows = [["Titolo","Commessa/Veicolo","Risorse","Sistemi","Data inizio","Data fine","Scadenza","Stato","Priorità","Ore lavorate","Ore (decimali)","Oggetto mail","Descrizione"]];
-      tasks.forEach(t => {
+      scopedTasks().forEach(t => {
         const minutes = totalTaskMinutes(t.daily_logs);
         rows.push([t.title, t.vehicle, resourcesLabel(t), (t.systems || []).join(", "), formatDate(t.start_date), formatDate(t.end_date), formatDate(t.due_date), t.status, t.priority, formatMinutes(minutes), hoursDecimal(minutes), t.mail_subject || "", t.description || ""]);
       });
-      downloadText(`railops_attivita_${fileStamp()}.csv`, csvRows(rows), "text/csv;charset=utf-8");
+      downloadText(`railops_attivita${scopeFileTag()}_${fileStamp()}.csv`, csvRows(rows), "text/csv;charset=utf-8");
       showToast("Export attività creato", { type: "success" });
     }
 
     function exportTripsCSV() {
       const rows = [["Stato","Commessa/Veicolo","Luogo","Cliente","Data inizio","Data fine","Persone","Sistemi","Giornate","Viaggio totale","Viaggio (ore dec.)","Lavoro netto","Lavoro (ore dec.)","Oggetto mail","Note"]];
-      trips.forEach(t => {
+      scopedTrips().forEach(t => {
         const travel = totalTripTravelMinutes(t.daily_logs), work = totalTripNetMinutes(t.daily_logs);
         rows.push([t.status, t.vehicle, t.place, t.customer || "", formatDate(t.start_date), formatDate(t.end_date), (t.people || []).join(", "), (t.systems || []).join(", "), normalizeTripDays(t.daily_logs).length, formatMinutes(travel), hoursDecimal(travel), formatMinutes(work), hoursDecimal(work), t.mail_subject || "", t.notes || ""]);
       });
-      downloadText(`railops_trasferte_${fileStamp()}.csv`, csvRows(rows), "text/csv;charset=utf-8");
+      downloadText(`railops_trasferte${scopeFileTag()}_${fileStamp()}.csv`, csvRows(rows), "text/csv;charset=utf-8");
       showToast("Export trasferte creato", { type: "success" });
     }
 
     function exportOncallCSV() {
       const rows = [["Data","Ora inizio","Ora fine","Durata","Risorsa","Tipo","Commessa/Veicolo","Sistemi","Oggetto mail","Note"]];
-      oncallInterventions.forEach(o => rows.push([formatDate(o.intervention_date), formatTimeValue(o.start_time), formatTimeValue(o.end_time), oncallDuration(o), o.resource, o.intervention_type, o.vehicle || "", (o.systems || []).join(", "), o.mail_subject || "", o.notes || ""]));
-      downloadText(`railops_reperibilita_${fileStamp()}.csv`, csvRows(rows), "text/csv;charset=utf-8");
+      scopedOncall().forEach(o => rows.push([formatDate(o.intervention_date), formatTimeValue(o.start_time), formatTimeValue(o.end_time), oncallDuration(o), o.resource, o.intervention_type, o.vehicle || "", (o.systems || []).join(", "), o.mail_subject || "", o.notes || ""]));
+      downloadText(`railops_reperibilita${scopeFileTag()}_${fileStamp()}.csv`, csvRows(rows), "text/csv;charset=utf-8");
       showToast("Export reperibilità creato", { type: "success" });
     }
 
     function exportResourceHoursCSV() {
       const rows = [["Risorsa","Ore totali","Ore attività","Ore lavoro trasferte","Ore viaggio","Ore reperibilità","Attività assegnate","Attività aperte","Attività completate","Trasferte","Indisponibilità","Interventi reperibilità"]];
-      resourceWorkStats().forEach(s => {
+      resourceWorkStats(true).forEach(s => {
         rows.push([s.resource, hoursDecimal(s.minutes), hoursDecimal(s.taskMinutes), hoursDecimal(s.tripMinutes), hoursDecimal(s.travelMinutes), hoursDecimal(s.oncallMinutes), s.assignedTasks.length, s.openTasks.length, s.doneTasks.length, s.resourceTrips.length, s.unavailable.length, s.oncall.length]);
       });
-      downloadText(`railops_ore_risorse_${fileStamp()}.csv`, csvRows(rows), "text/csv;charset=utf-8");
+      downloadText(`railops_ore_risorse${scopeFileTag()}_${fileStamp()}.csv`, csvRows(rows), "text/csv;charset=utf-8");
       showToast("Export ore risorse creato", { type: "success" });
     }
 
@@ -7522,10 +7604,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const { startKey, endKey, label } = backupPeriodKeys();
       return {
         startKey, endKey, label,
-        trips: trips.filter(t => rangesOverlap(startKey, endKey, t.start_date, t.end_date || t.start_date)),
-        tasks: tasks.filter(t => rangesOverlap(startKey, endKey, taskRange(t).start, taskRange(t).end)),
-        unavailable: unavailability.filter(u => rangesOverlap(startKey, endKey, u.start_date, u.end_date || u.start_date)),
-        oncall: oncallInterventions.filter(o => o.intervention_date >= startKey && o.intervention_date <= endKey)
+        trips: scopedTrips().filter(t => rangesOverlap(startKey, endKey, t.start_date, t.end_date || t.start_date)),
+        tasks: scopedTasks().filter(t => rangesOverlap(startKey, endKey, taskRange(t).start, taskRange(t).end)),
+        unavailable: scopedUnavailability().filter(u => rangesOverlap(startKey, endKey, u.start_date, u.end_date || u.start_date)),
+        oncall: scopedOncall().filter(o => o.intervention_date >= startKey && o.intervention_date <= endKey)
       };
     }
 
@@ -7536,7 +7618,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       m.tasks.forEach(t => rows.push(["Attività", t.title, resourcesLabel(t), t.vehicle, `${formatDate(t.start_date || t.due_date)} → ${formatDate(t.end_date || t.due_date || t.start_date)}`, t.status || "", formatMinutes(totalTaskMinutes(t.daily_logs)), t.description || ""]));
       m.unavailable.forEach(u => rows.push(["Indisponibilità", u.reason, u.resource, "", `${formatDate(u.start_date)} → ${formatDate(u.end_date || u.start_date)}`, u.reason || "", "", u.notes || ""]));
       m.oncall.forEach(o => rows.push(["Reperibilità", o.intervention_type, o.resource, o.vehicle || "", `${formatDate(o.intervention_date)} ${formatTimeValue(o.start_time)}-${formatTimeValue(o.end_time)}`, o.intervention_type || "", oncallDuration(o), o.notes || ""]));
-      downloadText(`railops_riepilogo_${m.startKey.slice(0,7)}.csv`, csvRows(rows), "text/csv;charset=utf-8");
+      downloadText(`railops_riepilogo${scopeFileTag()}_${m.startKey.slice(0,7)}.csv`, csvRows(rows), "text/csv;charset=utf-8");
       showToast("Export riepilogo mensile creato", { type: "success" });
     }
 
@@ -7748,7 +7830,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         + pdfSection("Attività", pdfTable(TASK_PDF_HEAD, taskRowsForPdf(m.tasks)))
         + pdfSection("Indisponibilità", pdfTable(UNAV_PDF_HEAD, unavRowsForPdf(m.unavailable)))
         + pdfSection("Interventi in reperibilità", pdfTable(ONCALL_PDF_HEAD, oncallRowsForPdf(m.oncall)));
-      openPrintDocument(`Riepilogo mensile · ${m.label.replace(/^./, c => c.toUpperCase())}`, "Consuntivo del mese", body);
+      openPrintDocument(`Riepilogo mensile · ${m.label.replace(/^./, c => c.toUpperCase())}`, scopeName() ? `Consuntivo del mese · ${scopeName()}` : "Consuntivo del mese · tutte le risorse", body);
     }
 
     function printChangeLogBackup() {
@@ -7962,7 +8044,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         indisponibilita: renderUnavailability,
         calendario: renderCalendar,
         risorse: renderResourceDetail,
-        backup: () => { updateBackupSelects(); renderReport(); },
+        backup: () => { updateBackupSelects(); renderReport(); renderBackupScopeNote(); },
         anagrafiche: renderAnagrafiche,
         licenza: renderChangelog,
         logmodifiche: renderChangeLog,
@@ -7997,6 +8079,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       sub.textContent = SECTION_META[id].sub || "";
       sub.classList.toggle("hidden", !SECTION_META[id].sub);
       document.title = `${SECTION_META[id].title} · RailOps Hub`;
+      document.getElementById("scopePicker")?.classList.toggle("hidden", !SCOPED_SECTIONS.includes(id));
 
       const hash = `#/${id}`;
       if (!opts.fromHistory && location.hash !== hash) {
@@ -8107,6 +8190,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       const savedOperator = storeGet(OPERATOR_STORAGE_KEY);
       if (savedOperator) {
         currentUser = operatorObject(savedOperator);
+        resetViewScopeToUser();
         updateAuthUI();
         applySavedSidebarState();
         const shortcut = handleLaunchShortcut();
@@ -8885,7 +8969,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     }
 
     function openRapportinoDialog(resource) {
-      const defResource = resource || (people.includes(currentUser?.name) ? currentUser.name : people[0]) || "";
+      const defResource = resource || scopeName() || (people.includes(currentUser?.name) ? currentUser.name : people[0]) || "";
       const luogo = storeGet(RAPP_LUOGO_KEY) || "BIT";
       document.getElementById("editModalTitle").textContent = "Rapportino settimanale (Excel)";
       document.getElementById("editModalBody").innerHTML = `
