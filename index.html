@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v58.5 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v58.7 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v58.5" />
+  <meta name="app-version" content="v58.7" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <script>
@@ -156,7 +156,8 @@
     .expense-list{display:flex;flex-direction:column;gap:8px}
     .expense-row{display:flex;gap:14px;align-items:center;justify-content:space-between;border:1px solid var(--border);border-left:4px solid var(--todo-dot);background:var(--panel);border-radius:12px;padding:10px 14px;cursor:pointer}
     .expense-row:hover{border-color:var(--border-strong)}
-    .expense-row.step-1{border-left-color:var(--trip-dot)} .expense-row.step-2{border-left-color:var(--issue-dot)} .expense-row.step-3{border-left-color:var(--prog-dot)} .expense-row.step-4{border-left-color:var(--done-dot)}
+    .expense-row.et-tosign{border-left-color:var(--issue-dot)} .expense-row.et-waiting{border-left-color:var(--prog-dot)} .expense-row.et-done{border-left-color:var(--done-dot)} .expense-row.et-empty{border-left-color:var(--todo-dot)}
+    .expense-row.et-tosign .er-status{color:var(--issue-ink)} .expense-row.et-waiting .er-status{color:var(--prog-ink)} .expense-row.et-done .er-status{color:var(--done-ink)}
     .er-main{min-width:0;flex:1}
     .er-veh{font-weight:600;color:var(--muted)}
     .er-steps{display:flex;align-items:center;gap:4px;margin-top:6px;flex-wrap:wrap}
@@ -172,8 +173,9 @@
     .er-empty{font-style:italic}
     .trip-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}
     .expense-trip-btn{font-variant-numeric:tabular-nums;border:1px solid var(--border)}
-    .expense-trip-btn.step-2{border-color:var(--issue-bd);color:var(--issue-ink);background:var(--issue-bg-2)}
-    .expense-trip-btn.step-4{border-color:var(--done-bd);color:var(--done-ink)}
+    .expense-trip-btn.et-tosign{border-color:var(--issue-bd);color:var(--issue-ink);background:var(--issue-bg-2)}
+    .expense-trip-btn.et-waiting{border-color:var(--prog-bd);color:var(--prog-ink);background:var(--prog-bg)}
+    .expense-trip-btn.et-done{border-color:var(--done-bd);color:var(--done-ink)}
     .expense-dash-kpi{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px}
     .expense-dash-kpi span{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
     .expense-dash-kpi strong{font-size:22px;font-variant-numeric:tabular-nums}
@@ -2996,9 +2998,11 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v58.5";
+    const APP_VERSION = "v58.7";
     const APP_RELEASE_DATE = "23/11/2026";
     const CHANGELOG = [
+      { v: "v58.7", date: "23/11/2026", items: ["Rimborsi: il colore delle pratiche segue lo stato — rosa da firmare (anche con nota spese non ancora emessa), giallo firmata in attesa di rimborso, verde rimborsata, grigio senza scontrini; stesso colore sul pulsante € delle trasferte", "Riquadro «Note spese da firmare»: niente più numero ripetuto («2 · nessuna ancora emessa» oppure «di cui 1 non ancora emessa»)"] },
+      { v: "v58.6", date: "23/11/2026", items: ["Rimborsi: «Note spese da firmare» conta anche le pratiche con scontrini la cui nota spese non è ancora stata emessa (campo «Nota spese emessa» vuoto), con l'indicazione di quante non sono ancora emesse; lo stesso numero compare nel menu e in Dashboard"] },
       { v: "v58.5", date: "23/11/2026", items: ["Rimborsi · vitto: «Bar / caffè» rinominato «☕ Fuori pasto» (anche nel riepilogo PDF ed Excel: «Vitto (fuori pasto)»)"] },
       { v: "v58.4", date: "23/11/2026", items: ["Rimborsi · vitto: scelta «🍽 Pasto» o «☕ Bar / caffè». Il pasto deve cadere nella pausa (o fuori orario); caffè, dolce, acqua e spuntini vanno bene anche durante il lavoro o il viaggio, senza avvisi", "Nel riepilogo PDF ed Excel compaiono come «Vitto (bar/caffè)», nel totale della categoria Vitto"] },
       { v: "v58.3", date: "23/11/2026", items: ["Rimborsi: il cambio non è più in tempo reale ma quello ufficiale BCE del giorno dello scontrino, impostato in automatico (sabato e domenica: ultimo cambio disponibile, indicato sullo scontrino)", "Se cambi la data di uno scontrino il cambio si aggiorna da solo; gli scontrini già inseriti con il cambio di un altro giorno vengono corretti all'apertura della pratica", "Le pratiche consegnate alla segretaria mantengono i cambi salvati"] },
@@ -9097,7 +9101,7 @@ exception when others then null; end $$;`;
       const byCat = {}, byCur = {};
       let total = 0, personal = 0, company = 0, missingPhoto = 0, incomplete = 0, count = 0;
       (receipts || []).forEach(raw => {
-        const r = raw && raw.id ? raw : normalizeReceipt(raw);
+        const r = normalizeReceipt(raw);
         count++;
         const eur = Number(r.amount_eur) || 0;
         total += eur;
@@ -9925,7 +9929,9 @@ exception when others then null; end $$;`;
       const open = rows.filter(r => r.step < 4 && r.claim);
       return {
         toRefund: round2(open.reduce((s, r) => s + r.totals.personal, 0)),
-        toSign: rows.filter(r => r.step === 2).length,
+        // nota spese da firmare: con scontrini e non ancora firmata (comprese quelle la cui nota non è ancora stata emessa)
+        toSign: rows.filter(r => r.totals.count && r.step < 3).length,
+        toEmit: rows.filter(r => r.totals.count && r.step < 2).length,
         waiting: rows.filter(r => r.step === 3),
         waitingAmount: round2(rows.filter(r => r.step === 3).reduce((s, r) => s + (hasValue(r.claim?.note_amount) ? Number(r.claim.note_amount) : r.totals.personal), 0)),
         noReceipts: rows.filter(r => !r.totals.count && (r.trip.end_date || r.trip.start_date || "") <= todayDateKey()).length,
@@ -9967,6 +9973,7 @@ exception when others then null; end $$;`;
       const q = document.getElementById("expenseSearch")?.value.toLowerCase() || "";
       let rows = allRows;
       if (expenseFilter === "open") rows = rows.filter(r => r.step < 4);
+      else if (expenseFilter === "tosign") rows = rows.filter(r => r.totals.count && r.step < 3);
       else if (expenseFilter !== "all") rows = rows.filter(r => CLAIM_STEPS[r.step].key === expenseFilter);
       if (q) rows = rows.filter(r => [r.trip.place, r.trip.vehicle, r.trip.customer, r.person, r.claim?.note_number, r.claim?.notes].join(" ").toLowerCase().includes(q));
       const admin = isAdminUser();
@@ -9977,7 +9984,7 @@ exception when others then null; end $$;`;
           : `Le spese sono private: vedi solo le tue. Solo gli amministratori vedono quelle di tutti.`}</span></div>
         <div class="cards expense-kpis">
           <div class="card kpi"><div class="stat-label"><span class="kpi-dot dot-trip"></span>Da rimborsare</div><div class="stat-value">${fmtEur(k.toRefund)}</div></div>
-          <button class="card kpi" onclick="setExpenseFilter('note')"><div class="stat-label"><span class="kpi-dot dot-issue"></span>Note spese da firmare</div><div class="stat-value">${k.toSign}</div></button>
+          <button class="card kpi" onclick="setExpenseFilter('tosign')"><div class="stat-label"><span class="kpi-dot dot-issue"></span>Note spese da firmare</div><div class="stat-value">${k.toSign}${k.toEmit ? ` <small>${k.toEmit === k.toSign ? (k.toSign === 1 ? "non ancora emessa" : "nessuna ancora emessa") : `di cui ${k.toEmit} non ancora emess${k.toEmit === 1 ? "a" : "e"}`}</small>` : ""}</div></button>
           <button class="card kpi" onclick="setExpenseFilter('signed')"><div class="stat-label"><span class="kpi-dot dot-progress"></span>Firmate, in attesa di rimborso</div><div class="stat-value">${k.waiting.length}${k.waiting.length ? ` <small>${fmtEur(k.waitingAmount)}</small>` : ""}</div></button>
           <button class="card kpi" onclick="setExpenseFilter('draft')"><div class="stat-label"><span class="kpi-dot dot-todo"></span>Trasferte senza scontrini</div><div class="stat-value">${k.noReceipts}</div></button>
         </div>
@@ -9988,6 +9995,7 @@ exception when others then null; end $$;`;
               <input id="expenseSearch" class="input" type="search" placeholder="Cerca luogo, commessa, persona, n. nota…" value="${escapeHtml(q)}" oninput="renderExpenses(); this.focus(); this.setSelectionRange(this.value.length, this.value.length)">
               <select class="select" onchange="setExpenseFilter(this.value)" aria-label="Stato">
                 <option value="open" ${expenseFilter === "open" ? "selected" : ""}>Da chiudere (non rimborsate)</option>
+                <option value="tosign" ${expenseFilter === "tosign" ? "selected" : ""}>Note spese da firmare (anche non ancora emesse)</option>
                 ${CLAIM_STEPS.map(s => `<option value="${s.key}" ${expenseFilter === s.key ? "selected" : ""}>${escapeHtml(s.label)}</option>`).join("")}
                 <option value="all" ${expenseFilter === "all" ? "selected" : ""}>Tutte</option>
               </select>
@@ -9997,15 +10005,22 @@ exception when others then null; end $$;`;
         </div>`;
     }
 
+    // Colore della pratica: grigio senza scontrini · rosa da firmare (anche nota non ancora emessa) · giallo firmata in attesa · verde rimborsata
+    function expenseTone(step, count) {
+      if (step >= 4) return "done";
+      if (step === 3) return "waiting";
+      return count ? "tosign" : "empty";
+    }
+
     function expenseRowHtml(r) {
       const checks = r.claim ? claimChecks(r.claim).filter(x => x.level === "warn") : [];
       const multi = !expensePeopleInScope() || isAdminUser();
       const days = r.step === 2 && r.claim?.note_date ? Math.round((parseDateKey(todayDateKey()) - parseDateKey(r.claim.note_date)) / 86400000) : null;
-      return `<div class="expense-row step-${r.step}" role="button" tabindex="0" onclick="openExpenseClaim(${jsArg(r.trip.id)}, ${jsArg(r.person)})">
+      return `<div class="expense-row step-${r.step} et-${expenseTone(r.step, r.totals.count)}" role="button" tabindex="0" onclick="openExpenseClaim(${jsArg(r.trip.id)}, ${jsArg(r.person)})">
         <div class="er-main">
           <div class="mini-title">${escapeHtml(r.trip.place || "-")} <span class="er-veh">· ${escapeHtml(r.trip.vehicle || "-")}</span></div>
           <div class="mini-meta">${formatDate(r.trip.start_date)} → ${formatDate(r.trip.end_date || r.trip.start_date)}${multi ? ` · <b>${escapeHtml(r.person)}</b>` : ""}${r.claim?.note_number ? ` · nota n. ${escapeHtml(r.claim.note_number)}` : ""}</div>
-          <div class="er-steps">${CLAIM_STEPS.map((s, i) => `<span class="er-step ${i < r.step ? "done" : i === r.step ? "current" : ""}" title="${escapeHtml(s.label)}"></span>`).join("")}<span class="er-status">${escapeHtml(CLAIM_STEPS[r.step].label)}${days ? ` · da ${days} gg` : ""}</span></div>
+          <div class="er-steps">${CLAIM_STEPS.map((s, i) => `<span class="er-step ${i < r.step ? "done" : i === r.step ? "current" : ""}" title="${escapeHtml(s.label)}"></span>`).join("")}<span class="er-status">${escapeHtml(r.totals.count && r.step === 0 ? "Nota spese non ancora emessa" : r.totals.count && r.step === 1 ? "Consegnati · nota spese non ancora emessa" : CLAIM_STEPS[r.step].label)}${days ? ` · da ${days} gg` : ""}</span></div>
           ${checks.length ? `<div class="er-warn">${icon("alert")}${escapeHtml(checks[0].text)}</div>` : ""}
         </div>
         <div class="er-amount">
@@ -10024,7 +10039,7 @@ exception when others then null; end $$;`;
       const claims = [claimFor(trip.id, mine)].filter(Boolean);
       const step = claims.length ? claimStepIndex(claims[0]) : 0;
       const t = claimTotals(claims.flatMap(c => c.receipts || []));
-      return `<button class="btn ghost small expense-trip-btn step-${claims.length ? step : "none"}" title="Spese e rimborso${claims.length ? ` · ${CLAIM_STEPS[step].label}` : ""}" onclick="event.stopPropagation(); openExpenseClaim(${jsArg(trip.id)}, ${jsArg(mine)})">€ ${t.count ? fmtEur(t.personal).replace(/\s?€/, "") : "Spese"}</button>`;
+      return `<button class="btn ghost small expense-trip-btn et-${expenseTone(step, t.count)}" title="Spese e rimborso${claims.length ? ` · ${CLAIM_STEPS[step].label}` : ""}" onclick="event.stopPropagation(); openExpenseClaim(${jsArg(trip.id)}, ${jsArg(mine)})">€ ${t.count ? fmtEur(t.personal).replace(/\s?€/, "") : "Spese"}</button>`;
     }
 
     // Dashboard: riquadro rimborsi
@@ -10035,19 +10050,20 @@ exception when others then null; end $$;`;
       panel.classList.remove("hidden");
       const rows = expenseRows();
       const k = expenseKpis(rows);
-      const actions = rows.filter(r => r.step === 2 || (r.step < 2 && !r.totals.count && (r.trip.end_date || r.trip.start_date || "") <= todayDateKey()) || r.step === 3)
-        .sort((a, b) => (a.step === 2 ? 0 : a.step === 3 ? 2 : 1) - (b.step === 2 ? 0 : b.step === 3 ? 2 : 1)).slice(0, 4);
+      const prio = r => r.step === 2 ? 0 : (r.step < 2 && r.totals.count) ? 1 : r.step === 3 ? 3 : 2;
+      const actions = rows.filter(r => r.step === 2 || r.step === 3 || (r.step < 2 && (r.totals.count || (r.trip.end_date || r.trip.start_date || "") <= todayDateKey())))
+        .sort((a, b) => prio(a) - prio(b)).slice(0, 4);
       document.getElementById("dashboardExpenses").innerHTML = `
         <div class="expense-dash-kpi"><span>Da rimborsare</span><strong>${fmtEur(k.toRefund)}</strong>${k.toSign ? `<em>${k.toSign} ${k.toSign === 1 ? "nota" : "note"} da firmare</em>` : ""}</div>
-        ${actions.map(r => `<div class="mini-item" onclick="openExpenseClaim(${jsArg(r.trip.id)}, ${jsArg(r.person)})"><div class="mini-title">${escapeHtml(r.trip.place || "-")}${isAdminUser() && !expensePeopleInScope() ? ` <span style="font-weight:600;color:var(--muted)">· ${escapeHtml(r.person)}</span>` : ""}</div><div class="mini-meta">${r.step === 2 ? "Nota spese da controllare e firmare" : r.step === 3 ? "Firmata, in attesa del rimborso" : "Mancano gli scontrini"} · ${r.totals.count ? fmtEur(r.totals.personal) : formatDate(r.trip.start_date)}</div></div>`).join("") || `<div class="mini-meta">Nessuna azione da fare sui rimborsi.</div>`}`;
+        ${actions.map(r => `<div class="mini-item" onclick="openExpenseClaim(${jsArg(r.trip.id)}, ${jsArg(r.person)})"><div class="mini-title">${escapeHtml(r.trip.place || "-")}${isAdminUser() && !expensePeopleInScope() ? ` <span style="font-weight:600;color:var(--muted)">· ${escapeHtml(r.person)}</span>` : ""}</div><div class="mini-meta">${r.step === 2 ? "Nota spese da controllare e firmare" : r.step === 3 ? "Firmata, in attesa del rimborso" : r.totals.count ? "Nota spese non ancora emessa" : "Mancano gli scontrini"} · ${r.totals.count ? fmtEur(r.totals.personal) : formatDate(r.trip.start_date)}</div></div>`).join("") || `<div class="mini-meta">Nessuna azione da fare sui rimborsi.</div>`}`;
     }
 
     function updateExpenseBadge() {
       const badge = document.getElementById("navExpensesBadge");
       if (!badge) return;
-      const n = expenseTableMissing || !currentUser ? 0 : expenseRows().filter(r => r.step === 2).length;
+      const n = expenseTableMissing || !currentUser ? 0 : expenseRows().filter(r => r.totals.count && r.step < 3).length;
       badge.textContent = n;
-      badge.title = `${n} note spese da firmare`;
+      badge.title = `${n} note spese da firmare (comprese quelle non ancora emesse)`;
       badge.classList.toggle("hidden", !n);
     }
 
