@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v59.1 · 23/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v59.2 · 24/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v59.1" />
+  <meta name="app-version" content="v59.2" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <script>
@@ -633,7 +633,9 @@
     .legend-item{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);font-weight:700}
     .legend-dot{width:10px;height:10px;border-radius:3px;display:inline-block}
     .dot-trip{background:var(--trip-dot)} .dot-todo{background:var(--todo-dot)} .dot-progress{background:var(--prog-dot)} .dot-done{background:var(--done-dot)} .dot-blocked{background:var(--block-dot)} .dot-unav{background:var(--unav-dot)} .dot-oncall{background:var(--oncall-dot)}
-    .calendar-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+    /* overflow-y:hidden: la rotella deve scorrere la pagina, non il contenitore del calendario
+       (prima i quadratini di ridimensionamento sporgevano di 1px e il calendario "catturava" la rotella) */
+    .calendar-scroll{width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:10px}
     .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
     .calendar-weekday{text-align:center;color:var(--muted);font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.06em;padding:4px}
     .calendar-day{min-height:150px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:8px 8px 6px;display:flex;flex-direction:column;gap:4px;min-width:0;cursor:pointer;transition:border-color .12s}
@@ -3001,9 +3003,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v59.1";
-    const APP_RELEASE_DATE = "23/11/2026";
+    const APP_VERSION = "v59.2";
+    const APP_RELEASE_DATE = "24/11/2026";
     const CHANGELOG = [
+      { v: "v59.2", date: "24/11/2026", items: ["Calendario: corretto lo scorrimento con la rotella del mouse — prima il contenitore del calendario «catturava» la rotella (per 1 px di sporgenza dei quadratini di ridimensionamento) e la pagina non scendeva al primo tentativo"] },
       { v: "v59.1", date: "23/11/2026", items: ["Trasferte: la prima riga dell'etichetta è solo «Trasferta - motivo» (es. «Trasferta - Controllo annuale»); il tipo di manutenzione resta nella scheda, nell'elenco Trasferte e nel dettaglio del calendario"] },
       { v: "v59.0", date: "23/11/2026", items: ["Trasferte: nuovi campi «Tipo di manutenzione» (ordinaria / correttiva, modificabili in Anagrafiche) e «Motivo della trasferta» (con suggerimenti); l'etichetta diventa «Trasferta manutenzione ordinaria - Controllo annuale» nel calendario, nell'elenco e in Dashboard", "Rapportino settimanale: per le trasferte la colonna ATTIVITÀ riporta «Trasferta - motivo»", "Le ore (registro giornaliero delle trasferte e registro tempo delle attività) si possono inserire già alla creazione, oltre che dopo", "Richiede due nuove colonne nella tabella trasferte: il comando SQL è nella sezione Trasferte"] },
       { v: "v58.7", date: "23/11/2026", items: ["Rimborsi: il colore delle pratiche segue lo stato — rosa da firmare (anche con nota spese non ancora emessa), giallo firmata in attesa di rimborso, verde rimborsata, grigio senza scontrini; stesso colore sul pulsante € delle trasferte", "Riquadro «Note spese da firmare»: niente più numero ripetuto («2 · nessuna ancora emessa» oppure «di cui 1 non ancora emessa»)"] },
