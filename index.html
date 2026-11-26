@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v59.2 · 24/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v59.3 · 25/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v59.2" />
+  <meta name="app-version" content="v59.3" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <script>
@@ -545,6 +545,8 @@
     /* ===================== REGISTRO GIORNALIERO (schede) ===================== */
     .days-list{display:flex;flex-direction:column;gap:10px}
     .day-card{border:1px solid var(--border);background:var(--soft);border-radius:14px;padding:12px}
+    .day-card.just-added{animation:justAdded 2.4s ease-out}
+    @keyframes justAdded{0%,40%{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 25%,transparent)}100%{box-shadow:none}}
     .day-card-head{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:10px}
     .day-card-head .field{min-width:160px}
     .day-card-head .day-totals{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto;align-items:center}
@@ -3003,9 +3005,10 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v59.2";
-    const APP_RELEASE_DATE = "24/11/2026";
+    const APP_VERSION = "v59.3";
+    const APP_RELEASE_DATE = "25/11/2026";
     const CHANGELOG = [
+      { v: "v59.3", date: "25/11/2026", items: ["Attività riprese in giorni diversi: nella scheda attività il nuovo pulsante «Riprendi oggi» aggiunge la giornata di oggi al registro tempo, rimette lo stato «In corso» e allunga la data fine, senza duplicare l'attività", "Calendario: un'attività con registro tempo compare solo nei giorni lavorati (più i giorni ancora pianificati dopo l'ultimo, se è aperta); i giorni in mezzo restano liberi. Le attività senza registro tempo restano come prima", "Dettaglio attività ed elenco Attività: riga «Giorni lavorati» (es. 17/11–18/11, 25/11)"] },
       { v: "v59.2", date: "24/11/2026", items: ["Calendario: corretto lo scorrimento con la rotella del mouse — prima il contenitore del calendario «catturava» la rotella (per 1 px di sporgenza dei quadratini di ridimensionamento) e la pagina non scendeva al primo tentativo"] },
       { v: "v59.1", date: "23/11/2026", items: ["Trasferte: la prima riga dell'etichetta è solo «Trasferta - motivo» (es. «Trasferta - Controllo annuale»); il tipo di manutenzione resta nella scheda, nell'elenco Trasferte e nel dettaglio del calendario"] },
       { v: "v59.0", date: "23/11/2026", items: ["Trasferte: nuovi campi «Tipo di manutenzione» (ordinaria / correttiva, modificabili in Anagrafiche) e «Motivo della trasferta» (con suggerimenti); l'etichetta diventa «Trasferta manutenzione ordinaria - Controllo annuale» nel calendario, nell'elenco e in Dashboard", "Rapportino settimanale: per le trasferte la colonna ATTIVITÀ riporta «Trasferta - motivo»", "Le ore (registro giornaliero delle trasferte e registro tempo delle attività) si possono inserire già alla creazione, oltre che dopo", "Richiede due nuove colonne nella tabella trasferte: il comando SQL è nella sezione Trasferte"] },
@@ -5591,6 +5594,7 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
               <div id="editTaskLogsBody" class="days-list"></div>
               <div class="daily-actions">
                 <button type="button" class="btn secondary small" onclick="addTaskLogRow({ start_date: todayDateKey(), end_date: todayDateKey() }); modalDirty = true;">${icon("plus")}Aggiungi tempo</button>
+                <button type="button" class="btn small" onclick="resumeTaskToday()" title="Hai ripreso questa attività oggi? Aggiunge la giornata di oggi al registro tempo, la rimette «In corso» e allunga la data fine. Nessun duplicato: nel calendario compaiono solo i giorni lavorati.">${icon("refresh")}Riprendi oggi</button>
                 <span class="daily-summary" id="editTaskLogsSummary"></span>
               </div>
             </div>
@@ -6360,6 +6364,10 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
             <div class="activity-detail-label">Periodo</div>
             <div>${formatDate(task.start_date)} → ${formatDate(task.end_date)} · Scadenza ${formatDate(task.due_date)}</div>
           </div>
+          ${taskWorkedDaysLabel(task) ? `<div class="activity-detail-item">
+            <div class="activity-detail-label">Giorni lavorati</div>
+            <div>${escapeHtml(taskWorkedDaysLabel(task))}</div>
+          </div>` : ""}
           <div class="activity-detail-item">
             <div class="activity-detail-label">Sistemi</div>
             <div>${escapeHtml(systemList.join(", ") || "-")}</div>
@@ -6472,7 +6480,7 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
           </td>
           <td data-label="Commessa / Veicolo">${escapeHtml(t.vehicle || "-")}<div class="cell-sub">${escapeHtml(systemList.join(", ") || "-")}</div></td>
           <td data-label="Risorse">${escapeHtml(resourcesLabel(t))}</td>
-          <td data-label="Periodo / Tempo" style="white-space:nowrap">${formatDate(t.start_date)} → ${formatDate(t.end_date)}<div class="cell-sub">Scadenza: ${formatDate(t.due_date)}</div>${overdue ? `<div class="overdue-flag">${icon("alert")}In ritardo</div>` : ""}<div class="cell-sub">${taskLogsSummary(t.daily_logs)}</div></td>
+          <td data-label="Periodo / Tempo" style="white-space:nowrap">${formatDate(t.start_date)} → ${formatDate(t.end_date)}<div class="cell-sub">Scadenza: ${formatDate(t.due_date)}</div>${overdue ? `<div class="overdue-flag">${icon("alert")}In ritardo</div>` : ""}<div class="cell-sub">${taskLogsSummary(t.daily_logs)}</div>${taskWorkedDaysLabel(t).includes(",") ? `<div class="cell-sub">Giorni: ${escapeHtml(taskWorkedDaysLabel(t))}</div>` : ""}</td>
           <td class="actions-cell">${rowActionsHtml("task", t.id, "openEditTask")}</td>
         </tr>`;
       }).join("");
@@ -6921,14 +6929,7 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
         return eachDateInRange(item.raw.start_date, item.raw.end_date);
       }
 
-      if (item.type === "task") {
-        const primary = eachDateInRange(item.raw.start_date || item.raw.due_date, item.raw.end_date || item.raw.due_date);
-        if (primary.length) return primary;
-
-        const logDates = normalizeTaskLogs(item.raw.daily_logs)
-          .flatMap(log => eachDateInRange(log.start_date || log.log_date, log.end_date || log.log_date));
-        return [...new Set(logDates)];
-      }
+      if (item.type === "task") return taskCalendarDays(item.raw);
 
       if (item.type === "unavailable") {
         return eachDateInRange(item.raw.start_date, item.raw.end_date || item.raw.start_date);
@@ -6941,6 +6942,71 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
       return [];
     }
 
+
+    /* ---- attività riprese in più momenti: i giorni lavorati vengono dal registro tempo ---- */
+    // Giorni con una registrazione nel registro tempo (ordinati, senza doppioni)
+    function taskWorkedDays(task) {
+      const keys = normalizeTaskLogs(task?.daily_logs)
+        .flatMap(log => eachDateInRange(log.start_date || log.log_date || log.end_date, log.end_date || log.start_date || log.log_date));
+      return [...new Set(keys)].sort();
+    }
+
+    // Giorni in cui l'attività compare nel calendario:
+    // - senza registro tempo: tutto il periodo Data inizio → Data fine (come prima);
+    // - con registro tempo: solo i giorni lavorati, più (se è ancora aperta) i giorni pianificati dopo l'ultimo giorno lavorato.
+    //   Così un'attività iniziata la settimana scorsa e ripresa oggi non "occupa" i giorni in mezzo.
+    function taskCalendarDays(task) {
+      const planned = eachDateInRange(task.start_date || task.due_date, task.end_date || task.due_date);
+      const worked = taskWorkedDays(task);
+      if (!worked.length) return planned;
+      const last = worked[worked.length - 1];
+      const rest = isDoneStatus(task.status) ? [] : planned.filter(k => k > last);
+      return [...worked, ...rest];
+    }
+
+    // "17/11–18/11, 25/11": giorni lavorati raggruppati per periodi consecutivi
+    function taskWorkedDaysLabel(task) {
+      const days = taskWorkedDays(task);
+      if (!days.length) return "";
+      const short = k => { const [y, m, d] = k.split("-"); return `${d}/${m}`; };
+      const runs = [];
+      days.forEach(k => {
+        const run = runs[runs.length - 1];
+        if (run && addDateDaysKey(run[1], 1) === k) run[1] = k; else runs.push([k, k]);
+      });
+      return runs.map(([a, b]) => a === b ? short(a) : `${short(a)}–${short(b)}`).join(", ");
+    }
+
+    // Pulsante "Riprendi oggi" nella scheda attività: stessa attività, nuova giornata nel registro tempo
+    function resumeTaskToday() {
+      const today = todayDateKey();
+      const body = document.getElementById("editTaskLogsBody");
+      if (!body) return;
+      let row = [...body.querySelectorAll(".task-log-row")].find(r => r.querySelector('[data-field="start_date"]')?.value === today);
+      const added = !row;
+      if (!row) {
+        addTaskLogRow({ start_date: today, end_date: today });
+        row = [...body.querySelectorAll(".task-log-row")].pop();
+      }
+      const notes = [];
+      const status = document.getElementById("editTaskStatus");
+      if (status && status.value !== "In corso" && !isIssueTask({ status: status.value }) && [...status.options].some(o => o.value === "In corso")) {
+        notes.push(`stato da «${status.value}» a «In corso»`);
+        status.value = "In corso";
+        status.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      const start = document.getElementById("editTaskStart"), end = document.getElementById("editTaskEnd");
+      if (start && !start.value) start.value = today;
+      if (end && (!end.value || end.value < today)) { end.value = today; notes.push("data fine al " + formatDate(today)); }
+      modalDirty = true;
+      refreshTaskDailyTotals();
+      row?.classList.add("just-added");
+      row?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => row?.querySelector('[data-field="slot_start_time"]')?.focus({ preventScroll: true }), 350);
+      const due = document.getElementById("editTaskDue")?.value;
+      const dueNote = due && due < today ? ` · la scadenza (${formatDate(due)}) è già passata: aggiornala se serve` : "";
+      showToast(`${added ? "Aggiunta la giornata di oggi nel registro tempo" : "La giornata di oggi è già nel registro tempo"}${notes.length ? " · " + notes.join(", ") : ""}. Inserisci gli orari e salva${dueNote}.`, { duration: 6500 });
+    }
 
     function taskCalendarReferenceDate(task) {
       return task?.start_date || task?.due_date || task?.end_date || todayDateKey();
