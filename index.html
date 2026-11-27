@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<!-- RailOps Hub · versione v59.3 · 25/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
+<!-- RailOps Hub · versione v59.6 · 27/11/2026 — per la pubblicazione il file deve chiamarsi index.html -->
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="app-version" content="v59.3" />
+  <meta name="app-version" content="v59.6" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="theme-color" content="#0f172a" />
   <script>
@@ -789,6 +789,62 @@
     /* anagrafiche, backup, licenza, log accessi */
     .registry-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
     .registry-card{border:1px solid var(--border);background:var(--panel);border-radius:14px;overflow:hidden}
+    /* Spazio e consumi Supabase */
+    .usage-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .usage-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .usage-tools .select{width:auto;min-width:150px;padding:6px 10px}
+    .usage-row{padding:10px 0;border-bottom:1px solid var(--border)}
+    .usage-row:first-of-type{padding-top:2px}
+    .usage-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+    .usage-label{font-weight:700;font-size:14px}
+    .usage-val{font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
+    .usage-val span{font-weight:500;color:var(--muted)}
+    .usage-bar{height:9px;border-radius:99px;background:var(--soft);border:1px solid var(--border);overflow:hidden;margin-top:7px}
+    .usage-bar span{display:block;height:100%;border-radius:99px;background:var(--success)}
+    .usage-bar.warn span{background:var(--warning)}
+    .usage-bar.bad span{background:var(--danger)}
+    .usage-sub{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.45}
+    .usage-sub .btn{margin-top:2px}
+    .usage-notes{display:grid;gap:10px;margin-top:12px}
+    .usage-note{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.45;padding:9px 11px;border-radius:10px;background:var(--soft);border:1px solid var(--border)}
+    .usage-note .ico{flex:none;margin-top:2px;color:var(--success)}
+    .usage-note.warn{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-ink)}
+    .usage-note.warn .ico{color:inherit}
+    .usage-note.info .ico{color:var(--muted)}
+    .usage-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .usage-alert{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn-ink)}
+    .usage-sql{margin-top:12px;border:1px dashed var(--border-strong);border-radius:10px;padding:10px 12px}
+    .usage-sql summary{cursor:pointer;font-weight:700;font-size:13.5px}
+    /* gestione file */
+    .fm-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .fm-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:99px;padding:6px 12px;font:inherit;font-size:13px;font-weight:650;cursor:pointer}
+    .fm-chip b{font-weight:850}
+    .fm-chip span{color:var(--muted);font-weight:500;font-size:12px}
+    .fm-chip:hover{background:var(--hover-bg)}
+    .fm-chip.on{background:var(--primary-soft);border-color:var(--primary-bd);color:var(--primary-ink)}
+    .fm-chip.warn:not(.on){border-color:var(--warn-bd);background:var(--warn-bg);color:var(--warn-ink)}
+    .fm-tools{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+    .fm-tools .input{flex:1 1 260px}
+    .fm-tools .select{flex:0 0 auto;width:auto;min-width:150px}
+    .fm-bulk{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:var(--soft);margin-bottom:10px;font-size:13px}
+    .fm-bulk.on{border-color:var(--danger-bd-2);background:var(--danger-soft)}
+    .fm-all{display:inline-flex;align-items:center;gap:6px;font-weight:650;cursor:pointer}
+    .fm-bulk-info{flex:1;color:var(--muted)}
+    .fm-bulk.on .fm-bulk-info{color:var(--text)}
+    .fm-table{min-width:760px}
+    .fm-table td.fm-check{width:1%}
+    .fm-table input[type=checkbox],.fm-all input{width:17px;height:17px;accent-color:var(--danger)}
+    .fm-table tr.fm-sel td{background:var(--danger-soft)}
+    .fm-name{display:flex;align-items:center;gap:7px;min-width:0}
+    .fm-name .ico{flex:none;color:var(--muted)}
+    .fm-name .cell-title{overflow-wrap:anywhere}
+    .fm-path{font-size:11px;overflow-wrap:anywhere;max-width:340px}
+    .fm-link{font-size:13px;line-height:1.35}
+    .fm-link+.fm-link{margin-top:3px}
+    .fm-orphan{display:inline-flex;align-items:center;gap:5px;color:var(--warn-ink);background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:99px;padding:2px 9px;font-size:12px;font-weight:700}
+    .fm-log-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .fm-log-actions .select{width:auto;min-width:110px;padding:6px 10px}
+    @media (max-width:760px){.fm-table td.fm-check{position:absolute;right:12px;top:10px;width:auto}.fm-table tr{position:relative}.fm-table td[data-label="File"]{padding-right:30px}.fm-path{max-width:none}}
     .registry-card-header{padding:14px 14px 10px;border-bottom:1px solid var(--border)}
     .registry-card-header h3{margin:0 0 3px;font-size:15px}
     .registry-card-header p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.4}
@@ -1050,6 +1106,7 @@
         <button data-section="anagrafiche" onclick="showSection('anagrafiche')"><svg class="ico"><use href="#i-list"/></svg>Anagrafiche</button>
         <button data-section="logmodifiche" onclick="showSection('logmodifiche')"><svg class="ico"><use href="#i-history"/></svg>Log modifiche</button>
         <button data-section="logaccessi" onclick="showSection('logaccessi')"><svg class="ico"><use href="#i-login"/></svg>Log accessi</button>
+        <button class="hidden" data-usage-only data-section="consumi" onclick="showSection('consumi')"><svg class="ico"><use href="#i-panel"/></svg>Spazio e consumi</button>
         <button class="hidden" data-install onclick="installApp()" style="margin-top:10px;color:#93b4ff"><svg class="ico"><use href="#i-download"/></svg>Installa l'app</button>
       </nav>
       <div class="user-box" style="margin-top:auto">
@@ -1390,7 +1447,7 @@
         <div class="backup-grid">
           <div class="backup-card primary">
             <h3>Backup completo JSON</h3>
-            <p>Tutti i dati: trasferte, attività, indisponibilità, reperibilità, anagrafiche, log modifiche e log accessi.</p>
+            <p>Tutti i dati: trasferte, attività, indisponibilità, reperibilità, rimborsi spese, anagrafiche, log modifiche e log accessi. I file allegati si salvano a parte con lo ZIP.</p>
             <div class="backup-actions"><button class="btn small" onclick="exportData()"><svg class="ico"><use href="#i-download"/></svg>Scarica JSON</button></div>
           </div>
           <div class="backup-card warning">
@@ -1400,6 +1457,11 @@
               <input type="file" id="restoreFileInput" accept="application/json,.json" class="hidden" onchange="restoreFromBackup(this)">
               <button class="btn secondary small" onclick="document.getElementById('restoreFileInput').click()"><svg class="ico"><use href="#i-upload"/></svg>Scegli file…</button>
             </div>
+          </div>
+          <div class="backup-card primary">
+            <h3>Allegati (ZIP)</h3>
+            <p>Tutti i file caricati: allegati di attività e trasferte, foto degli scontrini e firme. Supabase gratuito non fa backup: scaricalo una volta al mese insieme al JSON.</p>
+            <div class="backup-actions"><button class="btn small" onclick="downloadAttachmentsZip(this)"><svg class="ico"><use href="#i-download"/></svg>Scarica ZIP</button></div>
           </div>
           <div class="backup-card primary">
             <h3>Backup completo PDF</h3>
@@ -1499,6 +1561,12 @@
             <div class="list-footer"><span id="changeLogMeta"></span><button class="btn secondary small" id="changeLogMoreBtn" onclick="loadMoreChangeLog()">Carica voci meno recenti</button></div>
           </div>
         </div>
+      </section>
+
+      <section id="consumi" class="section">
+        <div id="usagePanel"></div>
+        <div id="filesPanel"></div>
+        <div id="dataPanel"></div>
       </section>
 
       <section id="logaccessi" class="section">
@@ -2946,7 +3014,47 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
   <script>
     const SUPABASE_URL = "https://wmznmklciqkeyjxmkrmx.supabase.co";
     const SUPABASE_KEY = "sb_publishable_mvzQ4k6JR2y_T_Yx6Wvr5g_lW8mQGfD";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    /* ---- consumi Supabase: traffico scaricato da questo dispositivo (stima mensile, per il pannello in Anagrafiche) ---- */
+    const TRAFFIC_KEY = "railops_traffic";
+    function trafficRead() {
+      try {
+        const t = JSON.parse(localStorage.getItem(TRAFFIC_KEY) || "{}");
+        const month = new Date().toISOString().slice(0, 7);
+        return t.month === month ? t : { month, bytes: 0, since: new Date().toISOString() };
+      } catch { return { month: new Date().toISOString().slice(0, 7), bytes: 0, since: new Date().toISOString() }; }
+    }
+    function trafficAdd(bytes) {
+      if (!(bytes > 0)) return;
+      try { const t = trafficRead(); t.bytes += bytes; localStorage.setItem(TRAFFIC_KEY, JSON.stringify(t)); } catch { /* ok */ }
+    }
+    async function trackedFetch(input, init) {
+      const res = await fetch(input, init);
+      try {
+        const len = Number(res.headers.get("content-length"));
+        if (len > 0) trafficAdd(len);
+        else res.clone().arrayBuffer().then(b => trafficAdd(b.byteLength)).catch(() => {});
+      } catch { /* ok */ }
+      return res;
+    }
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { global: { fetch: trackedFetch } });
+
+    // Tabelle modificate da questo dispositivo dall'ultimo caricamento: dopo un salvataggio si ricaricano solo quelle
+    // (prima si riscaricava tutto il database a ogni salvataggio, consumando traffico Supabase)
+    const dirtyTables = new Set();
+    const dirtyAt = new Map();          // tabella → momento dell'ultima scrittura da questo dispositivo
+    (() => {
+      const from = sb.from.bind(sb);
+      sb.from = table => {
+        const builder = from(table);
+        if (table === "railops_usage_traffic") return builder; // contatore consumi: non richiede di ricaricare i dati
+        ["insert", "update", "upsert", "delete"].forEach(method => {
+          if (typeof builder?.[method] !== "function") return;
+          const original = builder[method].bind(builder);
+          builder[method] = (...args) => { dirtyTables.add(table); dirtyAt.set(table, Date.now()); return original(...args); };
+        });
+        return builder;
+      };
+    })();
 
     let vehicles = [
       "GENERICO","ELZEL_GENERICO","ELZEL1_OCPD001_09771","ELZEL1_OCPD001_09772","ELZEL1_OCPD001_09773","ELZEL1_OCPD001_09774",
@@ -3005,9 +3113,30 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
     let realtimeChannel = null;
 
     // Versione dell'app: aggiornarla a ogni pubblicazione (anche nel commento e nel meta in cima al file).
-    const APP_VERSION = "v59.3";
-    const APP_RELEASE_DATE = "25/11/2026";
+    const APP_VERSION = "v59.6";
+    const APP_RELEASE_DATE = "27/11/2026";
     const CHANGELOG = [
+      { v: "v59.6", date: "27/11/2026", items: [
+        "Spazio e consumi › File su Supabase: elenco di tutti i file (allegati, foto scontrini, firme) con peso, data e a cosa sono collegati; filtri, ricerca e ordinamento per peso",
+        "Eliminazione di uno o più file: se un file è usato da un'attività, una trasferta o uno scontrino viene tolto anche da lì; i file «Non collegati» (rimasti senza nessun elemento) si possono eliminare in blocco",
+        "Spazio e consumi › Dati: log modifiche e log accessi con numero di voci; le voci più vecchie di 3/6/12/24 mesi si possono eliminare dopo averle scaricate in un archivio JSON",
+        "Se Supabase rifiuta una cancellazione, il pannello mostra il comando SQL dei permessi da eseguire"
+      ] },
+      { v: "v59.5", date: "27/11/2026", items: [
+        "Nuova sezione «Spazio e consumi» (Amministrazione), visibile solo a Davide De Palma: spazio del database e dei file, traffico del mese e backup; tolta da Anagrafiche",
+        "Traffico del mese su tutti i dispositivi: ogni dispositivo registra quanto ha scaricato e il pannello mostra il totale, con il dettaglio per persona",
+        "Il comando SQL del pannello (rieseguibile) crea anche la tabella del traffico: va eseguito una volta"
+      ] },
+      { v: "v59.4", date: "26/11/2026", items: [
+        "Meno traffico su Supabase: dopo un salvataggio non si riscarica più tutto il database, ma solo la tabella modificata (o la sola riga, quando arriva in tempo reale)",
+        "Tempo reale riga per riga: quando un collega modifica qualcosa si scarica solo quell'elemento, non più tutti i dati su tutti i dispositivi aperti",
+        "Tornando sull'app (cambio scheda o finestra) non si ricarica più tutto: solo dopo più di 10 minuti in background o se il collegamento in tempo reale si è interrotto",
+        "Log modifiche e log accessi si caricano solo quando apri le loro sezioni (prima a ogni apertura dell'app)",
+        "Foto allegate ad attività e trasferte ridotte automaticamente (max 2400 px) se pesano più di 400 KB; PDF e documenti restano identici",
+        "Backup JSON: ora contiene anche i rimborsi spese (l'amministratore salva quelli di tutti) e il ripristino li reinserisce",
+        "Nuovo backup «Allegati (ZIP)»: tutti i file (allegati, foto scontrini, firme) con gli stessi percorsi del backup JSON",
+        "Anagrafiche › Spazio e consumi Supabase: database, file e traffico rispetto ai limiti del piano, data dell'ultimo backup e promemoria sulla pausa del piano gratuito. Per i numeri esatti serve un comando SQL (facoltativo) mostrato nel pannello"
+      ] },
       { v: "v59.3", date: "25/11/2026", items: ["Attività riprese in giorni diversi: nella scheda attività il nuovo pulsante «Riprendi oggi» aggiunge la giornata di oggi al registro tempo, rimette lo stato «In corso» e allunga la data fine, senza duplicare l'attività", "Calendario: un'attività con registro tempo compare solo nei giorni lavorati (più i giorni ancora pianificati dopo l'ultimo, se è aperta); i giorni in mezzo restano liberi. Le attività senza registro tempo restano come prima", "Dettaglio attività ed elenco Attività: riga «Giorni lavorati» (es. 17/11–18/11, 25/11)"] },
       { v: "v59.2", date: "24/11/2026", items: ["Calendario: corretto lo scorrimento con la rotella del mouse — prima il contenitore del calendario «catturava» la rotella (per 1 px di sporgenza dei quadratini di ridimensionamento) e la pagina non scendeva al primo tentativo"] },
       { v: "v59.1", date: "23/11/2026", items: ["Trasferte: la prima riga dell'etichetta è solo «Trasferta - motivo» (es. «Trasferta - Controllo annuale»); il tipo di manutenzione resta nella scheda, nell'elenco Trasferte e nel dettaglio del calendario"] },
@@ -3379,8 +3508,30 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       return true;
     }
 
+    // Foto allegate ad attività e trasferte: ridotte (max 2400 px, JPEG) se pesano più di 400 KB.
+    // PDF, documenti e immagini piccole restano identici. Si tiene la versione ridotta solo se è davvero più leggera.
+    async function compressAttachmentImage(file) {
+      if (!/^image\/(jpeg|png|webp|heic|heif)$/i.test(file.type || "") || file.size < 400 * 1024) return file;
+      try {
+        const { width, height, url } = await imageSize(file);
+        const img = await new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = reject; i.src = url; });
+        const scale = Math.min(1, 2400 / Math.max(width, height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(width * scale); canvas.height = Math.round(height * scale);
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff"; // le parti trasparenti dei PNG diventano bianche (non nere) nel JPEG
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.85));
+        if (!blob || blob.size > file.size * 0.8) return file;
+        return new File([blob], String(file.name || "foto").replace(/\.[a-z0-9]+$/i, "") + ".jpg", { type: "image/jpeg" });
+      } catch { return file; }
+    }
+
     async function uploadEntityAttachments(entityType, entityId, files) {
-      const list = [...(files || [])];
+      const list = [];
+      for (const file of [...(files || [])]) list.push(await compressAttachmentImage(file));
       if (!list.length) return [];
       if (!validateAttachmentFiles(list)) throw new Error("Allegato troppo grande");
 
@@ -3766,7 +3917,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       document.getElementById("accessLast").textContent = accessLog[0]?.created_at ? new Date(accessLog[0].created_at).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit" }) : "-";
 
       if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-cell"><div class="empty">Nessun accesso registrato.</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-cell"><div class="empty">${accessLogLoaded ? "Nessun accesso registrato." : "Caricamento del log accessi…"}</div></td></tr>`;
         return;
       }
 
@@ -3821,7 +3972,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       applySavedSidebarState();
       if (!handleLaunchShortcut()) showSection(routeFromHash() || "dashboard", { replace: true });
       recordAppAccess("selezione operatore");
-      await loadAllData();
+      await loadAllData({ full: true });
       startRealtime();
       showToast("Benvenuto, " + operatorName, { type: "success" });
       checkVersionChange();
@@ -3838,6 +3989,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     function updateAuthUI() {
       const active = !!currentUser;
+      document.querySelectorAll("[data-usage-only]").forEach(el => el.classList.toggle("hidden", !canSeeUsage()));
       document.getElementById("authScreen").classList.toggle("hidden", active);
       document.getElementById("app").classList.toggle("hidden", !active);
       document.getElementById("mobileHeader").classList.toggle("hidden", !active);
@@ -3851,9 +4003,21 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     let loadPromise = null;
     let reloadQueued = false;
+    let fullReloadQueued = false;
 
-    // Carica tutti i dati. Se un caricamento è già in corso, ne accoda uno solo (niente richieste sovrapposte).
-    async function loadAllData() {
+    // Tabelle principali: come si leggono e dove finiscono in memoria (usato dal caricamento parziale e dal tempo reale)
+    const CORE_TABLES = {
+      railops_trips: { query: () => sb.from("railops_trips").select("*").order("created_at", { ascending:false }), get: () => trips, set: rows => { trips = rows; } },
+      railops_tasks: { query: () => sb.from("railops_tasks").select("*").order("created_at", { ascending:false }), get: () => tasks, set: rows => { tasks = rows; } },
+      railops_unavailability: { query: () => sb.from("railops_unavailability").select("*").order("start_date", { ascending:false }), get: () => unavailability, set: rows => { unavailability = rows; } },
+      railops_oncall_interventions: { query: () => sb.from("railops_oncall_interventions").select("*").order("intervention_date", { ascending:false }).order("start_time", { ascending:false }), get: () => oncallInterventions, set: rows => { oncallInterventions = rows; } }
+    };
+    const registryQuery = () => sb.from("railops_registry").select("*").eq("is_active", true).order("position", { ascending:true }).order("value", { ascending:true });
+
+    // Carica i dati. Se un caricamento è già in corso, ne accoda uno solo (niente richieste sovrapposte).
+    // Dopo un salvataggio si riscaricano solo le tabelle modificate; { full: true } forza il caricamento completo.
+    async function loadAllData(opts = {}) {
+      if (opts.full) fullReloadQueued = true;
       if (loadPromise) {
         reloadQueued = true;
         return loadPromise;
@@ -3861,31 +4025,75 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       loadPromise = (async () => {
         do {
           reloadQueued = false;
-          await fetchAllData();
+          const full = fullReloadQueued || !dataLoaded || usingOfflineSnapshot || !dirtyTables.size;
+          fullReloadQueued = false;
+          if (full) await fetchAllData();
+          else await fetchChangedTables();
         } while (reloadQueued);
       })();
       try { await loadPromise; } finally { loadPromise = null; }
     }
 
+    // Caricamento parziale dopo un salvataggio. Con il tempo reale collegato la riga salvata arriva da sola
+    // (si aspetta al massimo 1,5 secondi); altrimenti si rilegge solo la tabella modificata. I log si aggiornano a parte.
+    async function fetchChangedTables() {
+      const changed = new Set(dirtyTables);
+      dirtyTables.clear();
+      // si aspetta il tempo reale solo per le tabelle da cui in questa sessione sono già arrivati eventi
+      // (una tabella non abilitata al tempo reale in Supabase viene riletta subito, senza attese)
+      const watched = [...changed].filter(table => realtimeTarget(table) && realtimeSeenAt.has(table));
+      let viaRealtime = new Set();
+      if (realtimeLive && watched.length) {
+        const arrived = table => (realtimeSeenAt.get(table) || 0) >= (dirtyAt.get(table) || 0);
+        const deadline = Date.now() + 1200;
+        while (Date.now() < deadline && !watched.every(arrived)) await new Promise(resolve => setTimeout(resolve, 100));
+        viaRealtime = new Set(watched.filter(arrived));
+        if (viaRealtime.size) {
+          clearTimeout(realtimeTimer);
+          await applyRealtimeChanges({ inLoad: true });
+        }
+      }
+      const jobs = [];
+      Object.entries(CORE_TABLES).forEach(([table, def]) => {
+        if (!changed.has(table) || viaRealtime.has(table)) return;
+        jobs.push(def.query().then(({ data, error }) => { if (error) throw error; def.set(data || []); }));
+      });
+      if (changed.has("railops_registry")) jobs.push(registryQuery().then(({ data, error }) => { if (error) throw error; applyRegistryRows(data || []); }));
+      if (changed.has(EXPENSE_TABLE) && !viaRealtime.has(EXPENSE_TABLE)) jobs.push(fetchExpenseClaims());
+      if (!jobs.length) { if (!viaRealtime.size) renderAll(); return; }
+      setLoading(true);
+      try {
+        await Promise.all(jobs);
+      } catch (error) {
+        setLoading(false);
+        console.warn("Caricamento parziale non riuscito, ricarico tutto:", error?.message || error);
+        return fetchAllData();
+      }
+      setLoading(false);
+      saveOfflineSnapshot();
+      refreshRegistryControls();
+      renderAll();
+    }
+
     async function fetchAllData() {
+      dirtyTables.clear();
       setLoading(true);
       let results;
       try {
+        // log modifiche e log accessi non si scaricano all'avvio: si caricano quando apri le loro sezioni
         results = await Promise.all([
-          sb.from("railops_registry").select("*").eq("is_active", true).order("position", { ascending:true }).order("value", { ascending:true }),
-          sb.from("railops_trips").select("*").order("created_at", { ascending:false }),
-          sb.from("railops_tasks").select("*").order("created_at", { ascending:false }),
-          sb.from("railops_unavailability").select("*").order("start_date", { ascending:false }),
-          sb.from("railops_oncall_interventions").select("*").order("intervention_date", { ascending:false }).order("start_time", { ascending:false }),
-          sb.from("railops_access_log").select("*").order("created_at", { ascending:false }).limit(1000),
-          sb.from("railops_change_log").select("*").order("created_at", { ascending:false }).limit(changeLogLimit)
+          registryQuery(),
+          CORE_TABLES.railops_trips.query(),
+          CORE_TABLES.railops_tasks.query(),
+          CORE_TABLES.railops_unavailability.query(),
+          CORE_TABLES.railops_oncall_interventions.query()
         ]);
       } catch (error) {
         setLoading(false);
         handleConnectionFailure(error?.message || String(error));
         return;
       }
-      const [registryRes, tripRes, taskRes, unavailabilityRes, oncallRes, accessRes, logRes] = results;
+      const [registryRes, tripRes, taskRes, unavailabilityRes, oncallRes] = results;
       // nessuna risposta dal server: connessione assente → si usa l'ultima copia salvata sul dispositivo
       if (results.every(r => r.error) && (!navigator.onLine || results.some(r => /fetch|network|load failed/i.test(r.error?.message || "")))) {
         setLoading(false);
@@ -3900,8 +4108,6 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (taskRes.error) errors.push("attività: " + taskRes.error.message);
       if (unavailabilityRes.error) errors.push("indisponibilità: " + unavailabilityRes.error.message);
       if (oncallRes.error) errors.push("reperibilità (script SQL v40)");
-      if (accessRes.error) errors.push("log accessi (script SQL v44)");
-      if (logRes.error) errors.push("log modifiche: " + logRes.error.message);
       if (errors.length) showToast("Errore caricamento " + errors.join(" · "), { type: "error" });
 
       // In caso di errore su una tabella si mantengono i dati già presenti invece di svuotare la vista.
@@ -3909,8 +4115,9 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       if (!taskRes.error) tasks = taskRes.data || [];
       if (!unavailabilityRes.error) unavailability = unavailabilityRes.data || [];
       if (!oncallRes.error) oncallInterventions = oncallRes.data || [];
-      if (!accessRes.error) accessLog = accessRes.data || [];
-      if (!logRes.error) changeLog = logRes.data || [];
+      // i log già aperti vengono riletti alla prossima apertura della loro sezione
+      changeLogLoaded = false;
+      accessLogLoaded = false;
       await fetchExpenseClaims();
       dataLoaded = true;
       if (!errors.length) saveOfflineSnapshot();
@@ -3922,17 +4129,148 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       renderAll();
     }
 
-    async function reloadAccessLog() {
-      const { data, error } = await sb.from("railops_access_log").select("*").order("created_at", { ascending:false }).limit(1000);
-      if (error) return;
-      accessLog = data || [];
-      if (currentSection === "logaccessi") renderAccessLog();
+    /* ---- log modifiche e log accessi: caricati solo quando servono ---- */
+    let changeLogLoaded = false, accessLogLoaded = false;
+    let changeLogPromise = null, accessLogPromise = null;
+
+    function ensureChangeLog(force = false) {
+      if (changeLogLoaded && !force) return Promise.resolve(true);
+      if (!changeLogPromise) {
+        changeLogPromise = (async () => {
+          const { data, error } = await sb.from("railops_change_log").select("*").order("created_at", { ascending:false }).limit(changeLogLimit);
+          if (error) { showToast("Errore caricamento log modifiche: " + error.message, { type: "error" }); return false; }
+          changeLog = data || [];
+          changeLogLoaded = true;
+          return true;
+        })().finally(() => { changeLogPromise = null; });
+      }
+      return changeLogPromise;
     }
 
+    function ensureAccessLog(force = false) {
+      if (accessLogLoaded && !force) return Promise.resolve(true);
+      if (!accessLogPromise) {
+        accessLogPromise = (async () => {
+          const { data, error } = await sb.from("railops_access_log").select("*").order("created_at", { ascending:false }).limit(1000);
+          if (error) { showToast("Log accessi non disponibile (script SQL v44): " + error.message, { type: "error" }); return false; }
+          accessLog = data || [];
+          accessLogLoaded = true;
+          return true;
+        })().finally(() => { accessLogPromise = null; });
+      }
+      return accessLogPromise;
+    }
+
+    function renderChangeLogSection() {
+      renderChangeLog();
+      if (!changeLogLoaded) ensureChangeLog().then(ok => { if (ok && currentSection === "logmodifiche") renderChangeLog(); });
+    }
+
+    function renderAccessLogSection() {
+      renderAccessLog();
+      if (!accessLogLoaded) ensureAccessLog().then(ok => { if (ok && currentSection === "logaccessi") renderAccessLog(); });
+    }
+
+    async function reloadAccessLog() {
+      if (await ensureAccessLog(true) && currentSection === "logaccessi") renderAccessLog();
+    }
+
+    /* ---- tempo reale: si aggiornano solo le righe cambiate (non più tutto il database a ogni modifica) ---- */
     let realtimeTimer = null;
+    let realtimeLive = false;
+    let realtimeHadError = false;
+    const realtimeQueue = [];
+    const realtimeSeenAt = new Map();   // tabella → momento dell'ultimo evento ricevuto
+
+    // ricarica completa (riconnessione, casi non gestibili riga per riga)
     function scheduleRealtimeReload() {
       clearTimeout(realtimeTimer);
-      realtimeTimer = setTimeout(() => loadAllData(), 400);
+      realtimeTimer = setTimeout(() => loadAllData({ full: true }), 400);
+    }
+
+    function realtimeTarget(table) {
+      if (CORE_TABLES[table]) return CORE_TABLES[table];
+      if (table === EXPENSE_TABLE) return { get: () => expenseClaims, set: rows => { expenseClaims = rows; }, filter: row => canSeeExpensesOf(row.resource) };
+      return null;
+    }
+
+    function queueRealtimeChange(table, payload) {
+      realtimeSeenAt.set(table, Date.now());
+      realtimeQueue.push({ table, payload });
+      clearTimeout(realtimeTimer);
+      realtimeTimer = setTimeout(applyRealtimeChanges, 350);
+    }
+
+    async function applyRealtimeChanges(opts = {}) {
+      if (loadPromise && !opts.inLoad) { try { await loadPromise; } catch { /* ok */ } }
+      const batch = realtimeQueue.splice(0);
+      if (!batch.length || !dataLoaded) return;
+      const toFetch = new Map(), toDelete = new Map();
+      let registryChanged = false, dataChanged = false, logChanged = false;
+      for (const { table, payload } of batch) {
+        const type = payload?.eventType;
+        if (table === "railops_change_log" || table === "railops_access_log") {
+          const isChange = table === "railops_change_log";
+          if (!(isChange ? changeLogLoaded : accessLogLoaded)) continue;
+          const list = isChange ? changeLog : accessLog;
+          if (type === "INSERT" && payload.new?.id != null && !list.some(r => r.id === payload.new.id)) list.unshift(payload.new);
+          else if (type === "DELETE") { const i = list.findIndex(r => r.id === payload.old?.id); if (i >= 0) list.splice(i, 1); }
+          else if (type === "UPDATE" && payload.new?.id != null) { const i = list.findIndex(r => r.id === payload.new.id); if (i >= 0) list[i] = payload.new; }
+          logChanged = true;
+          continue;
+        }
+        if (table === "railops_registry") { registryChanged = true; continue; }
+        if (!realtimeTarget(table)) continue;
+        const id = type === "DELETE" ? payload.old?.id : payload.new?.id;
+        if (id === undefined || id === null) return scheduleRealtimeReload();
+        if (!toFetch.has(table)) toFetch.set(table, new Set());
+        if (!toDelete.has(table)) toDelete.set(table, new Set());
+        if (type === "DELETE") { toDelete.get(table).add(id); toFetch.get(table).delete(id); }
+        else { toFetch.get(table).add(id); toDelete.get(table).delete(id); }
+      }
+      try {
+        for (const [table, ids] of toDelete) {
+          if (!ids.size) continue;
+          const target = realtimeTarget(table);
+          target.set(target.get().filter(row => !ids.has(row.id)));
+          dataChanged = true;
+        }
+        for (const [table, ids] of toFetch) {
+          if (!ids.size) continue;
+          const target = realtimeTarget(table);
+          const { data, error } = await sb.from(table).select("*").in("id", [...ids]);
+          if (error) throw error;
+          const rows = target.get().slice();
+          const found = new Set();
+          (data || []).forEach(row => {
+            found.add(row.id);
+            const index = rows.findIndex(r => r.id === row.id);
+            const visible = !target.filter || target.filter(row);
+            if (index >= 0) { if (visible) rows[index] = row; else rows.splice(index, 1); }
+            else if (visible) rows.unshift(row);
+          });
+          // non più leggibile (eliminato nel frattempo): si toglie
+          target.set(rows.filter(row => !ids.has(row.id) || found.has(row.id)));
+          dataChanged = true;
+        }
+        if (registryChanged) {
+          const { data, error } = await registryQuery();
+          if (error) throw error;
+          applyRegistryRows(data || []);
+          refreshRegistryControls();
+          dataChanged = true;
+        }
+      } catch (error) {
+        console.warn("Aggiornamento in tempo reale non riuscito, ricarico tutto:", error?.message || error);
+        return scheduleRealtimeReload();
+      }
+      if (dataChanged) {
+        saveOfflineSnapshot();
+        renderAll();
+      } else if (logChanged) {
+        if (currentSection === "logmodifiche") renderChangeLog();
+        if (currentSection === "logaccessi") renderAccessLog();
+      }
     }
 
     /* ===================== TEMA CHIARO / SCURO ===================== */
@@ -4039,7 +4377,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
 
     // Frecce in alto: aggiornano i dati e, se è stata pubblicata una nuova versione, anche l'app
     async function manualRefresh() {
-      const [, check] = await Promise.all([loadAllData(), checkForAppUpdate({ silent: false })]);
+      const [, check] = await Promise.all([loadAllData({ full: true }), checkForAppUpdate({ silent: false })]);
       if (check?.newer) return updateAppNow(check.remote);
       showToast(check?.remote ? `Dati aggiornati · hai già l'ultima versione (${APP_VERSION})` : "Dati aggiornati", { type: "success" });
     }
@@ -4050,15 +4388,23 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
       setSyncStatus("wait");
       const dataTables = ["railops_trips", "railops_tasks", "railops_unavailability", "railops_change_log", "railops_registry", "railops_oncall_interventions"];
       let channel = sb.channel("railops-realtime");
-      dataTables.forEach(table => {
-        channel = channel.on("postgres_changes", { event:"*", schema:"public", table }, scheduleRealtimeReload);
+      [...dataTables, "railops_access_log"].forEach(table => {
+        channel = channel.on("postgres_changes", { event:"*", schema:"public", table }, payload => queueRealtimeChange(table, payload));
       });
-      // un nuovo accesso non richiede di ricaricare tutto: si aggiorna solo il log accessi
-      channel = channel.on("postgres_changes", { event:"*", schema:"public", table:"railops_access_log" }, () => reloadAccessLog());
       realtimeChannel = channel.subscribe((status) => {
-        if (status === "SUBSCRIBED") setSyncStatus("live");
-        else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setSyncStatus("err");
-        else if (status === "CLOSED") setSyncStatus("off");
+        if (status === "SUBSCRIBED") {
+          realtimeLive = true;
+          setSyncStatus("live");
+          // dopo una disconnessione si potrebbero essere perse delle modifiche: si riallinea tutto una volta
+          if (realtimeHadError) { realtimeHadError = false; loadAllData({ full: true }); }
+        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          realtimeLive = false;
+          realtimeHadError = true;
+          setSyncStatus("err");
+        } else if (status === "CLOSED") {
+          realtimeLive = false;
+          setSyncStatus("off");
+        }
       });
     }
 
@@ -4068,6 +4414,7 @@ AGDCAQBjdXN0b21YbWwvX3JlbHMvaXRlbTIueG1sLnJlbHNQSwUGAAAAAB4AHgBICAAAZ8QBAAAA
         sb.removeChannel(realtimeChannel);
         realtimeChannel = null;
       }
+      realtimeLive = false;
       setSyncStatus("off");
     }
 
@@ -7188,6 +7535,7 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
       if (entityType === "registry") return "Anagrafica";
       if (entityType === "oncall") return "Reperibilità";
       if (entityType === "backup") return "Backup";
+      if (entityType === "storage") return "File";
       return entityType || "-";
     }
 
@@ -7235,6 +7583,7 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
       setLoading(false);
       if (error) return showToast("Errore caricamento log: " + error.message);
       changeLog = data || [];
+      changeLogLoaded = true;
       renderChangeLog();
     }
 
@@ -7302,7 +7651,7 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
       if (!tbody) return;
 
       if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-cell"><div class="empty">Nessuna voce trovata.</div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-cell"><div class="empty">${changeLogLoaded || activeLogEntityId ? "Nessuna voce trovata." : "Caricamento del log modifiche…"}</div></td></tr>`;
         return;
       }
 
@@ -8586,7 +8935,8 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
       showToast("Export riepilogo mensile creato", { type: "success" });
     }
 
-    function exportChangeLogCSV() {
+    async function exportChangeLogCSV() {
+      if (!changeLogLoaded) await ensureChangeLog();
       const rows = [["Data/Ora","Operatore","Tipo elemento","Elemento","Azione","Riepilogo"]];
       changeLog.forEach(item => rows.push([formatDateTime(item.created_at), item.user_email || "-", entityLabel(item.entity_type), item.entity_title || "-", logActionBadgeText(item.action), item.summary || "-"]));
       downloadText(`railops_log_modifiche_${fileStamp()}.csv`, csvRows(rows), "text/csv;charset=utf-8");
@@ -8751,7 +9101,8 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
         stats.map(s => [s.resource, formatMinutes(s.minutes), formatMinutes(s.taskMinutes), formatMinutes(s.tripMinutes), formatMinutes(s.travelMinutes), s.openTasks.length, s.doneTasks.length, s.resourceTrips.length, s.unavailable.length, s.oncall.length]));
     }
 
-    function printFullBackup() {
+    async function printFullBackup() {
+      if (!changeLogLoaded) await ensureChangeLog();
       const body = pdfKv([["Trasferte", trips.length], ["Attività", tasks.length], ["Attività aperte", tasks.filter(isOpenTask).length], ["Indisponibilità", unavailability.length], ["Reperibilità", oncallInterventions.length], ["Risorse", people.length], ["Commesse", vehicles.length], ["Voci di log", changeLog.length]])
         + pdfSection("Trasferte", pdfTable(TRIP_PDF_HEAD, tripRowsForPdf(trips)))
         + pdfSection("Attività", pdfTable(TASK_PDF_HEAD, taskRowsForPdf(tasks)))
@@ -8810,7 +9161,8 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
       openPrintDocument(`Riepilogo mensile · ${m.label.replace(/^./, c => c.toUpperCase())}`, scopeName() ? `Consuntivo del mese · ${scopeName()}` : "Consuntivo del mese · tutte le risorse", body);
     }
 
-    function printChangeLogBackup() {
+    async function printChangeLogBackup() {
+      if (!changeLogLoaded) await ensureChangeLog();
       openPrintDocument("Log modifiche", `Ultime ${changeLog.length} voci`, pdfTable(LOG_PDF_HEAD, logRowsForPdf(changeLog)));
     }
 
@@ -8851,6 +9203,8 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
       return all;
     }
 
+    const LAST_BACKUP_KEY = "railops_last_backup";
+
     async function exportData() {
       setLoading(true);
       let fullChangeLog = changeLog, fullAccessLog = accessLog, logsNote = "";
@@ -8858,6 +9212,12 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
         [fullChangeLog, fullAccessLog] = await Promise.all([fetchAllRows("railops_change_log"), fetchAllRows("railops_access_log")]);
       } catch (error) {
         logsNote = "Log esportati parzialmente (ultime voci caricate) per un errore di lettura: " + (error?.message || error);
+      }
+      // rimborsi spese: l'amministratore salva quelli di tutti, gli altri solo i propri
+      let backupExpenses = expenseClaims;
+      if (!expenseTableMissing && isAdminUser()) {
+        try { backupExpenses = await fetchAllRows(EXPENSE_TABLE); }
+        catch (error) { logsNote = (logsNote ? logsNote + " · " : "") + "Rimborsi esportati da quelli già caricati: " + (error?.message || error); }
       }
       setLoading(false);
       const registry = {};
@@ -8871,11 +9231,14 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
         registry,
         vehicles, people, systems,
         trips, tasks, unavailability, oncallInterventions,
+        expenseClaims: backupExpenses,
+        expenseScope: isAdminUser() ? "tutte le risorse" : (currentUser?.name || ""),
         changeLog: fullChangeLog,
         accessLog: fullAccessLog,
         notes: logsNote || undefined
       };
       downloadText(`railops_backup_${fileStamp()}.json`, JSON.stringify(data, null, 2), "application/json");
+      storeSet(LAST_BACKUP_KEY, new Date().toISOString());
       showToast(logsNote ? "Backup creato, ma con log parziali" : "Backup completo scaricato", { type: logsNote ? "error" : "success" });
     }
 
@@ -8902,9 +9265,10 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
         { key: "trips", table: "railops_trips", label: "Trasferte", current: trips },
         { key: "tasks", table: "railops_tasks", label: "Attività", current: tasks },
         { key: "unavailability", table: "railops_unavailability", label: "Indisponibilità", current: unavailability },
-        { key: "oncallInterventions", table: "railops_oncall_interventions", label: "Reperibilità", current: oncallInterventions }
+        { key: "oncallInterventions", table: "railops_oncall_interventions", label: "Reperibilità", current: oncallInterventions },
+        ...(expenseTableMissing ? [] : [{ key: "expenseClaims", table: EXPENSE_TABLE, label: "Rimborsi spese", current: expenseClaims, filter: row => canSeeExpensesOf(row.resource) }])
       ].map(set => {
-        const rows = (Array.isArray(backup[set.key]) ? backup[set.key] : []).filter(row => row && row.id);
+        const rows = (Array.isArray(backup[set.key]) ? backup[set.key] : []).filter(row => row && row.id && (!set.filter || set.filter(row)));
         const existing = new Set(set.current.map(x => x.id));
         return { ...set, rows, added: rows.filter(r => !existing.has(r.id)).length, updated: rows.filter(r => existing.has(r.id)).length };
       });
@@ -9003,6 +9367,7 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
       risorse: { title: "Risorse", sub: "Carico, ore e calendario personale" },
       logmodifiche: { title: "Log modifiche", sub: "" },
       logaccessi: { title: "Log accessi", sub: "" },
+      consumi: { title: "Spazio e consumi", sub: "Database, file, traffico, backup e gestione dei file su Supabase · sezione visibile solo a te" },
       backup: { title: "Report & Export", sub: "Backup, PDF, CSV e report testuale" },
       licenza: { title: "Info & Licenza", sub: "" },
       anagrafiche: { title: "Anagrafiche", sub: "Valori usati in moduli, filtri e report" }
@@ -9025,11 +9390,13 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
         indisponibilita: renderUnavailability,
         calendario: renderCalendar,
         risorse: renderResourceDetail,
-        backup: () => { updateBackupSelects(); renderReport(); renderBackupScopeNote(); },
+        // il log modifiche serve ai PDF di questa sezione: si carica in anticipo (le finestre di stampa vanno aperte subito al clic)
+        backup: () => { updateBackupSelects(); renderReport(); renderBackupScopeNote(); ensureChangeLog(); },
         anagrafiche: renderAnagrafiche,
         licenza: renderChangelog,
-        logmodifiche: renderChangeLog,
-        logaccessi: renderAccessLog
+        logmodifiche: renderChangeLogSection,
+        logaccessi: renderAccessLogSection,
+        consumi: () => { renderUsagePanel(); renderFilesPanel(); renderDataPanel(); }
       };
       try {
         renderers[id]?.();
@@ -9041,6 +9408,8 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
 
     function showSection(id, opts = {}) {
       if (id === "report") id = "backup";
+      if (id === "consumi" && !canSeeUsage()) id = "dashboard"; // sezione riservata
+
       const target = document.getElementById(id);
       if (!target || !SECTION_META[id]) {
         showToast("Sezione non disponibile: " + id);
@@ -9179,7 +9548,7 @@ alter table public.railops_trips add column if not exists trip_reason text;`;
         const shortcut = handleLaunchShortcut();
         if (!shortcut) showSection(routeFromHash() || "dashboard", { replace: true });
         recordAppAccess("apertura app");
-        await loadAllData();
+        await loadAllData({ full: true });
         startRealtime();
       } else {
         updateAuthUI();
@@ -9369,7 +9738,7 @@ exception when others then null; end $$;`;
       if (expenseChannel || expenseTableMissing || !navigator.onLine) return;
       try {
         expenseChannel = sb.channel("railops-expenses")
-          .on("postgres_changes", { event: "*", schema: "public", table: EXPENSE_TABLE }, () => scheduleRealtimeReload())
+          .on("postgres_changes", { event: "*", schema: "public", table: EXPENSE_TABLE }, payload => queueRealtimeChange(EXPENSE_TABLE, payload))
           .subscribe();
       } catch { expenseChannel = null; }
     }
@@ -10822,6 +11191,678 @@ exception when others then null; end $$;`;
       setTimeout(() => URL.revokeObjectURL(url), 2000);
     }
 
+    /* ===================== SPAZIO E CONSUMI SUPABASE (Anagrafiche) ===================== */
+    const MB = 1024 * 1024, GB = 1024 * MB;
+    const SUPABASE_PLANS = {
+      free: { label: "Free (gratuito)", db: 500 * MB, files: 1 * GB, egress: 5 * GB },
+      pro: { label: "Pro", db: 8 * GB, files: 100 * GB, egress: 250 * GB }
+    };
+    const PLAN_KEY = "railops_supabase_plan";
+    const SUPABASE_USAGE_URL = "https://supabase.com/dashboard/org/_/usage";
+    const USAGE_SQL = `-- RailOps Hub · Spazio e consumi (v59.5) — da eseguire una sola volta in Supabase › SQL Editor
+-- 1) Traffico: ogni dispositivo registra quanti dati ha scaricato nel mese (solo numeri, per il totale di tutti i dispositivi)
+create table if not exists public.railops_usage_traffic (
+  device_id text not null,
+  month text not null,
+  operator text,
+  device text,
+  bytes bigint not null default 0,
+  updated_at timestamptz default now(),
+  primary key (device_id, month)
+);
+alter table public.railops_usage_traffic enable row level security;
+drop policy if exists "railops_usage_traffic_all" on public.railops_usage_traffic;
+create policy "railops_usage_traffic_all" on public.railops_usage_traffic
+  for all to anon, authenticated using (true) with check (true);
+-- 2) Spazio: dimensione del database e dei file (solo dimensioni e conteggi, nessun dato delle attività o dei file)
+create or replace function public.railops_usage()
+returns json
+language sql
+security definer
+set search_path = public, storage
+as $$
+  select json_build_object(
+    'db_bytes', pg_database_size(current_database()),
+    'tables', (select coalesce(json_object_agg(c.relname, pg_total_relation_size(c.oid)), '{}'::json)
+               from pg_class c join pg_namespace n on n.oid = c.relnamespace
+               where n.nspname = 'public' and c.relkind = 'r' and c.relname like 'railops_%'),
+    'files_bytes', (select coalesce(sum((metadata->>'size')::bigint), 0) from storage.objects where bucket_id = 'railops-attachments'),
+    'files_count', (select count(*) from storage.objects where bucket_id = 'railops-attachments'),
+    'folders', (select coalesce(json_object_agg(f, b), '{}'::json) from (
+                  select split_part(name, '/', 1) as f, sum((metadata->>'size')::bigint) as b
+                  from storage.objects where bucket_id = 'railops-attachments' group by 1) x)
+  );
+$$;
+grant execute on function public.railops_usage() to anon, authenticated;`;
+
+    const USAGE_TABLE_LABELS = {
+      railops_tasks: "Attività", railops_trips: "Trasferte", railops_change_log: "Log modifiche", railops_access_log: "Log accessi",
+      railops_expense_claims: "Rimborsi spese", railops_oncall_interventions: "Reperibilità", railops_unavailability: "Indisponibilità", railops_registry: "Anagrafiche"
+    };
+
+    let usageInfo = null;          // ultimo calcolo (sessione)
+    let usageLoading = false;
+
+    // Il pannello «Spazio e consumi» è visibile solo a queste persone
+    const USAGE_VIEWERS = ["Davide De Palma"];
+    function canSeeUsage() {
+      return USAGE_VIEWERS.includes(currentUser?.name);
+    }
+
+    /* traffico di tutti i dispositivi: ognuno salva il proprio totale del mese (una riga per dispositivo e mese) */
+    const TRAFFIC_TABLE = "railops_usage_traffic";
+    const DEVICE_KEY = "railops_device_id";
+    let trafficTableMissing = false;
+    let lastTrafficReport = 0;
+
+    function deviceId() {
+      let id = storeGet(DEVICE_KEY);
+      if (!id) {
+        id = "dev_" + (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+        storeSet(DEVICE_KEY, id);
+      }
+      return id;
+    }
+
+    async function reportTraffic(minGapMs = 10 * 60 * 1000) {
+      if (trafficTableMissing || !currentUser || !navigator.onLine) return;
+      if (Date.now() - lastTrafficReport < minGapMs) return;
+      const t = trafficRead();
+      if (!t.bytes) return;
+      lastTrafficReport = Date.now();
+      try {
+        const { error } = await sb.from(TRAFFIC_TABLE).upsert([{
+          device_id: deviceId(), month: t.month, operator: currentUser.name,
+          device: `${detectDeviceType()} · ${browserSummary()}`, bytes: Math.round(t.bytes), updated_at: new Date().toISOString()
+        }], { onConflict: "device_id,month" });
+        if (error && /does not exist|schema cache|relation|42P01|PGRST20/i.test(`${error.message || ""} ${error.code || ""}`)) trafficTableMissing = true;
+      } catch { /* si riprova al prossimo giro */ }
+    }
+    setInterval(() => reportTraffic(), 10 * 60 * 1000);
+    setTimeout(() => reportTraffic(0), 20000);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") reportTraffic(60 * 1000); });
+
+    function formatSize(bytes) {
+      const v = Number(bytes) || 0;
+      const num = (x, d) => String(Number(x.toFixed(d))).replace(".", ",");
+      if (v >= GB) return `${num(v / GB, 2)} GB`;
+      if (v >= MB) return `${num(v / MB, 1)} MB`;
+      if (v >= 1024) return `${Math.round(v / 1024)} KB`;
+      return `${v} B`;
+    }
+
+    function currentPlan() {
+      return SUPABASE_PLANS[storeGet(PLAN_KEY)] || SUPABASE_PLANS.free;
+    }
+
+    function setSupabasePlan(value) {
+      storeSet(PLAN_KEY, value);
+      renderUsagePanel();
+    }
+
+    // Elenco completo dei file nello storage (cartella per cartella)
+    async function listStorageTree(prefix = "", out = [], depth = 0) {
+      if (depth > 8) return out;
+      for (let offset = 0; ; offset += 1000) {
+        const { data, error } = await sb.storage.from(ATTACHMENT_BUCKET).list(prefix, { limit: 1000, offset, sortBy: { column: "name", order: "asc" } });
+        if (error) throw error;
+        for (const item of data || []) {
+          const path = prefix ? `${prefix}/${item.name}` : item.name;
+          if (!item.id && !item.metadata) await listStorageTree(path, out, depth + 1); // cartella
+          else out.push({ path, size: Number(item.metadata?.size) || 0, updated_at: item.updated_at || item.created_at || "", type: item.metadata?.mimetype || "" });
+        }
+        if (!data || data.length < 1000) break;
+      }
+      return out;
+    }
+
+    function storageGroupOf(folder) {
+      if (folder === "firme") return "Firme";
+      if (folder === "spese") return "Foto scontrini";
+      return "Allegati attività e trasferte";
+    }
+
+    // Peso dei dati scaricati a ogni apertura completa (non compresso: il traffico reale è di solito minore)
+    function fullLoadBytes() {
+      try {
+        return new Blob([JSON.stringify([registryRows, trips, tasks, unavailability, oncallInterventions, expenseClaims])]).size;
+      } catch { return 0; }
+    }
+
+    async function loadUsageInfo({ listFiles = false } = {}) {
+      if (usageLoading || !canSeeUsage()) return;
+      usageLoading = true;
+      renderUsagePanel();
+      const info = { at: new Date(), sql: false, error: "" };
+      // traffico del mese di tutti i dispositivi (prima si aggiorna quello di questo dispositivo)
+      trafficTableMissing = false;
+      await reportTraffic(0);
+      try {
+        const { data, error } = await sb.from(TRAFFIC_TABLE).select("*").eq("month", trafficRead().month);
+        if (error) throw error;
+        const devices = (data || []).map(r => ({ ...r, bytes: Number(r.bytes) || 0 }));
+        const mine = devices.find(r => r.device_id === deviceId());
+        if (!mine) devices.push({ device_id: deviceId(), operator: currentUser?.name, bytes: trafficRead().bytes });
+        else mine.bytes = Math.max(mine.bytes, trafficRead().bytes);
+        const byOperator = {};
+        devices.forEach(r => { const k = r.operator || "Sconosciuto"; byOperator[k] = (byOperator[k] || 0) + r.bytes; });
+        info.traffic = { total: devices.reduce((s, r) => s + r.bytes, 0), devices: devices.length, byOperator };
+      } catch (error) {
+        info.trafficMissing = true;
+      }
+      try {
+        const res = typeof sb.rpc === "function" ? await sb.rpc("railops_usage") : { error: { message: "non disponibile" } };
+        if (res.error) throw res.error;
+        const d = typeof res.data === "string" ? JSON.parse(res.data) : res.data;
+        info.sql = true;
+        info.db = Number(d.db_bytes) || 0;
+        info.tables = d.tables || {};
+        info.files = Number(d.files_bytes) || 0;
+        info.fileCount = Number(d.files_count) || 0;
+        info.groups = {};
+        Object.entries(d.folders || {}).forEach(([folder, bytes]) => { const g = storageGroupOf(folder); info.groups[g] = (info.groups[g] || 0) + (Number(bytes) || 0); });
+      } catch (error) {
+        info.sqlMissing = /function|does not exist|schema cache|PGRST202|42883|non disponibile/i.test(`${error?.message || ""} ${error?.code || ""}`);
+        if (!info.sqlMissing) info.error = error?.message || String(error);
+        info.dbEstimate = fullLoadBytes();
+        if (listFiles || usageInfo?.files !== undefined) {
+          try {
+            const files = await listStorageTree();
+            info.files = files.reduce((sum, f) => sum + f.size, 0);
+            info.fileCount = files.length;
+            info.groups = {};
+            files.forEach(f => { const g = storageGroupOf(f.path.split("/")[0]); info.groups[g] = (info.groups[g] || 0) + f.size; });
+          } catch (e) { info.filesError = e?.message || String(e); }
+        }
+      }
+      usageInfo = info;
+      usageLoading = false;
+      renderUsagePanel();
+    }
+
+    function usageMeter(label, used, limit, sub, opts = {}) {
+      const pct = limit ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+      const tone = pct >= 90 ? "bad" : pct >= 70 ? "warn" : "ok";
+      return `
+        <div class="usage-row">
+          <div class="usage-head"><span class="usage-label">${label}</span><span class="usage-val">${used === null ? "—" : `${opts.approx ? "≈ " : ""}${formatSize(used)} <span>di ${formatSize(limit)}${used !== null ? ` · ${pct}%` : ""}</span>`}</span></div>
+          <div class="usage-bar ${tone}"><span style="width:${used === null ? 0 : Math.max(pct, used > 0 ? 1 : 0)}%"></span></div>
+          ${sub ? `<div class="usage-sub">${sub}</div>` : ""}
+        </div>`;
+    }
+
+    function lastBackupInfo() {
+      const iso = storeGet(LAST_BACKUP_KEY);
+      if (!iso) return { text: "Da questo dispositivo non è mai stato scaricato un backup.", warn: true };
+      const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+      return { text: `Ultimo backup scaricato da questo dispositivo: <b>${formatDateTime(iso)}</b> (${days === 0 ? "oggi" : days === 1 ? "ieri" : `${days} giorni fa`}).`, warn: days > 14 };
+    }
+
+    function renderUsagePanel() {
+      const box = document.getElementById("usagePanel");
+      if (!box) return;
+      if (!canSeeUsage()) { box.innerHTML = ""; return; }
+      if (!usageInfo && !usageLoading) { loadUsageInfo(); return; }
+      const plan = currentPlan();
+      const planKey = storeGet(PLAN_KEY) === "pro" ? "pro" : "free";
+      const u = usageInfo || {};
+      const traffic = trafficRead();
+      const perLoad = fullLoadBytes();
+      const tables = u.sql ? Object.entries(u.tables || {}).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([t, b]) => `${escapeHtml(USAGE_TABLE_LABELS[t] || t.replace(/^railops_/, ""))} ${formatSize(b)}`).join(" · ") : "";
+      const groups = u.groups ? Object.entries(u.groups).sort((a, b) => b[1] - a[1]).map(([g, b]) => `${escapeHtml(g)} ${formatSize(b)}`).join(" · ") : "";
+      const backup = lastBackupInfo();
+      const dbRow = u.sql
+        ? usageMeter("Database", u.db, plan.db, tables ? `Più pesanti: ${tables}` : "")
+        : usageMeter("Database", u.dbEstimate ?? null, plan.db, "Stima dai dati caricati (log esclusi). Per il dato esatto esegui il comando SQL qui sotto.", { approx: true });
+      const filesRow = u.files !== undefined
+        ? usageMeter("File (allegati, scontrini, firme)", u.files, plan.files, `${u.fileCount} file${groups ? ` · ${groups}` : ""}`)
+        : `<div class="usage-row"><div class="usage-head"><span class="usage-label">File (allegati, scontrini, firme)</span><span class="usage-val">non calcolato</span></div>
+            <div class="usage-sub">${u.filesError ? `Errore: ${escapeHtml(u.filesError)} · ` : ""}<button type="button" class="btn secondary small" onclick="loadUsageInfo({ listFiles: true })">${icon("refresh")}Calcola spazio file</button></div></div>`;
+      const monthName = new Date().toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+      const people = u.traffic ? Object.entries(u.traffic.byOperator).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([n, b]) => `${escapeHtml(n)} ${formatSize(b)}`).join(" · ") : "";
+      const trafficRow = u.traffic
+        ? usageMeter(`Traffico di ${monthName} · tutti i dispositivi`, u.traffic.total, plan.egress,
+          `${u.traffic.devices} dispositiv${u.traffic.devices === 1 ? "o" : "i"}${people ? ` · ${people}` : ""}. Questo dispositivo: ${formatSize(traffic.bytes)}. Stima dell'app (le foto aperte nelle schede non sono contate): il dato ufficiale è su Supabase. Un caricamento completo dell'app pesa al massimo ${formatSize(perLoad)}.`, { approx: true })
+        : usageMeter("Traffico del mese · solo questo dispositivo", traffic.bytes, plan.egress,
+          `Dal ${formatDate(String(traffic.since).slice(0, 10))}. Per il totale di tutti i dispositivi esegui il comando SQL qui sotto. Un caricamento completo dell'app pesa al massimo ${formatSize(perLoad)}.`, { approx: true });
+      box.innerHTML = `
+        <div class="registry-card usage-card" style="margin-bottom:16px">
+          <div class="registry-card-header usage-header">
+            <div><h3>Spazio e consumi Supabase</h3><p>Quanto state usando, su tutto il database, rispetto ai limiti del piano. Aggiornato ${u.at ? `alle ${u.at.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}` : "…"}.</p></div>
+            <div class="usage-tools">
+              <label class="mini-meta" for="usagePlan">Piano</label>
+              <select id="usagePlan" class="select" onchange="setSupabasePlan(this.value)">
+                <option value="free" ${planKey === "free" ? "selected" : ""}>Free (gratuito)</option>
+                <option value="pro" ${planKey === "pro" ? "selected" : ""}>Pro</option>
+              </select>
+              <button type="button" class="btn secondary small" ${usageLoading ? "disabled" : ""} onclick="loadUsageInfo()">${icon("refresh")}${usageLoading ? "Calcolo…" : "Aggiorna"}</button>
+            </div>
+          </div>
+          <div class="registry-card-body">
+            ${u.error ? `<div class="operator-card-note usage-alert">${icon("alert")}Non riesco a leggere i consumi: ${escapeHtml(u.error)}</div>` : ""}
+            ${dbRow}${filesRow}${trafficRow}
+            <div class="usage-notes">
+              <div class="usage-note ${backup.warn ? "warn" : ""}">${icon(backup.warn ? "alert" : "check")}<span>${backup.text} ${planKey === "free" ? "Il piano Free <b>non fa backup automatici</b>: scarica il backup JSON e gli allegati almeno una volta al mese." : "Il piano Pro conserva un backup giornaliero per 7 giorni."}</span></div>
+              <div class="usage-actions">
+                <button type="button" class="btn small" onclick="exportData()">${icon("download")}Backup JSON</button>
+                <button type="button" class="btn secondary small" onclick="downloadAttachmentsZip(this)">${icon("download")}Allegati (ZIP)</button>
+                <a class="btn ghost small" href="${SUPABASE_USAGE_URL}" target="_blank" rel="noopener">Consumi esatti su Supabase ↗</a>
+              </div>
+              ${planKey === "free" ? `<div class="usage-note info">${icon("clock")}<span>Il piano Free mette in pausa il progetto dopo <b>7 giorni senza utilizzo</b> (es. ferie). I dati restano: si riattiva da supabase.com aprendo il progetto e scegliendo «Restore».</span></div>` : ""}
+            </div>
+            ${u.sqlMissing || u.trafficMissing ? `
+              <details class="usage-sql" ${u.sqlMissing ? "" : "open"}>
+                <summary>${u.sqlMissing ? "Numeri esatti di database, file e traffico totale" : "Traffico totale di tutti i dispositivi"}: esegui una volta un comando SQL</summary>
+                <p class="mini-meta">Supabase › SQL Editor › incolla › Run. Crea una piccola tabella per il traffico dei dispositivi e una funzione che legge solo dimensioni e conteggi (nessun dato delle attività o dei file). Si può eseguire anche più volte.</p>
+                <textarea id="usageSqlText" class="textarea" readonly style="min-height:120px;font-family:Consolas,ui-monospace,monospace;font-size:12px">${escapeHtml(USAGE_SQL)}</textarea>
+                <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                  <button type="button" class="btn small" onclick="copyUsageSql()">${icon("copy")}Copia il comando SQL</button>
+                  <button type="button" class="btn secondary small" onclick="loadUsageInfo()">${icon("refresh")}Ho eseguito il comando, ricalcola</button>
+                </div>
+              </details>` : ""}
+          </div>
+        </div>`;
+    }
+
+    function copyUsageSql() {
+      const done = () => showToast("Comando SQL copiato: incollalo in Supabase › SQL Editor ed esegui", { type: "success", duration: 6000 });
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(USAGE_SQL).then(done).catch(fallbackCopy);
+      else fallbackCopy();
+      function fallbackCopy() { const ta = document.getElementById("usageSqlText"); ta?.select(); try { document.execCommand("copy"); done(); } catch { showToast("Seleziona il testo e copialo a mano"); } }
+    }
+
+    // Backup degli allegati: tutti i file dello storage in uno ZIP, con gli stessi percorsi indicati nel backup JSON
+    async function downloadAttachmentsZip(btn) {
+      if (btn?.dataset.busy) return;
+      const restore = btn ? btn.innerHTML : "";
+      const setBtn = text => { if (btn) btn.innerHTML = `${icon("download")}${text}`; };
+      let files;
+      try {
+        if (btn) btn.dataset.busy = "1";
+        setBtn("Lettura elenco…");
+        files = await listStorageTree();
+      } catch (error) {
+        if (btn) { delete btn.dataset.busy; btn.innerHTML = restore; }
+        return showToast("Impossibile leggere l'elenco dei file: " + (error?.message || error), { type: "error" });
+      }
+      // le foto degli scontrini degli altri restano private
+      if (!isAdminUser()) {
+        const mine = `spese/${signatureSlug(currentUser?.name || "")}/`;
+        files = files.filter(f => !f.path.startsWith("spese/") || f.path.startsWith(mine));
+      }
+      files = files.filter(f => !/(^|\/)\.emptyFolderPlaceholder$/.test(f.path));
+      const total = files.reduce((sum, f) => sum + f.size, 0);
+      if (!files.length) { if (btn) { delete btn.dataset.busy; btn.innerHTML = restore; } return showToast("Nessun file da salvare"); }
+      const ok = await uiConfirm(`${files.length} file, circa ${formatSize(total)}${isAdminUser() ? "" : " (le foto degli scontrini sono solo le tue)"}.\nLo scaricamento conta nel traffico mensile di Supabase: basta farlo una volta al mese insieme al backup JSON.`, { title: "Scaricare tutti gli allegati?", confirmLabel: "Scarica ZIP" });
+      if (!ok) { if (btn) { delete btn.dataset.busy; btn.innerHTML = restore; } return; }
+      try {
+        const JSZip = await loadScriptOnce(JSZIP_URL, "JSZip");
+        const zip = new JSZip();
+        const failed = [];
+        let done = 0, next = 0;
+        const worker = async () => {
+          while (next < files.length) {
+            const f = files[next++];
+            const { data, error } = await sb.storage.from(ATTACHMENT_BUCKET).download(f.path);
+            if (error || !data) failed.push(`${f.path} — ${error?.message || "non scaricato"}`);
+            else zip.file(f.path, data);
+            setBtn(`${++done}/${files.length}…`);
+          }
+        };
+        await Promise.all([worker(), worker(), worker(), worker()]);
+        zip.file("LEGGIMI.txt", `RailOps Hub · allegati salvati il ${new Date().toLocaleString("it-IT")} da ${currentUser?.name || "-"}\r\n`
+          + `I percorsi dei file corrispondono al campo "path" degli allegati nel backup JSON.\r\n`
+          + `File: ${files.length - failed.length} di ${files.length}.\r\n`
+          + (failed.length ? `\r\nNon scaricati:\r\n${failed.join("\r\n")}\r\n` : ""));
+        setBtn("Creazione ZIP…");
+        const blob = await zip.generateAsync({ type: "blob", compression: "STORE" });
+        downloadBlob(`railops_allegati_${fileStamp()}.zip`, blob);
+        showToast(failed.length ? `ZIP creato, ma ${failed.length} file non sono stati scaricati (elenco nel LEGGIMI)` : `ZIP con ${files.length} file scaricato`, { type: failed.length ? "error" : "success", duration: 6000 });
+      } catch (error) {
+        showToast("Errore nella creazione dello ZIP: " + (error?.message || error), { type: "error" });
+      } finally {
+        if (btn) { delete btn.dataset.busy; btn.innerHTML = restore; }
+      }
+    }
+
+    /* ===================== GESTIONE FILE E DATI (sezione Spazio e consumi, solo Davide) ===================== */
+    let fmFiles = null;            // elenco dei file nello storage (sessione)
+    let fmLoading = false;
+    let fmError = "";
+    let fmKind = "all";            // all | attach | receipt | signature | orphan
+    let fmSort = "size";           // size | date | name
+    let fmQuery = "";
+    let fmLimit = 100;
+    const fmSelected = new Set();
+    let fmBlocked = false;         // Supabase ha rifiutato una cancellazione: si mostra il comando SQL dei permessi
+
+    const DELETE_PERMISSIONS_SQL = `-- RailOps Hub · permessi di cancellazione (v59.6) — da eseguire solo se la cancellazione viene rifiutata
+drop policy if exists "railops_attachments_delete" on storage.objects;
+create policy "railops_attachments_delete" on storage.objects
+  for delete to anon, authenticated using (bucket_id = 'railops-attachments');
+drop policy if exists "railops_change_log_delete" on public.railops_change_log;
+create policy "railops_change_log_delete" on public.railops_change_log
+  for delete to anon, authenticated using (true);
+drop policy if exists "railops_access_log_delete" on public.railops_access_log;
+create policy "railops_access_log_delete" on public.railops_access_log
+  for delete to anon, authenticated using (true);`;
+
+    function fileKindOf(path) {
+      const top = String(path).split("/")[0];
+      if (top === "firme") return "signature";
+      if (top === "spese") return "receipt";
+      return "attach";
+    }
+
+    // A cosa è collegato ogni file (attività, trasferte, scontrini dei rimborsi, firme)
+    function buildFileReferences() {
+      const refs = new Map();
+      const add = (path, ref) => { if (!path) return; if (!refs.has(path)) refs.set(path, []); refs.get(path).push(ref); };
+      tasks.forEach(t => normalizeAttachments(t.attachments).forEach(a => add(a.path, { kind: "task", id: t.id, label: `Attività: ${taskTitle(t)}`, name: a.name })));
+      trips.forEach(t => normalizeAttachments(t.attachments).forEach(a => add(a.path, { kind: "trip", id: t.id, label: `Trasferta: ${tripTitle(t)}`, name: a.name })));
+      expenseClaims.forEach(c => (c.receipts || []).forEach(r => {
+        if (!r?.photo?.path) return;
+        const trip = trips.find(t => String(t.id) === String(c.trip_id));
+        add(r.photo.path, { kind: "receipt", id: c.id, receiptId: r.id, label: `Rimborso ${c.resource} · ${trip ? tripLabel(trip) : "trasferta eliminata"} · scontrino del ${formatDate(r.date)}`, name: r.photo.name });
+      }));
+      people.forEach(p => add(signaturePath(p), { kind: "signature", person: p, label: `Firma di ${p}` }));
+      return refs;
+    }
+
+    function prettyFileName(path) {
+      return String(path).split("/").pop().replace(/^\d{10,}_[0-9a-f-]{6,36}_/i, "");
+    }
+
+    async function loadFileManager() {
+      if (fmLoading || !canSeeUsage()) return;
+      fmLoading = true; fmError = "";
+      renderFilesPanel();
+      try {
+        fmFiles = (await listStorageTree()).filter(f => !/(^|\/)\.emptyFolderPlaceholder$/.test(f.path));
+        const live = new Set(fmFiles.map(f => f.path));
+        [...fmSelected].forEach(p => { if (!live.has(p)) fmSelected.delete(p); });
+      } catch (error) {
+        fmError = error?.message || String(error);
+      }
+      fmLoading = false;
+      renderFilesPanel();
+    }
+
+    function fmRows() {
+      const refs = buildFileReferences();
+      const q = fmQuery.trim().toLowerCase();
+      const expensesUnknown = expenseTableMissing;
+      let rows = (fmFiles || []).map(f => {
+        const links = refs.get(f.path) || [];
+        const kind = fileKindOf(f.path);
+        // senza tabella dei rimborsi non si può sapere se una foto di scontrino è usata: non si segna come orfana
+        const orphan = !links.length && !(kind === "receipt" && expensesUnknown);
+        return { ...f, kind, links, orphan, name: links[0]?.name || prettyFileName(f.path) };
+      });
+      const counts = { all: rows.length, attach: 0, receipt: 0, signature: 0, orphan: 0 };
+      const bytes = { all: 0, attach: 0, receipt: 0, signature: 0, orphan: 0 };
+      rows.forEach(r => { counts[r.kind]++; bytes[r.kind] += r.size; bytes.all += r.size; if (r.orphan) { counts.orphan++; bytes.orphan += r.size; } });
+      rows = rows.filter(r => (fmKind === "all" || (fmKind === "orphan" ? r.orphan : r.kind === fmKind))
+        && (!q || `${r.name} ${r.path} ${r.links.map(l => l.label).join(" ")}`.toLowerCase().includes(q)));
+      rows.sort((a, b) => fmSort === "date" ? String(b.updated_at).localeCompare(String(a.updated_at))
+        : fmSort === "name" ? a.name.localeCompare(b.name, "it") : b.size - a.size);
+      return { rows, counts, bytes };
+    }
+
+    function renderFilesPanel() {
+      const box = document.getElementById("filesPanel");
+      if (!box) return;
+      if (!canSeeUsage()) { box.innerHTML = ""; return; }
+      if (!fmFiles && !fmLoading && !fmError) { loadFileManager(); return; }
+      const { rows, counts, bytes } = fmFiles ? fmRows() : { rows: [], counts: {}, bytes: {} };
+      const selectedRows = (fmFiles || []).filter(f => fmSelected.has(f.path));
+      const selectedBytes = selectedRows.reduce((s, f) => s + f.size, 0);
+      const chip = (key, label) => `<button type="button" class="fm-chip ${fmKind === key ? "on" : ""} ${key === "orphan" && counts.orphan ? "warn" : ""}" onclick="fmSetKind('${key}')">${label} <b>${counts[key] ?? 0}</b>${bytes[key] ? `<span>${formatSize(bytes[key])}</span>` : ""}</button>`;
+      const visible = rows.slice(0, fmLimit);
+      const allVisibleSelected = visible.length && visible.every(r => fmSelected.has(r.path));
+      const kindIcon = { attach: "file", receipt: "wallet", signature: "edit" };
+      const body = fmLoading && !fmFiles ? `<tr><td colspan="5" class="empty-cell"><div class="empty">Lettura dei file in corso…</div></td></tr>`
+        : !rows.length ? `<tr><td colspan="5" class="empty-cell"><div class="empty">${fmFiles?.length ? "Nessun file con questi filtri." : "Nessun file nello storage."}</div></td></tr>`
+        : visible.map(r => `
+          <tr class="${fmSelected.has(r.path) ? "fm-sel" : ""}">
+            <td class="fm-check no-label"><input type="checkbox" aria-label="Seleziona ${escapeHtml(r.name)}" ${fmSelected.has(r.path) ? "checked" : ""} onchange="fmToggle(${jsArg(r.path)}, this.checked)"></td>
+            <td data-label="File"><div class="fm-name">${icon(kindIcon[r.kind])}<span class="cell-title">${escapeHtml(r.name)}</span></div><div class="cell-sub fm-path">${escapeHtml(r.path)}</div></td>
+            <td data-label="Collegato a">${r.links.length ? r.links.map(l => `<div class="fm-link">${escapeHtml(l.label)}</div>`).join("") : r.orphan ? `<span class="fm-orphan">${icon("alert")}Non collegato a nulla</span>` : `<span class="cell-sub">Non verificabile (tabella rimborsi assente)</span>`}</td>
+            <td data-label="Dimensione / data" style="white-space:nowrap"><b>${formatSize(r.size)}</b><div class="cell-sub">${r.updated_at ? formatDateTime(r.updated_at) : "-"}</div></td>
+            <td class="actions-cell no-label"><div class="row-actions">
+              <button type="button" class="btn ghost small" onclick="openAttachment(${jsArg(r.path)})">Apri ↗</button>
+              <button type="button" class="btn danger-soft small" onclick="deleteStorageFiles([${jsArg(r.path)}])">${icon("trash")}Elimina</button>
+            </div></td>
+          </tr>`).join("");
+      box.innerHTML = `
+        <div class="registry-card" style="margin-bottom:16px">
+          <div class="registry-card-header usage-header">
+            <div><h3>File su Supabase</h3><p>Tutti i file caricati: puoi aprirli ed eliminarli. Se un file è collegato a un'attività, una trasferta o uno scontrino, viene tolto anche da lì. «Non collegati» sono file rimasti senza nessun elemento che li usa: si possono eliminare senza conseguenze.</p></div>
+            <div class="usage-tools"><button type="button" class="btn secondary small" ${fmLoading ? "disabled" : ""} onclick="loadFileManager()">${icon("refresh")}${fmLoading ? "Lettura…" : "Aggiorna elenco"}</button></div>
+          </div>
+          <div class="registry-card-body">
+            ${fmError ? `<div class="operator-card-note usage-alert">${icon("alert")}Impossibile leggere i file: ${escapeHtml(fmError)}</div>` : ""}
+            ${fmBlocked ? deletePermissionsHtml() : ""}
+            <div class="fm-chips">${chip("all", "Tutti")}${chip("attach", "Allegati")}${chip("receipt", "Scontrini")}${chip("signature", "Firme")}${chip("orphan", "Non collegati")}</div>
+            <div class="fm-tools">
+              <input class="input" type="search" placeholder="Cerca per nome, percorso o elemento collegato…" value="${escapeHtml(fmQuery)}" oninput="fmQuery=this.value; fmLimit=100; renderFilesPanelKeepFocus(this)">
+              <select class="select" onchange="fmSort=this.value; renderFilesPanel()" aria-label="Ordina">
+                <option value="size" ${fmSort === "size" ? "selected" : ""}>Più pesanti</option>
+                <option value="date" ${fmSort === "date" ? "selected" : ""}>Più recenti</option>
+                <option value="name" ${fmSort === "name" ? "selected" : ""}>Nome</option>
+              </select>
+            </div>
+            <div class="fm-bulk ${fmSelected.size ? "on" : ""}">
+              <label class="fm-all"><input type="checkbox" ${allVisibleSelected ? "checked" : ""} ${visible.length ? "" : "disabled"} onchange="fmToggleVisible(this.checked)"> Seleziona ${rows.length > visible.length ? `i primi ${visible.length}` : `tutti (${visible.length})`}</label>
+              <span class="fm-bulk-info">${fmSelected.size ? `<b>${fmSelected.size}</b> selezionat${fmSelected.size === 1 ? "o" : "i"} · ${formatSize(selectedBytes)}` : "Nessun file selezionato"}</span>
+              ${fmSelected.size ? `<button type="button" class="btn ghost small" onclick="fmSelected.clear(); renderFilesPanel()">Deseleziona</button><button type="button" class="btn danger small" onclick="deleteStorageFiles([...fmSelected])">${icon("trash")}Elimina selezionati</button>` : ""}
+            </div>
+            <div class="table-wrap"><table class="data-table fm-table">
+              <thead><tr><th></th><th>File</th><th>Collegato a</th><th>Dimensione / data</th><th></th></tr></thead>
+              <tbody>${body}</tbody>
+            </table></div>
+            ${rows.length > visible.length ? `<div class="list-footer"><span>Mostrati ${visible.length} di ${rows.length}</span><button type="button" class="btn secondary small" onclick="fmLimit += 200; renderFilesPanel()">Mostra altri</button></div>` : ""}
+          </div>
+        </div>`;
+    }
+
+    function renderFilesPanelKeepFocus(input) {
+      const pos = input.selectionStart;
+      renderFilesPanel();
+      const again = document.querySelector("#filesPanel .fm-tools input");
+      if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch { /* ok */ } }
+    }
+
+    function fmSetKind(kind) { fmKind = kind; fmLimit = 100; renderFilesPanel(); }
+    function fmToggle(path, on) { if (on) fmSelected.add(path); else fmSelected.delete(path); renderFilesPanel(); }
+    function fmToggleVisible(on) {
+      fmRows().rows.slice(0, fmLimit).forEach(r => { if (on) fmSelected.add(r.path); else fmSelected.delete(r.path); });
+      renderFilesPanel();
+    }
+
+    function deletePermissionsHtml() {
+      return `<div class="operator-card-note usage-alert" style="display:block">
+        ${icon("alert")}<b>Supabase non ha permesso la cancellazione.</b> Esegui una volta questo comando in Supabase › SQL Editor (concede la cancellazione dei file dell'app e dei log), poi riprova.
+        <textarea id="deletePermSql" class="textarea" readonly style="min-height:110px;margin-top:8px;font-family:Consolas,ui-monospace,monospace;font-size:12px">${escapeHtml(DELETE_PERMISSIONS_SQL)}</textarea>
+        <button type="button" class="btn small" style="margin-top:8px" onclick="copyText(DELETE_PERMISSIONS_SQL, 'deletePermSql')">${icon("copy")}Copia il comando SQL</button>
+      </div>`;
+    }
+
+    function copyText(text, textareaId) {
+      const done = () => showToast("Comando SQL copiato: incollalo in Supabase › SQL Editor ed esegui", { type: "success", duration: 6000 });
+      const fallback = () => { const ta = document.getElementById(textareaId); ta?.select(); try { document.execCommand("copy"); done(); } catch { showToast("Seleziona il testo e copialo a mano"); } };
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done).catch(fallback);
+      else fallback();
+    }
+
+    // Elimina file dallo storage e li toglie dagli elementi che li usano
+    async function deleteStorageFiles(paths) {
+      if (!canSeeUsage()) return;
+      paths = [...new Set(paths)].filter(Boolean);
+      if (!paths.length) return;
+      const refs = buildFileReferences();
+      const info = new Map((fmFiles || []).map(f => [f.path, f]));
+      const total = paths.reduce((s, p) => s + (info.get(p)?.size || 0), 0);
+      const linked = paths.filter(p => refs.get(p)?.length);
+      const items = [];
+      paths.slice(0, 8).forEach(p => { const l = refs.get(p); items.push(`${prettyFileName(p)} (${formatSize(info.get(p)?.size || 0)})${l?.length ? ` → ${l[0].label}` : " · non collegato"}`); });
+      if (paths.length > 8) items.push(`… e altri ${paths.length - 8} file`);
+      const ok = await uiConfirm(`${paths.length} file, ${formatSize(total)} in totale.${linked.length ? `\n${linked.length} ${linked.length === 1 ? "è collegato" : "sono collegati"} ad attività, trasferte, scontrini o firme: ${linked.length === 1 ? "verrà tolto" : "verranno tolti"} anche da lì.` : ""}\nL'eliminazione è definitiva: se ti servono, scaricali prima con «Allegati (ZIP)».`, {
+        title: paths.length === 1 ? "Eliminare il file?" : `Eliminare ${paths.length} file?`, items, confirmLabel: "Elimina definitivamente", danger: true
+      });
+      if (!ok) return;
+
+      setLoading(true);
+      const deleted = new Set(), errors = [];
+      for (let i = 0; i < paths.length; i += 100) {
+        const chunk = paths.slice(i, i + 100);
+        const { data, error } = await sb.storage.from(ATTACHMENT_BUCKET).remove(chunk);
+        if (error) { errors.push(error.message); continue; }
+        // con permessi insufficienti Supabase non dà errore ma non elimina nulla: si controlla l'elenco restituito
+        const gone = Array.isArray(data) ? new Set(data.map(o => o.name)) : new Set(chunk);
+        chunk.forEach(p => { if (gone.has(p)) deleted.add(p); });
+      }
+      fmBlocked = deleted.size < paths.length && !errors.length;
+
+      // si tolgono i riferimenti dagli elementi che usavano i file eliminati
+      const touched = { task: new Map(), trip: new Map(), receipt: new Map() };
+      deleted.forEach(p => (refs.get(p) || []).forEach(ref => {
+        if (touched[ref.kind]) { if (!touched[ref.kind].has(ref.id)) touched[ref.kind].set(ref.id, new Set()); touched[ref.kind].get(ref.id).add(p); }
+        if (ref.kind === "signature") { signatureCache.delete(signatureSlug(ref.person)); signatureIndex?.delete(signatureSlug(ref.person)); }
+      }));
+      for (const [kind, table, list] of [["task", "railops_tasks", tasks], ["trip", "railops_trips", trips]]) {
+        for (const [id, gone] of touched[kind]) {
+          const item = list.find(x => x.id === id);
+          if (!item) continue;
+          const next = normalizeAttachments(item.attachments).filter(a => !gone.has(a.path));
+          const { data, error } = await sb.from(table).update({ attachments: next }).eq("id", id).select().single();
+          if (error) { errors.push(`${kind === "task" ? "Attività" : "Trasferta"} ${id}: ${error.message}`); continue; }
+          await logChange({ entityType: kind, entityId: id, entityTitle: kind === "task" ? taskTitle(data || item) : tripTitle(data || item), action: "update", oldData: item, newData: data || { ...item, attachments: next } });
+        }
+      }
+      for (const [id, gone] of touched.receipt) {
+        const claim = expenseClaims.find(c => c.id === id);
+        if (!claim) continue;
+        const receipts = (claim.receipts || []).map(r => r?.photo?.path && gone.has(r.photo.path) ? { ...r, photo: null } : r);
+        const { error } = await sb.from(EXPENSE_TABLE).update({ receipts, updated_at: new Date().toISOString() }).eq("id", id);
+        if (error) errors.push(`Rimborso ${claim.resource}: ${error.message}`);
+      }
+      if (deleted.size) {
+        await logChange({ entityType: "storage", entityId: null, entityTitle: `${deleted.size} file eliminati (Spazio e consumi)`, action: "delete", oldData: { files: [...deleted] } });
+        fmFiles = (fmFiles || []).filter(f => !deleted.has(f.path));
+        deleted.forEach(p => fmSelected.delete(p));
+        usageInfo = null; // spazio da ricalcolare
+      }
+      setLoading(false);
+      await loadAllData();
+      renderFilesPanel();
+      renderUsagePanel();
+      const freed = [...deleted].reduce((s, p) => s + (info.get(p)?.size || 0), 0);
+      if (errors.length) showToast(`Eliminati ${deleted.size} file su ${paths.length}. Errori: ${errors.join(" · ")}`, { type: "error", duration: 10000 });
+      else if (fmBlocked) showToast(`Supabase ha rifiutato l'eliminazione di ${paths.length - deleted.size} file: serve un permesso (comando SQL qui sopra)`, { type: "error", duration: 10000 });
+      else showToast(`${deleted.size} file eliminat${deleted.size === 1 ? "o" : "i"} · liberati ${formatSize(freed)}`, { type: "success" });
+    }
+
+    /* ---- Dati: log modifiche e log accessi (archivio + pulizia delle voci vecchie) ---- */
+    const LOG_TABLES = [
+      { table: "railops_change_log", label: "Log modifiche", file: "log_modifiche", hint: "Ogni salvataggio conserva la versione prima e dopo dell'elemento: è la tabella che cresce di più." },
+      { table: "railops_access_log", label: "Log accessi", file: "log_accessi", hint: "Un ingresso nell'app per riga." }
+    ];
+    let logStats = null;
+    let logStatsLoading = false;
+
+    async function loadLogStats() {
+      if (logStatsLoading || !canSeeUsage()) return;
+      logStatsLoading = true;
+      renderDataPanel();
+      const stats = {};
+      for (const def of LOG_TABLES) {
+        try {
+          const [countRes, oldestRes] = await Promise.all([
+            sb.from(def.table).select("id", { count: "exact", head: true }),
+            sb.from(def.table).select("created_at").order("created_at", { ascending: true }).limit(1)
+          ]);
+          stats[def.table] = { count: typeof countRes.count === "number" ? countRes.count : null, oldest: oldestRes.data?.[0]?.created_at || null, error: countRes.error?.message || oldestRes.error?.message || "" };
+        } catch (error) { stats[def.table] = { count: null, oldest: null, error: error?.message || String(error) }; }
+      }
+      logStats = stats;
+      logStatsLoading = false;
+      renderDataPanel();
+    }
+
+    function renderDataPanel() {
+      const box = document.getElementById("dataPanel");
+      if (!box) return;
+      if (!canSeeUsage()) { box.innerHTML = ""; return; }
+      if (!logStats && !logStatsLoading) { loadLogStats(); return; }
+      const tableBytes = usageInfo?.sql ? usageInfo.tables || {} : {};
+      const rows = LOG_TABLES.map(def => {
+        const s = logStats?.[def.table] || {};
+        const size = tableBytes[def.table];
+        return `
+          <div class="usage-row fm-log">
+            <div class="usage-head"><span class="usage-label">${def.label}</span><span class="usage-val">${s.count === null || s.count === undefined ? "—" : `${s.count.toLocaleString("it-IT")} voci`}${size ? ` <span>· ${formatSize(size)}</span>` : ""}</span></div>
+            <div class="usage-sub">${escapeHtml(def.hint)} ${s.oldest ? `Voce più vecchia: ${formatDate(String(s.oldest).slice(0, 10))}.` : ""}${s.error ? ` <span style="color:var(--danger)">Errore: ${escapeHtml(s.error)}</span>` : ""}</div>
+            <div class="fm-log-actions">
+              <label class="mini-meta" for="logAge_${def.table}">Elimina le voci più vecchie di</label>
+              <select id="logAge_${def.table}" class="select">
+                <option value="3">3 mesi</option><option value="6">6 mesi</option><option value="12" selected>12 mesi</option><option value="24">24 mesi</option>
+              </select>
+              <button type="button" class="btn danger-soft small" onclick="purgeOldLog('${def.table}')">${icon("trash")}Archivia ed elimina</button>
+            </div>
+          </div>`;
+      }).join("");
+      box.innerHTML = `
+        <div class="registry-card" style="margin-bottom:16px">
+          <div class="registry-card-header usage-header">
+            <div><h3>Dati: log</h3><p>Attività, trasferte, rimborsi e reperibilità si gestiscono dalle loro sezioni. Qui puoi alleggerire i log: prima di eliminare, le voci vengono scaricate in un file JSON di archivio.</p></div>
+            <div class="usage-tools"><button type="button" class="btn secondary small" ${logStatsLoading ? "disabled" : ""} onclick="loadLogStats()">${icon("refresh")}${logStatsLoading ? "Lettura…" : "Aggiorna"}</button></div>
+          </div>
+          <div class="registry-card-body">${rows}</div>
+        </div>`;
+    }
+
+    async function purgeOldLog(table) {
+      if (!canSeeUsage()) return;
+      const def = LOG_TABLES.find(d => d.table === table);
+      const months = Number(document.getElementById(`logAge_${table}`)?.value || 12);
+      const cut = new Date(); cut.setMonth(cut.getMonth() - months);
+      const cutoff = cut.toISOString();
+      setLoading(true);
+      let rows = [];
+      try {
+        for (let from = 0; ; from += 1000) {
+          const { data, error } = await sb.from(table).select("*").lt("created_at", cutoff).order("created_at", { ascending: true }).range(from, from + 999);
+          if (error) throw error;
+          rows.push(...(data || []));
+          if (!data || data.length < 1000) break;
+        }
+      } catch (error) {
+        setLoading(false);
+        return showToast(`Errore lettura ${def.label}: ${error?.message || error}`, { type: "error" });
+      }
+      setLoading(false);
+      if (!rows.length) return showToast(`Nessuna voce più vecchia di ${months} mesi in ${def.label}`);
+      const ok = await uiConfirm(`${rows.length.toLocaleString("it-IT")} voci di ${def.label.toLowerCase()} anteriori al ${formatDate(cutoff.slice(0, 10))}.\nPrima viene scaricato il file di archivio JSON con tutte le voci, poi vengono eliminate dal database. L'operazione non si può annullare.`, { title: `Archiviare ed eliminare?`, confirmLabel: "Scarica archivio ed elimina", danger: true });
+      if (!ok) return;
+      downloadText(`railops_archivio_${def.file}_fino_al_${cutoff.slice(0, 10)}.json`, JSON.stringify({ app: "RailOps Hub", table, before: cutoff, exportedAt: new Date().toISOString(), exportedBy: currentUser?.name || "", rows }, null, 1), "application/json");
+      setLoading(true);
+      const { error, count } = await sb.from(table).delete({ count: "exact" }).lt("created_at", cutoff);
+      setLoading(false);
+      if (error) return showToast(`Errore eliminazione ${def.label}: ${error.message}`, { type: "error" });
+      if (count === 0) {
+        fmBlocked = true;
+        renderFilesPanel();
+        return showToast(`Supabase non ha eliminato nessuna voce: serve un permesso (comando SQL nel riquadro «File su Supabase»). L'archivio è comunque stato scaricato.`, { type: "error", duration: 12000 });
+      }
+      if (table === "railops_change_log") changeLogLoaded = false; else accessLogLoaded = false;
+      showToast(`${(count ?? rows.length).toLocaleString("it-IT")} voci eliminate da ${def.label} · archivio scaricato`, { type: "success", duration: 6000 });
+      usageInfo = null;
+      logStats = null;
+      renderUsagePanel();
+      renderDataPanel();
+    }
+
     /* ---------- Firme operatori (PNG nello storage condiviso, cartella "firme/") ---------- */
     const SIGNATURE_FOLDER = "firme";
     let signatureIndex = null;            // Map slug → { name, updated_at } dei file presenti
@@ -11361,7 +12402,7 @@ exception when others then null; end $$;`;
     window.addEventListener("online", async () => {
       if (!currentUser) return;
       showToast("Connessione ripristinata", { type: "success" });
-      await loadAllData();
+      await loadAllData({ full: true });
       startRealtime();
     });
 
@@ -11405,10 +12446,14 @@ exception when others then null; end $$;`;
       return true;
     }
 
+    // Al ritorno sull'app si riallineano i dati solo se serve: se il tempo reale è rimasto collegato le modifiche
+    // sono già arrivate riga per riga. Si ricarica tutto dopo più di 10 minuti in background (es. iPhone) o senza collegamento.
+    let appHiddenAt = 0;
     document.addEventListener("visibilitychange", () => {
-      // al ritorno sull'app (es. iPhone dopo ore in background) si riallineano i dati
-      if (document.visibilityState === "visible" && currentUser && dataLoaded && navigator.onLine && !document.getElementById("editModal").classList.contains("show")) {
-        loadAllData();
+      if (document.visibilityState === "hidden") { appHiddenAt = Date.now(); return; }
+      if (currentUser && dataLoaded && navigator.onLine && !document.getElementById("editModal").classList.contains("show")) {
+        const away = appHiddenAt ? Date.now() - appHiddenAt : 0;
+        if (!realtimeLive || away > 10 * 60 * 1000) loadAllData({ full: true });
         if (!realtimeChannel) startRealtime();
       }
     });
